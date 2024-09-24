@@ -1,0 +1,1403 @@
+[2024-09-24 16:45:27] Script started
+[2024-09-24 16:45:27] SERVER: Array
+(
+    [MIBDIRS] => /xampp/php/extras/mibs
+    [MYSQL_HOME] => \xampp\mysql\bin
+    [OPENSSL_CONF] => /xampp/apache/bin/openssl.cnf
+    [PHP_PEAR_SYSCONF_DIR] => \xampp\php
+    [PHPRC] => \xampp\php
+    [TMP] => \xampp\tmp
+    [HTTP_HOST] => localhost
+    [HTTP_CONNECTION] => keep-alive
+    [HTTP_SEC_CH_UA] => "Chromium";v="128", "Not;A=Brand";v="24", "Google Chrome";v="128"
+    [HTTP_SEC_CH_UA_MOBILE] => ?0
+    [HTTP_USER_AGENT] => Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36
+    [HTTP_SEC_CH_UA_PLATFORM] => "Windows"
+    [HTTP_ACCEPT] => */*
+    [HTTP_SEC_FETCH_SITE] => same-origin
+    [HTTP_SEC_FETCH_MODE] => cors
+    [HTTP_SEC_FETCH_DEST] => empty
+    [HTTP_REFERER] => http://localhost/misproyectos/ProyectoHiker_prueba/paginasespecializadas/Usuario/my_account.html
+    [HTTP_ACCEPT_ENCODING] => gzip, deflate, br, zstd
+    [HTTP_ACCEPT_LANGUAGE] => es-ES,es;q=0.9,fr;q=0.8,en;q=0.7,eu;q=0.6,ro;q=0.5
+    [HTTP_COOKIE] => rol=U; usuario=antton; PHPSESSID=m8t28i5fqsffsfkuffc88mi5hd
+    [PATH] => C:\WINDOWS\system32;C:\WINDOWS;C:\WINDOWS\System32\Wbem;C:\WINDOWS\System32\WindowsPowerShell\v1.0\;C:\WINDOWS\System32\OpenSSH\;C:\Program Files\nodejs\;C:\Users\antto\AppData\Local\Microsoft\WindowsApps;C:\Users\antto\AppData\Local\Programs\Microsoft VS Code\bin;C:\Users\antto\AppData\Roaming\npm
+    [SystemRoot] => C:\WINDOWS
+    [COMSPEC] => C:\WINDOWS\system32\cmd.exe
+    [PATHEXT] => .COM;.EXE;.BAT;.CMD;.VBS;.VBE;.JS;.JSE;.WSF;.WSH;.MSC
+    [WINDIR] => C:\WINDOWS
+    [SERVER_SIGNATURE] => <address>Apache/2.4.58 (Win64) OpenSSL/3.1.3 PHP/8.2.12 Server at localhost Port 80</address>
+
+    [SERVER_SOFTWARE] => Apache/2.4.58 (Win64) OpenSSL/3.1.3 PHP/8.2.12
+    [SERVER_NAME] => localhost
+    [SERVER_ADDR] => ::1
+    [SERVER_PORT] => 80
+    [REMOTE_ADDR] => ::1
+    [DOCUMENT_ROOT] => C:/xampp/htdocs
+    [REQUEST_SCHEME] => http
+    [CONTEXT_PREFIX] => 
+    [CONTEXT_DOCUMENT_ROOT] => C:/xampp/htdocs
+    [SERVER_ADMIN] => postmaster@localhost
+    [SCRIPT_FILENAME] => C:/xampp/htdocs/misproyectos/ProyectoHiker_prueba/paginasespecializadas/Usuario/javascript/usuario.php
+    [REMOTE_PORT] => 54715
+    [GATEWAY_INTERFACE] => CGI/1.1
+    [SERVER_PROTOCOL] => HTTP/1.1
+    [REQUEST_METHOD] => GET
+    [QUERY_STRING] => 
+    [REQUEST_URI] => /misproyectos/ProyectoHiker_prueba/paginasespecializadas/Usuario/javascript/usuario.php
+    [SCRIPT_NAME] => /misproyectos/ProyectoHiker_prueba/paginasespecializadas/Usuario/javascript/usuario.php
+    [PHP_SELF] => /misproyectos/ProyectoHiker_prueba/paginasespecializadas/Usuario/javascript/usuario.php
+    [REQUEST_TIME_FLOAT] => 1727189127.6697
+    [REQUEST_TIME] => 1727189127
+)
+
+[2024-09-24 16:45:27] About to require connection files
+[2024-09-24 16:45:27] Connection files included
+[2024-09-24 16:45:27] Database connection successful
+[2024-09-24 16:45:27] Action requested: 
+[2024-09-24 16:45:27] Exception caught: {"error":"Acci\u00f3n no v\u00e1lida"}
+[2024-09-24 16:45:27] Script ended
+[2024-09-24 16:48:06] Script started
+[2024-09-24 16:48:06] SERVER: Array
+(
+    [MIBDIRS] => /xampp/php/extras/mibs
+    [MYSQL_HOME] => \xampp\mysql\bin
+    [OPENSSL_CONF] => /xampp/apache/bin/openssl.cnf
+    [PHP_PEAR_SYSCONF_DIR] => \xampp\php
+    [PHPRC] => \xampp\php
+    [TMP] => \xampp\tmp
+    [HTTP_HOST] => localhost
+    [HTTP_CONNECTION] => keep-alive
+    [HTTP_SEC_CH_UA] => "Chromium";v="128", "Not;A=Brand";v="24", "Google Chrome";v="128"
+    [HTTP_SEC_CH_UA_MOBILE] => ?0
+    [HTTP_USER_AGENT] => Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36
+    [HTTP_SEC_CH_UA_PLATFORM] => "Windows"
+    [HTTP_ACCEPT] => */*
+    [HTTP_SEC_FETCH_SITE] => same-origin
+    [HTTP_SEC_FETCH_MODE] => cors
+    [HTTP_SEC_FETCH_DEST] => empty
+    [HTTP_REFERER] => http://localhost/misproyectos/ProyectoHiker_prueba/paginasespecializadas/Usuario/my_account.html
+    [HTTP_ACCEPT_ENCODING] => gzip, deflate, br, zstd
+    [HTTP_ACCEPT_LANGUAGE] => es-ES,es;q=0.9,fr;q=0.8,en;q=0.7,eu;q=0.6,ro;q=0.5
+    [HTTP_COOKIE] => rol=U; usuario=antton; PHPSESSID=m8t28i5fqsffsfkuffc88mi5hd
+    [PATH] => C:\WINDOWS\system32;C:\WINDOWS;C:\WINDOWS\System32\Wbem;C:\WINDOWS\System32\WindowsPowerShell\v1.0\;C:\WINDOWS\System32\OpenSSH\;C:\Program Files\nodejs\;C:\Users\antto\AppData\Local\Microsoft\WindowsApps;C:\Users\antto\AppData\Local\Programs\Microsoft VS Code\bin;C:\Users\antto\AppData\Roaming\npm
+    [SystemRoot] => C:\WINDOWS
+    [COMSPEC] => C:\WINDOWS\system32\cmd.exe
+    [PATHEXT] => .COM;.EXE;.BAT;.CMD;.VBS;.VBE;.JS;.JSE;.WSF;.WSH;.MSC
+    [WINDIR] => C:\WINDOWS
+    [SERVER_SIGNATURE] => <address>Apache/2.4.58 (Win64) OpenSSL/3.1.3 PHP/8.2.12 Server at localhost Port 80</address>
+
+    [SERVER_SOFTWARE] => Apache/2.4.58 (Win64) OpenSSL/3.1.3 PHP/8.2.12
+    [SERVER_NAME] => localhost
+    [SERVER_ADDR] => ::1
+    [SERVER_PORT] => 80
+    [REMOTE_ADDR] => ::1
+    [DOCUMENT_ROOT] => C:/xampp/htdocs
+    [REQUEST_SCHEME] => http
+    [CONTEXT_PREFIX] => 
+    [CONTEXT_DOCUMENT_ROOT] => C:/xampp/htdocs
+    [SERVER_ADMIN] => postmaster@localhost
+    [SCRIPT_FILENAME] => C:/xampp/htdocs/misproyectos/ProyectoHiker_prueba/paginasespecializadas/Usuario/javascript/usuario.php
+    [REMOTE_PORT] => 54800
+    [GATEWAY_INTERFACE] => CGI/1.1
+    [SERVER_PROTOCOL] => HTTP/1.1
+    [REQUEST_METHOD] => GET
+    [QUERY_STRING] => action=check_session
+    [REQUEST_URI] => /misproyectos/ProyectoHiker_prueba/paginasespecializadas/Usuario/javascript/usuario.php?action=check_session
+    [SCRIPT_NAME] => /misproyectos/ProyectoHiker_prueba/paginasespecializadas/Usuario/javascript/usuario.php
+    [PHP_SELF] => /misproyectos/ProyectoHiker_prueba/paginasespecializadas/Usuario/javascript/usuario.php
+    [REQUEST_TIME_FLOAT] => 1727189286.6387
+    [REQUEST_TIME] => 1727189286
+)
+
+[2024-09-24 16:48:06] About to require connection files
+[2024-09-24 16:48:06] Connection files included
+[2024-09-24 16:48:06] Database connection successful
+[2024-09-24 16:48:06] Action requested: check_session
+[2024-09-24 16:48:06] Script ended
+[2024-09-24 16:49:00] Script started
+[2024-09-24 16:49:00] SERVER: Array
+(
+    [MIBDIRS] => /xampp/php/extras/mibs
+    [MYSQL_HOME] => \xampp\mysql\bin
+    [OPENSSL_CONF] => /xampp/apache/bin/openssl.cnf
+    [PHP_PEAR_SYSCONF_DIR] => \xampp\php
+    [PHPRC] => \xampp\php
+    [TMP] => \xampp\tmp
+    [HTTP_HOST] => localhost
+    [HTTP_CONNECTION] => keep-alive
+    [HTTP_SEC_CH_UA] => "Chromium";v="128", "Not;A=Brand";v="24", "Google Chrome";v="128"
+    [HTTP_SEC_CH_UA_MOBILE] => ?0
+    [HTTP_USER_AGENT] => Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36
+    [HTTP_SEC_CH_UA_PLATFORM] => "Windows"
+    [HTTP_ACCEPT] => */*
+    [HTTP_SEC_FETCH_SITE] => same-origin
+    [HTTP_SEC_FETCH_MODE] => cors
+    [HTTP_SEC_FETCH_DEST] => empty
+    [HTTP_REFERER] => http://localhost/misproyectos/ProyectoHiker_prueba/paginasespecializadas/Usuario/my_account.html
+    [HTTP_ACCEPT_ENCODING] => gzip, deflate, br, zstd
+    [HTTP_ACCEPT_LANGUAGE] => es-ES,es;q=0.9,fr;q=0.8,en;q=0.7,eu;q=0.6,ro;q=0.5
+    [HTTP_COOKIE] => rol=U; usuario=antton; PHPSESSID=m8t28i5fqsffsfkuffc88mi5hd
+    [PATH] => C:\WINDOWS\system32;C:\WINDOWS;C:\WINDOWS\System32\Wbem;C:\WINDOWS\System32\WindowsPowerShell\v1.0\;C:\WINDOWS\System32\OpenSSH\;C:\Program Files\nodejs\;C:\Users\antto\AppData\Local\Microsoft\WindowsApps;C:\Users\antto\AppData\Local\Programs\Microsoft VS Code\bin;C:\Users\antto\AppData\Roaming\npm
+    [SystemRoot] => C:\WINDOWS
+    [COMSPEC] => C:\WINDOWS\system32\cmd.exe
+    [PATHEXT] => .COM;.EXE;.BAT;.CMD;.VBS;.VBE;.JS;.JSE;.WSF;.WSH;.MSC
+    [WINDIR] => C:\WINDOWS
+    [SERVER_SIGNATURE] => <address>Apache/2.4.58 (Win64) OpenSSL/3.1.3 PHP/8.2.12 Server at localhost Port 80</address>
+
+    [SERVER_SOFTWARE] => Apache/2.4.58 (Win64) OpenSSL/3.1.3 PHP/8.2.12
+    [SERVER_NAME] => localhost
+    [SERVER_ADDR] => ::1
+    [SERVER_PORT] => 80
+    [REMOTE_ADDR] => ::1
+    [DOCUMENT_ROOT] => C:/xampp/htdocs
+    [REQUEST_SCHEME] => http
+    [CONTEXT_PREFIX] => 
+    [CONTEXT_DOCUMENT_ROOT] => C:/xampp/htdocs
+    [SERVER_ADMIN] => postmaster@localhost
+    [SCRIPT_FILENAME] => C:/xampp/htdocs/misproyectos/ProyectoHiker_prueba/paginasespecializadas/Usuario/javascript/usuario.php
+    [REMOTE_PORT] => 54827
+    [GATEWAY_INTERFACE] => CGI/1.1
+    [SERVER_PROTOCOL] => HTTP/1.1
+    [REQUEST_METHOD] => GET
+    [QUERY_STRING] => action=check_session
+    [REQUEST_URI] => /misproyectos/ProyectoHiker_prueba/paginasespecializadas/Usuario/javascript/usuario.php?action=check_session
+    [SCRIPT_NAME] => /misproyectos/ProyectoHiker_prueba/paginasespecializadas/Usuario/javascript/usuario.php
+    [PHP_SELF] => /misproyectos/ProyectoHiker_prueba/paginasespecializadas/Usuario/javascript/usuario.php
+    [REQUEST_TIME_FLOAT] => 1727189340.9644
+    [REQUEST_TIME] => 1727189340
+)
+
+[2024-09-24 16:49:00] About to require connection files
+[2024-09-24 16:49:00] Connection files included
+[2024-09-24 16:49:00] Database connection successful
+[2024-09-24 16:49:00] Action requested: check_session
+[2024-09-24 16:49:00] Script ended
+[2024-09-24 16:49:23] Script started
+[2024-09-24 16:49:23] SERVER: Array
+(
+    [MIBDIRS] => /xampp/php/extras/mibs
+    [MYSQL_HOME] => \xampp\mysql\bin
+    [OPENSSL_CONF] => /xampp/apache/bin/openssl.cnf
+    [PHP_PEAR_SYSCONF_DIR] => \xampp\php
+    [PHPRC] => \xampp\php
+    [TMP] => \xampp\tmp
+    [HTTP_HOST] => localhost
+    [HTTP_CONNECTION] => keep-alive
+    [HTTP_SEC_CH_UA] => "Chromium";v="128", "Not;A=Brand";v="24", "Google Chrome";v="128"
+    [HTTP_SEC_CH_UA_MOBILE] => ?0
+    [HTTP_USER_AGENT] => Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36
+    [HTTP_SEC_CH_UA_PLATFORM] => "Windows"
+    [HTTP_ACCEPT] => */*
+    [HTTP_SEC_FETCH_SITE] => same-origin
+    [HTTP_SEC_FETCH_MODE] => cors
+    [HTTP_SEC_FETCH_DEST] => empty
+    [HTTP_REFERER] => http://localhost/misproyectos/ProyectoHiker_prueba/paginasespecializadas/Usuario/my_account.html
+    [HTTP_ACCEPT_ENCODING] => gzip, deflate, br, zstd
+    [HTTP_ACCEPT_LANGUAGE] => es-ES,es;q=0.9,fr;q=0.8,en;q=0.7,eu;q=0.6,ro;q=0.5
+    [HTTP_COOKIE] => rol=U; usuario=antton; PHPSESSID=m8t28i5fqsffsfkuffc88mi5hd
+    [PATH] => C:\WINDOWS\system32;C:\WINDOWS;C:\WINDOWS\System32\Wbem;C:\WINDOWS\System32\WindowsPowerShell\v1.0\;C:\WINDOWS\System32\OpenSSH\;C:\Program Files\nodejs\;C:\Users\antto\AppData\Local\Microsoft\WindowsApps;C:\Users\antto\AppData\Local\Programs\Microsoft VS Code\bin;C:\Users\antto\AppData\Roaming\npm
+    [SystemRoot] => C:\WINDOWS
+    [COMSPEC] => C:\WINDOWS\system32\cmd.exe
+    [PATHEXT] => .COM;.EXE;.BAT;.CMD;.VBS;.VBE;.JS;.JSE;.WSF;.WSH;.MSC
+    [WINDIR] => C:\WINDOWS
+    [SERVER_SIGNATURE] => <address>Apache/2.4.58 (Win64) OpenSSL/3.1.3 PHP/8.2.12 Server at localhost Port 80</address>
+
+    [SERVER_SOFTWARE] => Apache/2.4.58 (Win64) OpenSSL/3.1.3 PHP/8.2.12
+    [SERVER_NAME] => localhost
+    [SERVER_ADDR] => ::1
+    [SERVER_PORT] => 80
+    [REMOTE_ADDR] => ::1
+    [DOCUMENT_ROOT] => C:/xampp/htdocs
+    [REQUEST_SCHEME] => http
+    [CONTEXT_PREFIX] => 
+    [CONTEXT_DOCUMENT_ROOT] => C:/xampp/htdocs
+    [SERVER_ADMIN] => postmaster@localhost
+    [SCRIPT_FILENAME] => C:/xampp/htdocs/misproyectos/ProyectoHiker_prueba/paginasespecializadas/Usuario/javascript/usuario.php
+    [REMOTE_PORT] => 54841
+    [GATEWAY_INTERFACE] => CGI/1.1
+    [SERVER_PROTOCOL] => HTTP/1.1
+    [REQUEST_METHOD] => GET
+    [QUERY_STRING] => action=check_session
+    [REQUEST_URI] => /misproyectos/ProyectoHiker_prueba/paginasespecializadas/Usuario/javascript/usuario.php?action=check_session
+    [SCRIPT_NAME] => /misproyectos/ProyectoHiker_prueba/paginasespecializadas/Usuario/javascript/usuario.php
+    [PHP_SELF] => /misproyectos/ProyectoHiker_prueba/paginasespecializadas/Usuario/javascript/usuario.php
+    [REQUEST_TIME_FLOAT] => 1727189363.2648
+    [REQUEST_TIME] => 1727189363
+)
+
+[2024-09-24 16:49:23] About to require connection files
+[2024-09-24 16:49:23] Connection files included
+[2024-09-24 16:49:23] Database connection successful
+[2024-09-24 16:49:23] Action requested: check_session
+[2024-09-24 16:49:23] Script ended
+[2024-09-24 16:49:29] Script started
+[2024-09-24 16:49:29] SERVER: Array
+(
+    [MIBDIRS] => /xampp/php/extras/mibs
+    [MYSQL_HOME] => \xampp\mysql\bin
+    [OPENSSL_CONF] => /xampp/apache/bin/openssl.cnf
+    [PHP_PEAR_SYSCONF_DIR] => \xampp\php
+    [PHPRC] => \xampp\php
+    [TMP] => \xampp\tmp
+    [HTTP_HOST] => localhost
+    [HTTP_CONNECTION] => keep-alive
+    [HTTP_SEC_CH_UA] => "Chromium";v="128", "Not;A=Brand";v="24", "Google Chrome";v="128"
+    [HTTP_SEC_CH_UA_MOBILE] => ?0
+    [HTTP_USER_AGENT] => Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36
+    [HTTP_SEC_CH_UA_PLATFORM] => "Windows"
+    [HTTP_ACCEPT] => */*
+    [HTTP_SEC_FETCH_SITE] => same-origin
+    [HTTP_SEC_FETCH_MODE] => cors
+    [HTTP_SEC_FETCH_DEST] => empty
+    [HTTP_REFERER] => http://localhost/misproyectos/ProyectoHiker_prueba/paginasespecializadas/Usuario/my_account.html
+    [HTTP_ACCEPT_ENCODING] => gzip, deflate, br, zstd
+    [HTTP_ACCEPT_LANGUAGE] => es-ES,es;q=0.9,fr;q=0.8,en;q=0.7,eu;q=0.6,ro;q=0.5
+    [HTTP_COOKIE] => rol=U; usuario=antton; PHPSESSID=m8t28i5fqsffsfkuffc88mi5hd
+    [PATH] => C:\WINDOWS\system32;C:\WINDOWS;C:\WINDOWS\System32\Wbem;C:\WINDOWS\System32\WindowsPowerShell\v1.0\;C:\WINDOWS\System32\OpenSSH\;C:\Program Files\nodejs\;C:\Users\antto\AppData\Local\Microsoft\WindowsApps;C:\Users\antto\AppData\Local\Programs\Microsoft VS Code\bin;C:\Users\antto\AppData\Roaming\npm
+    [SystemRoot] => C:\WINDOWS
+    [COMSPEC] => C:\WINDOWS\system32\cmd.exe
+    [PATHEXT] => .COM;.EXE;.BAT;.CMD;.VBS;.VBE;.JS;.JSE;.WSF;.WSH;.MSC
+    [WINDIR] => C:\WINDOWS
+    [SERVER_SIGNATURE] => <address>Apache/2.4.58 (Win64) OpenSSL/3.1.3 PHP/8.2.12 Server at localhost Port 80</address>
+
+    [SERVER_SOFTWARE] => Apache/2.4.58 (Win64) OpenSSL/3.1.3 PHP/8.2.12
+    [SERVER_NAME] => localhost
+    [SERVER_ADDR] => ::1
+    [SERVER_PORT] => 80
+    [REMOTE_ADDR] => ::1
+    [DOCUMENT_ROOT] => C:/xampp/htdocs
+    [REQUEST_SCHEME] => http
+    [CONTEXT_PREFIX] => 
+    [CONTEXT_DOCUMENT_ROOT] => C:/xampp/htdocs
+    [SERVER_ADMIN] => postmaster@localhost
+    [SCRIPT_FILENAME] => C:/xampp/htdocs/misproyectos/ProyectoHiker_prueba/paginasespecializadas/Usuario/javascript/usuario.php
+    [REMOTE_PORT] => 54855
+    [GATEWAY_INTERFACE] => CGI/1.1
+    [SERVER_PROTOCOL] => HTTP/1.1
+    [REQUEST_METHOD] => GET
+    [QUERY_STRING] => action=check_session
+    [REQUEST_URI] => /misproyectos/ProyectoHiker_prueba/paginasespecializadas/Usuario/javascript/usuario.php?action=check_session
+    [SCRIPT_NAME] => /misproyectos/ProyectoHiker_prueba/paginasespecializadas/Usuario/javascript/usuario.php
+    [PHP_SELF] => /misproyectos/ProyectoHiker_prueba/paginasespecializadas/Usuario/javascript/usuario.php
+    [REQUEST_TIME_FLOAT] => 1727189369.8642
+    [REQUEST_TIME] => 1727189369
+)
+
+[2024-09-24 16:49:29] About to require connection files
+[2024-09-24 16:49:29] Connection files included
+[2024-09-24 16:49:29] Database connection successful
+[2024-09-24 16:49:29] Action requested: check_session
+[2024-09-24 16:49:29] Script ended
+[2024-09-24 16:49:36] Script started
+[2024-09-24 16:49:36] SERVER: Array
+(
+    [MIBDIRS] => /xampp/php/extras/mibs
+    [MYSQL_HOME] => \xampp\mysql\bin
+    [OPENSSL_CONF] => /xampp/apache/bin/openssl.cnf
+    [PHP_PEAR_SYSCONF_DIR] => \xampp\php
+    [PHPRC] => \xampp\php
+    [TMP] => \xampp\tmp
+    [HTTP_HOST] => localhost
+    [HTTP_CONNECTION] => keep-alive
+    [HTTP_SEC_CH_UA] => "Chromium";v="128", "Not;A=Brand";v="24", "Google Chrome";v="128"
+    [HTTP_SEC_CH_UA_MOBILE] => ?0
+    [HTTP_USER_AGENT] => Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36
+    [HTTP_SEC_CH_UA_PLATFORM] => "Windows"
+    [HTTP_ACCEPT] => */*
+    [HTTP_SEC_FETCH_SITE] => same-origin
+    [HTTP_SEC_FETCH_MODE] => cors
+    [HTTP_SEC_FETCH_DEST] => empty
+    [HTTP_REFERER] => http://localhost/misproyectos/ProyectoHiker_prueba/paginasespecializadas/Usuario/my_account.html
+    [HTTP_ACCEPT_ENCODING] => gzip, deflate, br, zstd
+    [HTTP_ACCEPT_LANGUAGE] => es-ES,es;q=0.9,fr;q=0.8,en;q=0.7,eu;q=0.6,ro;q=0.5
+    [HTTP_COOKIE] => rol=U; usuario=antton; PHPSESSID=m8t28i5fqsffsfkuffc88mi5hd
+    [PATH] => C:\WINDOWS\system32;C:\WINDOWS;C:\WINDOWS\System32\Wbem;C:\WINDOWS\System32\WindowsPowerShell\v1.0\;C:\WINDOWS\System32\OpenSSH\;C:\Program Files\nodejs\;C:\Users\antto\AppData\Local\Microsoft\WindowsApps;C:\Users\antto\AppData\Local\Programs\Microsoft VS Code\bin;C:\Users\antto\AppData\Roaming\npm
+    [SystemRoot] => C:\WINDOWS
+    [COMSPEC] => C:\WINDOWS\system32\cmd.exe
+    [PATHEXT] => .COM;.EXE;.BAT;.CMD;.VBS;.VBE;.JS;.JSE;.WSF;.WSH;.MSC
+    [WINDIR] => C:\WINDOWS
+    [SERVER_SIGNATURE] => <address>Apache/2.4.58 (Win64) OpenSSL/3.1.3 PHP/8.2.12 Server at localhost Port 80</address>
+
+    [SERVER_SOFTWARE] => Apache/2.4.58 (Win64) OpenSSL/3.1.3 PHP/8.2.12
+    [SERVER_NAME] => localhost
+    [SERVER_ADDR] => ::1
+    [SERVER_PORT] => 80
+    [REMOTE_ADDR] => ::1
+    [DOCUMENT_ROOT] => C:/xampp/htdocs
+    [REQUEST_SCHEME] => http
+    [CONTEXT_PREFIX] => 
+    [CONTEXT_DOCUMENT_ROOT] => C:/xampp/htdocs
+    [SERVER_ADMIN] => postmaster@localhost
+    [SCRIPT_FILENAME] => C:/xampp/htdocs/misproyectos/ProyectoHiker_prueba/paginasespecializadas/Usuario/javascript/usuario.php
+    [REMOTE_PORT] => 54868
+    [GATEWAY_INTERFACE] => CGI/1.1
+    [SERVER_PROTOCOL] => HTTP/1.1
+    [REQUEST_METHOD] => GET
+    [QUERY_STRING] => action=check_session
+    [REQUEST_URI] => /misproyectos/ProyectoHiker_prueba/paginasespecializadas/Usuario/javascript/usuario.php?action=check_session
+    [SCRIPT_NAME] => /misproyectos/ProyectoHiker_prueba/paginasespecializadas/Usuario/javascript/usuario.php
+    [PHP_SELF] => /misproyectos/ProyectoHiker_prueba/paginasespecializadas/Usuario/javascript/usuario.php
+    [REQUEST_TIME_FLOAT] => 1727189376.5571
+    [REQUEST_TIME] => 1727189376
+)
+
+[2024-09-24 16:49:36] About to require connection files
+[2024-09-24 16:49:36] Connection files included
+[2024-09-24 16:49:36] Database connection successful
+[2024-09-24 16:49:36] Action requested: check_session
+[2024-09-24 16:49:36] Script ended
+[2024-09-24 16:51:35] Script started
+[2024-09-24 16:51:35] SERVER: Array
+(
+    [MIBDIRS] => /xampp/php/extras/mibs
+    [MYSQL_HOME] => \xampp\mysql\bin
+    [OPENSSL_CONF] => /xampp/apache/bin/openssl.cnf
+    [PHP_PEAR_SYSCONF_DIR] => \xampp\php
+    [PHPRC] => \xampp\php
+    [TMP] => \xampp\tmp
+    [HTTP_HOST] => localhost
+    [HTTP_CONNECTION] => keep-alive
+    [HTTP_SEC_CH_UA] => "Chromium";v="128", "Not;A=Brand";v="24", "Google Chrome";v="128"
+    [HTTP_SEC_CH_UA_MOBILE] => ?0
+    [HTTP_USER_AGENT] => Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36
+    [HTTP_SEC_CH_UA_PLATFORM] => "Windows"
+    [HTTP_ACCEPT] => */*
+    [HTTP_SEC_FETCH_SITE] => same-origin
+    [HTTP_SEC_FETCH_MODE] => cors
+    [HTTP_SEC_FETCH_DEST] => empty
+    [HTTP_REFERER] => http://localhost/misproyectos/ProyectoHiker_prueba/paginasespecializadas/Usuario/my_account.html
+    [HTTP_ACCEPT_ENCODING] => gzip, deflate, br, zstd
+    [HTTP_ACCEPT_LANGUAGE] => es-ES,es;q=0.9,fr;q=0.8,en;q=0.7,eu;q=0.6,ro;q=0.5
+    [HTTP_COOKIE] => rol=U; usuario=antton; PHPSESSID=m8t28i5fqsffsfkuffc88mi5hd
+    [PATH] => C:\WINDOWS\system32;C:\WINDOWS;C:\WINDOWS\System32\Wbem;C:\WINDOWS\System32\WindowsPowerShell\v1.0\;C:\WINDOWS\System32\OpenSSH\;C:\Program Files\nodejs\;C:\Users\antto\AppData\Local\Microsoft\WindowsApps;C:\Users\antto\AppData\Local\Programs\Microsoft VS Code\bin;C:\Users\antto\AppData\Roaming\npm
+    [SystemRoot] => C:\WINDOWS
+    [COMSPEC] => C:\WINDOWS\system32\cmd.exe
+    [PATHEXT] => .COM;.EXE;.BAT;.CMD;.VBS;.VBE;.JS;.JSE;.WSF;.WSH;.MSC
+    [WINDIR] => C:\WINDOWS
+    [SERVER_SIGNATURE] => <address>Apache/2.4.58 (Win64) OpenSSL/3.1.3 PHP/8.2.12 Server at localhost Port 80</address>
+
+    [SERVER_SOFTWARE] => Apache/2.4.58 (Win64) OpenSSL/3.1.3 PHP/8.2.12
+    [SERVER_NAME] => localhost
+    [SERVER_ADDR] => ::1
+    [SERVER_PORT] => 80
+    [REMOTE_ADDR] => ::1
+    [DOCUMENT_ROOT] => C:/xampp/htdocs
+    [REQUEST_SCHEME] => http
+    [CONTEXT_PREFIX] => 
+    [CONTEXT_DOCUMENT_ROOT] => C:/xampp/htdocs
+    [SERVER_ADMIN] => postmaster@localhost
+    [SCRIPT_FILENAME] => C:/xampp/htdocs/misproyectos/ProyectoHiker_prueba/paginasespecializadas/Usuario/javascript/usuario.php
+    [REMOTE_PORT] => 54930
+    [GATEWAY_INTERFACE] => CGI/1.1
+    [SERVER_PROTOCOL] => HTTP/1.1
+    [REQUEST_METHOD] => GET
+    [QUERY_STRING] => 
+    [REQUEST_URI] => /misproyectos/ProyectoHiker_prueba/paginasespecializadas/Usuario/javascript/usuario.php
+    [SCRIPT_NAME] => /misproyectos/ProyectoHiker_prueba/paginasespecializadas/Usuario/javascript/usuario.php
+    [PHP_SELF] => /misproyectos/ProyectoHiker_prueba/paginasespecializadas/Usuario/javascript/usuario.php
+    [REQUEST_TIME_FLOAT] => 1727189495.7616
+    [REQUEST_TIME] => 1727189495
+)
+
+[2024-09-24 16:51:35] About to require connection files
+[2024-09-24 16:51:35] Connection files included
+[2024-09-24 16:51:35] Database connection successful
+[2024-09-24 16:51:35] Action requested: 
+[2024-09-24 16:51:35] Exception caught: {"error":"Acci\u00f3n no v\u00e1lida"}
+[2024-09-24 16:51:35] Script ended
+[2024-09-24 16:51:38] Script started
+[2024-09-24 16:51:38] SERVER: Array
+(
+    [MIBDIRS] => /xampp/php/extras/mibs
+    [MYSQL_HOME] => \xampp\mysql\bin
+    [OPENSSL_CONF] => /xampp/apache/bin/openssl.cnf
+    [PHP_PEAR_SYSCONF_DIR] => \xampp\php
+    [PHPRC] => \xampp\php
+    [TMP] => \xampp\tmp
+    [HTTP_HOST] => localhost
+    [HTTP_CONNECTION] => keep-alive
+    [HTTP_SEC_CH_UA] => "Chromium";v="128", "Not;A=Brand";v="24", "Google Chrome";v="128"
+    [HTTP_SEC_CH_UA_MOBILE] => ?0
+    [HTTP_USER_AGENT] => Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36
+    [HTTP_SEC_CH_UA_PLATFORM] => "Windows"
+    [HTTP_ACCEPT] => */*
+    [HTTP_SEC_FETCH_SITE] => same-origin
+    [HTTP_SEC_FETCH_MODE] => cors
+    [HTTP_SEC_FETCH_DEST] => empty
+    [HTTP_REFERER] => http://localhost/misproyectos/ProyectoHiker_prueba/paginasespecializadas/Usuario/my_account.html
+    [HTTP_ACCEPT_ENCODING] => gzip, deflate, br, zstd
+    [HTTP_ACCEPT_LANGUAGE] => es-ES,es;q=0.9,fr;q=0.8,en;q=0.7,eu;q=0.6,ro;q=0.5
+    [HTTP_COOKIE] => rol=U; usuario=antton; PHPSESSID=m8t28i5fqsffsfkuffc88mi5hd
+    [PATH] => C:\WINDOWS\system32;C:\WINDOWS;C:\WINDOWS\System32\Wbem;C:\WINDOWS\System32\WindowsPowerShell\v1.0\;C:\WINDOWS\System32\OpenSSH\;C:\Program Files\nodejs\;C:\Users\antto\AppData\Local\Microsoft\WindowsApps;C:\Users\antto\AppData\Local\Programs\Microsoft VS Code\bin;C:\Users\antto\AppData\Roaming\npm
+    [SystemRoot] => C:\WINDOWS
+    [COMSPEC] => C:\WINDOWS\system32\cmd.exe
+    [PATHEXT] => .COM;.EXE;.BAT;.CMD;.VBS;.VBE;.JS;.JSE;.WSF;.WSH;.MSC
+    [WINDIR] => C:\WINDOWS
+    [SERVER_SIGNATURE] => <address>Apache/2.4.58 (Win64) OpenSSL/3.1.3 PHP/8.2.12 Server at localhost Port 80</address>
+
+    [SERVER_SOFTWARE] => Apache/2.4.58 (Win64) OpenSSL/3.1.3 PHP/8.2.12
+    [SERVER_NAME] => localhost
+    [SERVER_ADDR] => ::1
+    [SERVER_PORT] => 80
+    [REMOTE_ADDR] => ::1
+    [DOCUMENT_ROOT] => C:/xampp/htdocs
+    [REQUEST_SCHEME] => http
+    [CONTEXT_PREFIX] => 
+    [CONTEXT_DOCUMENT_ROOT] => C:/xampp/htdocs
+    [SERVER_ADMIN] => postmaster@localhost
+    [SCRIPT_FILENAME] => C:/xampp/htdocs/misproyectos/ProyectoHiker_prueba/paginasespecializadas/Usuario/javascript/usuario.php
+    [REMOTE_PORT] => 54931
+    [GATEWAY_INTERFACE] => CGI/1.1
+    [SERVER_PROTOCOL] => HTTP/1.1
+    [REQUEST_METHOD] => GET
+    [QUERY_STRING] => 
+    [REQUEST_URI] => /misproyectos/ProyectoHiker_prueba/paginasespecializadas/Usuario/javascript/usuario.php
+    [SCRIPT_NAME] => /misproyectos/ProyectoHiker_prueba/paginasespecializadas/Usuario/javascript/usuario.php
+    [PHP_SELF] => /misproyectos/ProyectoHiker_prueba/paginasespecializadas/Usuario/javascript/usuario.php
+    [REQUEST_TIME_FLOAT] => 1727189498.0894
+    [REQUEST_TIME] => 1727189498
+)
+
+[2024-09-24 16:51:38] About to require connection files
+[2024-09-24 16:51:38] Connection files included
+[2024-09-24 16:51:38] Database connection successful
+[2024-09-24 16:51:38] Action requested: 
+[2024-09-24 16:51:38] Exception caught: {"error":"Acci\u00f3n no v\u00e1lida"}
+[2024-09-24 16:51:38] Script ended
+[2024-09-24 16:51:41] Script started
+[2024-09-24 16:51:41] SERVER: Array
+(
+    [MIBDIRS] => /xampp/php/extras/mibs
+    [MYSQL_HOME] => \xampp\mysql\bin
+    [OPENSSL_CONF] => /xampp/apache/bin/openssl.cnf
+    [PHP_PEAR_SYSCONF_DIR] => \xampp\php
+    [PHPRC] => \xampp\php
+    [TMP] => \xampp\tmp
+    [HTTP_HOST] => localhost
+    [HTTP_CONNECTION] => keep-alive
+    [HTTP_SEC_CH_UA] => "Chromium";v="128", "Not;A=Brand";v="24", "Google Chrome";v="128"
+    [HTTP_SEC_CH_UA_MOBILE] => ?0
+    [HTTP_USER_AGENT] => Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36
+    [HTTP_SEC_CH_UA_PLATFORM] => "Windows"
+    [HTTP_ACCEPT] => */*
+    [HTTP_SEC_FETCH_SITE] => same-origin
+    [HTTP_SEC_FETCH_MODE] => cors
+    [HTTP_SEC_FETCH_DEST] => empty
+    [HTTP_REFERER] => http://localhost/misproyectos/ProyectoHiker_prueba/paginasespecializadas/Usuario/my_account.html
+    [HTTP_ACCEPT_ENCODING] => gzip, deflate, br, zstd
+    [HTTP_ACCEPT_LANGUAGE] => es-ES,es;q=0.9,fr;q=0.8,en;q=0.7,eu;q=0.6,ro;q=0.5
+    [HTTP_COOKIE] => rol=U; usuario=antton; PHPSESSID=m8t28i5fqsffsfkuffc88mi5hd
+    [PATH] => C:\WINDOWS\system32;C:\WINDOWS;C:\WINDOWS\System32\Wbem;C:\WINDOWS\System32\WindowsPowerShell\v1.0\;C:\WINDOWS\System32\OpenSSH\;C:\Program Files\nodejs\;C:\Users\antto\AppData\Local\Microsoft\WindowsApps;C:\Users\antto\AppData\Local\Programs\Microsoft VS Code\bin;C:\Users\antto\AppData\Roaming\npm
+    [SystemRoot] => C:\WINDOWS
+    [COMSPEC] => C:\WINDOWS\system32\cmd.exe
+    [PATHEXT] => .COM;.EXE;.BAT;.CMD;.VBS;.VBE;.JS;.JSE;.WSF;.WSH;.MSC
+    [WINDIR] => C:\WINDOWS
+    [SERVER_SIGNATURE] => <address>Apache/2.4.58 (Win64) OpenSSL/3.1.3 PHP/8.2.12 Server at localhost Port 80</address>
+
+    [SERVER_SOFTWARE] => Apache/2.4.58 (Win64) OpenSSL/3.1.3 PHP/8.2.12
+    [SERVER_NAME] => localhost
+    [SERVER_ADDR] => ::1
+    [SERVER_PORT] => 80
+    [REMOTE_ADDR] => ::1
+    [DOCUMENT_ROOT] => C:/xampp/htdocs
+    [REQUEST_SCHEME] => http
+    [CONTEXT_PREFIX] => 
+    [CONTEXT_DOCUMENT_ROOT] => C:/xampp/htdocs
+    [SERVER_ADMIN] => postmaster@localhost
+    [SCRIPT_FILENAME] => C:/xampp/htdocs/misproyectos/ProyectoHiker_prueba/paginasespecializadas/Usuario/javascript/usuario.php
+    [REMOTE_PORT] => 54938
+    [GATEWAY_INTERFACE] => CGI/1.1
+    [SERVER_PROTOCOL] => HTTP/1.1
+    [REQUEST_METHOD] => GET
+    [QUERY_STRING] => action=check_session
+    [REQUEST_URI] => /misproyectos/ProyectoHiker_prueba/paginasespecializadas/Usuario/javascript/usuario.php?action=check_session
+    [SCRIPT_NAME] => /misproyectos/ProyectoHiker_prueba/paginasespecializadas/Usuario/javascript/usuario.php
+    [PHP_SELF] => /misproyectos/ProyectoHiker_prueba/paginasespecializadas/Usuario/javascript/usuario.php
+    [REQUEST_TIME_FLOAT] => 1727189501.9837
+    [REQUEST_TIME] => 1727189501
+)
+
+[2024-09-24 16:51:41] About to require connection files
+[2024-09-24 16:51:42] Connection files included
+[2024-09-24 16:51:42] Database connection successful
+[2024-09-24 16:51:42] Action requested: check_session
+[2024-09-24 16:51:42] Script ended
+[2024-09-24 16:52:41] Script started
+[2024-09-24 16:52:41] SERVER: Array
+(
+    [MIBDIRS] => /xampp/php/extras/mibs
+    [MYSQL_HOME] => \xampp\mysql\bin
+    [OPENSSL_CONF] => /xampp/apache/bin/openssl.cnf
+    [PHP_PEAR_SYSCONF_DIR] => \xampp\php
+    [PHPRC] => \xampp\php
+    [TMP] => \xampp\tmp
+    [HTTP_HOST] => localhost
+    [HTTP_CONNECTION] => keep-alive
+    [HTTP_SEC_CH_UA] => "Chromium";v="128", "Not;A=Brand";v="24", "Google Chrome";v="128"
+    [HTTP_SEC_CH_UA_MOBILE] => ?0
+    [HTTP_USER_AGENT] => Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36
+    [HTTP_SEC_CH_UA_PLATFORM] => "Windows"
+    [HTTP_ACCEPT] => */*
+    [HTTP_SEC_FETCH_SITE] => same-origin
+    [HTTP_SEC_FETCH_MODE] => cors
+    [HTTP_SEC_FETCH_DEST] => empty
+    [HTTP_REFERER] => http://localhost/misproyectos/ProyectoHiker_prueba/paginasespecializadas/Usuario/my_account.html
+    [HTTP_ACCEPT_ENCODING] => gzip, deflate, br, zstd
+    [HTTP_ACCEPT_LANGUAGE] => es-ES,es;q=0.9,fr;q=0.8,en;q=0.7,eu;q=0.6,ro;q=0.5
+    [HTTP_COOKIE] => rol=U; usuario=antton; PHPSESSID=m8t28i5fqsffsfkuffc88mi5hd
+    [PATH] => C:\WINDOWS\system32;C:\WINDOWS;C:\WINDOWS\System32\Wbem;C:\WINDOWS\System32\WindowsPowerShell\v1.0\;C:\WINDOWS\System32\OpenSSH\;C:\Program Files\nodejs\;C:\Users\antto\AppData\Local\Microsoft\WindowsApps;C:\Users\antto\AppData\Local\Programs\Microsoft VS Code\bin;C:\Users\antto\AppData\Roaming\npm
+    [SystemRoot] => C:\WINDOWS
+    [COMSPEC] => C:\WINDOWS\system32\cmd.exe
+    [PATHEXT] => .COM;.EXE;.BAT;.CMD;.VBS;.VBE;.JS;.JSE;.WSF;.WSH;.MSC
+    [WINDIR] => C:\WINDOWS
+    [SERVER_SIGNATURE] => <address>Apache/2.4.58 (Win64) OpenSSL/3.1.3 PHP/8.2.12 Server at localhost Port 80</address>
+
+    [SERVER_SOFTWARE] => Apache/2.4.58 (Win64) OpenSSL/3.1.3 PHP/8.2.12
+    [SERVER_NAME] => localhost
+    [SERVER_ADDR] => ::1
+    [SERVER_PORT] => 80
+    [REMOTE_ADDR] => ::1
+    [DOCUMENT_ROOT] => C:/xampp/htdocs
+    [REQUEST_SCHEME] => http
+    [CONTEXT_PREFIX] => 
+    [CONTEXT_DOCUMENT_ROOT] => C:/xampp/htdocs
+    [SERVER_ADMIN] => postmaster@localhost
+    [SCRIPT_FILENAME] => C:/xampp/htdocs/misproyectos/ProyectoHiker_prueba/paginasespecializadas/Usuario/javascript/usuario.php
+    [REMOTE_PORT] => 54955
+    [GATEWAY_INTERFACE] => CGI/1.1
+    [SERVER_PROTOCOL] => HTTP/1.1
+    [REQUEST_METHOD] => GET
+    [QUERY_STRING] => action=check_session
+    [REQUEST_URI] => /misproyectos/ProyectoHiker_prueba/paginasespecializadas/Usuario/javascript/usuario.php?action=check_session
+    [SCRIPT_NAME] => /misproyectos/ProyectoHiker_prueba/paginasespecializadas/Usuario/javascript/usuario.php
+    [PHP_SELF] => /misproyectos/ProyectoHiker_prueba/paginasespecializadas/Usuario/javascript/usuario.php
+    [REQUEST_TIME_FLOAT] => 1727189561.677
+    [REQUEST_TIME] => 1727189561
+)
+
+[2024-09-24 16:52:41] About to require connection files
+[2024-09-24 16:52:41] Connection files included
+[2024-09-24 16:52:41] Database connection successful
+[2024-09-24 16:52:41] Action requested: check_session
+[2024-09-24 16:52:41] Script ended
+[2024-09-24 16:53:54] Script started
+[2024-09-24 16:53:54] SERVER: Array
+(
+    [MIBDIRS] => /xampp/php/extras/mibs
+    [MYSQL_HOME] => \xampp\mysql\bin
+    [OPENSSL_CONF] => /xampp/apache/bin/openssl.cnf
+    [PHP_PEAR_SYSCONF_DIR] => \xampp\php
+    [PHPRC] => \xampp\php
+    [TMP] => \xampp\tmp
+    [HTTP_HOST] => localhost
+    [HTTP_CONNECTION] => keep-alive
+    [HTTP_SEC_CH_UA] => "Chromium";v="128", "Not;A=Brand";v="24", "Google Chrome";v="128"
+    [HTTP_SEC_CH_UA_MOBILE] => ?0
+    [HTTP_USER_AGENT] => Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36
+    [HTTP_SEC_CH_UA_PLATFORM] => "Windows"
+    [HTTP_ACCEPT] => */*
+    [HTTP_SEC_FETCH_SITE] => same-origin
+    [HTTP_SEC_FETCH_MODE] => cors
+    [HTTP_SEC_FETCH_DEST] => empty
+    [HTTP_REFERER] => http://localhost/misproyectos/ProyectoHiker_prueba/paginasespecializadas/Usuario/my_account.html
+    [HTTP_ACCEPT_ENCODING] => gzip, deflate, br, zstd
+    [HTTP_ACCEPT_LANGUAGE] => es-ES,es;q=0.9,fr;q=0.8,en;q=0.7,eu;q=0.6,ro;q=0.5
+    [HTTP_COOKIE] => rol=U; usuario=antton; PHPSESSID=m8t28i5fqsffsfkuffc88mi5hd
+    [PATH] => C:\WINDOWS\system32;C:\WINDOWS;C:\WINDOWS\System32\Wbem;C:\WINDOWS\System32\WindowsPowerShell\v1.0\;C:\WINDOWS\System32\OpenSSH\;C:\Program Files\nodejs\;C:\Users\antto\AppData\Local\Microsoft\WindowsApps;C:\Users\antto\AppData\Local\Programs\Microsoft VS Code\bin;C:\Users\antto\AppData\Roaming\npm
+    [SystemRoot] => C:\WINDOWS
+    [COMSPEC] => C:\WINDOWS\system32\cmd.exe
+    [PATHEXT] => .COM;.EXE;.BAT;.CMD;.VBS;.VBE;.JS;.JSE;.WSF;.WSH;.MSC
+    [WINDIR] => C:\WINDOWS
+    [SERVER_SIGNATURE] => <address>Apache/2.4.58 (Win64) OpenSSL/3.1.3 PHP/8.2.12 Server at localhost Port 80</address>
+
+    [SERVER_SOFTWARE] => Apache/2.4.58 (Win64) OpenSSL/3.1.3 PHP/8.2.12
+    [SERVER_NAME] => localhost
+    [SERVER_ADDR] => ::1
+    [SERVER_PORT] => 80
+    [REMOTE_ADDR] => ::1
+    [DOCUMENT_ROOT] => C:/xampp/htdocs
+    [REQUEST_SCHEME] => http
+    [CONTEXT_PREFIX] => 
+    [CONTEXT_DOCUMENT_ROOT] => C:/xampp/htdocs
+    [SERVER_ADMIN] => postmaster@localhost
+    [SCRIPT_FILENAME] => C:/xampp/htdocs/misproyectos/ProyectoHiker_prueba/paginasespecializadas/Usuario/javascript/usuario.php
+    [REMOTE_PORT] => 55033
+    [GATEWAY_INTERFACE] => CGI/1.1
+    [SERVER_PROTOCOL] => HTTP/1.1
+    [REQUEST_METHOD] => GET
+    [QUERY_STRING] => action=check_session
+    [REQUEST_URI] => /misproyectos/ProyectoHiker_prueba/paginasespecializadas/Usuario/javascript/usuario.php?action=check_session
+    [SCRIPT_NAME] => /misproyectos/ProyectoHiker_prueba/paginasespecializadas/Usuario/javascript/usuario.php
+    [PHP_SELF] => /misproyectos/ProyectoHiker_prueba/paginasespecializadas/Usuario/javascript/usuario.php
+    [REQUEST_TIME_FLOAT] => 1727189633.9984
+    [REQUEST_TIME] => 1727189633
+)
+
+[2024-09-24 16:53:54] About to require connection files
+[2024-09-24 16:53:54] Connection files included
+[2024-09-24 16:53:54] Database connection successful
+[2024-09-24 16:53:54] Action requested: check_session
+[2024-09-24 16:53:54] Script ended
+[2024-09-24 16:54:01] Script started
+[2024-09-24 16:54:01] SERVER: Array
+(
+    [MIBDIRS] => /xampp/php/extras/mibs
+    [MYSQL_HOME] => \xampp\mysql\bin
+    [OPENSSL_CONF] => /xampp/apache/bin/openssl.cnf
+    [PHP_PEAR_SYSCONF_DIR] => \xampp\php
+    [PHPRC] => \xampp\php
+    [TMP] => \xampp\tmp
+    [HTTP_HOST] => localhost
+    [HTTP_CONNECTION] => keep-alive
+    [HTTP_SEC_CH_UA] => "Chromium";v="128", "Not;A=Brand";v="24", "Google Chrome";v="128"
+    [HTTP_SEC_CH_UA_MOBILE] => ?0
+    [HTTP_USER_AGENT] => Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36
+    [HTTP_SEC_CH_UA_PLATFORM] => "Windows"
+    [HTTP_ACCEPT] => */*
+    [HTTP_SEC_FETCH_SITE] => same-origin
+    [HTTP_SEC_FETCH_MODE] => cors
+    [HTTP_SEC_FETCH_DEST] => empty
+    [HTTP_REFERER] => http://localhost/misproyectos/ProyectoHiker_prueba/paginasespecializadas/Usuario/my_account.html
+    [HTTP_ACCEPT_ENCODING] => gzip, deflate, br, zstd
+    [HTTP_ACCEPT_LANGUAGE] => es-ES,es;q=0.9,fr;q=0.8,en;q=0.7,eu;q=0.6,ro;q=0.5
+    [HTTP_COOKIE] => rol=U; usuario=antton; PHPSESSID=m8t28i5fqsffsfkuffc88mi5hd
+    [PATH] => C:\WINDOWS\system32;C:\WINDOWS;C:\WINDOWS\System32\Wbem;C:\WINDOWS\System32\WindowsPowerShell\v1.0\;C:\WINDOWS\System32\OpenSSH\;C:\Program Files\nodejs\;C:\Users\antto\AppData\Local\Microsoft\WindowsApps;C:\Users\antto\AppData\Local\Programs\Microsoft VS Code\bin;C:\Users\antto\AppData\Roaming\npm
+    [SystemRoot] => C:\WINDOWS
+    [COMSPEC] => C:\WINDOWS\system32\cmd.exe
+    [PATHEXT] => .COM;.EXE;.BAT;.CMD;.VBS;.VBE;.JS;.JSE;.WSF;.WSH;.MSC
+    [WINDIR] => C:\WINDOWS
+    [SERVER_SIGNATURE] => <address>Apache/2.4.58 (Win64) OpenSSL/3.1.3 PHP/8.2.12 Server at localhost Port 80</address>
+
+    [SERVER_SOFTWARE] => Apache/2.4.58 (Win64) OpenSSL/3.1.3 PHP/8.2.12
+    [SERVER_NAME] => localhost
+    [SERVER_ADDR] => ::1
+    [SERVER_PORT] => 80
+    [REMOTE_ADDR] => ::1
+    [DOCUMENT_ROOT] => C:/xampp/htdocs
+    [REQUEST_SCHEME] => http
+    [CONTEXT_PREFIX] => 
+    [CONTEXT_DOCUMENT_ROOT] => C:/xampp/htdocs
+    [SERVER_ADMIN] => postmaster@localhost
+    [SCRIPT_FILENAME] => C:/xampp/htdocs/misproyectos/ProyectoHiker_prueba/paginasespecializadas/Usuario/javascript/usuario.php
+    [REMOTE_PORT] => 55055
+    [GATEWAY_INTERFACE] => CGI/1.1
+    [SERVER_PROTOCOL] => HTTP/1.1
+    [REQUEST_METHOD] => GET
+    [QUERY_STRING] => action=check_session
+    [REQUEST_URI] => /misproyectos/ProyectoHiker_prueba/paginasespecializadas/Usuario/javascript/usuario.php?action=check_session
+    [SCRIPT_NAME] => /misproyectos/ProyectoHiker_prueba/paginasespecializadas/Usuario/javascript/usuario.php
+    [PHP_SELF] => /misproyectos/ProyectoHiker_prueba/paginasespecializadas/Usuario/javascript/usuario.php
+    [REQUEST_TIME_FLOAT] => 1727189641.1689
+    [REQUEST_TIME] => 1727189641
+)
+
+[2024-09-24 16:54:01] About to require connection files
+[2024-09-24 16:54:01] Connection files included
+[2024-09-24 16:54:01] Database connection successful
+[2024-09-24 16:54:01] Action requested: check_session
+[2024-09-24 16:54:01] Script ended
+[2024-09-24 16:57:14] Script started
+[2024-09-24 16:57:14] SERVER: Array
+(
+    [MIBDIRS] => /xampp/php/extras/mibs
+    [MYSQL_HOME] => \xampp\mysql\bin
+    [OPENSSL_CONF] => /xampp/apache/bin/openssl.cnf
+    [PHP_PEAR_SYSCONF_DIR] => \xampp\php
+    [PHPRC] => \xampp\php
+    [TMP] => \xampp\tmp
+    [HTTP_HOST] => localhost
+    [HTTP_CONNECTION] => keep-alive
+    [HTTP_SEC_CH_UA] => "Chromium";v="128", "Not;A=Brand";v="24", "Google Chrome";v="128"
+    [HTTP_SEC_CH_UA_MOBILE] => ?0
+    [HTTP_USER_AGENT] => Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36
+    [HTTP_SEC_CH_UA_PLATFORM] => "Windows"
+    [HTTP_ACCEPT] => */*
+    [HTTP_SEC_FETCH_SITE] => same-origin
+    [HTTP_SEC_FETCH_MODE] => cors
+    [HTTP_SEC_FETCH_DEST] => empty
+    [HTTP_REFERER] => http://localhost/misproyectos/ProyectoHiker_prueba/paginasespecializadas/Usuario/my_account.html
+    [HTTP_ACCEPT_ENCODING] => gzip, deflate, br, zstd
+    [HTTP_ACCEPT_LANGUAGE] => es-ES,es;q=0.9,fr;q=0.8,en;q=0.7,eu;q=0.6,ro;q=0.5
+    [HTTP_COOKIE] => rol=U; usuario=antton; PHPSESSID=m8t28i5fqsffsfkuffc88mi5hd
+    [PATH] => C:\WINDOWS\system32;C:\WINDOWS;C:\WINDOWS\System32\Wbem;C:\WINDOWS\System32\WindowsPowerShell\v1.0\;C:\WINDOWS\System32\OpenSSH\;C:\Program Files\nodejs\;C:\Users\antto\AppData\Local\Microsoft\WindowsApps;C:\Users\antto\AppData\Local\Programs\Microsoft VS Code\bin;C:\Users\antto\AppData\Roaming\npm
+    [SystemRoot] => C:\WINDOWS
+    [COMSPEC] => C:\WINDOWS\system32\cmd.exe
+    [PATHEXT] => .COM;.EXE;.BAT;.CMD;.VBS;.VBE;.JS;.JSE;.WSF;.WSH;.MSC
+    [WINDIR] => C:\WINDOWS
+    [SERVER_SIGNATURE] => <address>Apache/2.4.58 (Win64) OpenSSL/3.1.3 PHP/8.2.12 Server at localhost Port 80</address>
+
+    [SERVER_SOFTWARE] => Apache/2.4.58 (Win64) OpenSSL/3.1.3 PHP/8.2.12
+    [SERVER_NAME] => localhost
+    [SERVER_ADDR] => ::1
+    [SERVER_PORT] => 80
+    [REMOTE_ADDR] => ::1
+    [DOCUMENT_ROOT] => C:/xampp/htdocs
+    [REQUEST_SCHEME] => http
+    [CONTEXT_PREFIX] => 
+    [CONTEXT_DOCUMENT_ROOT] => C:/xampp/htdocs
+    [SERVER_ADMIN] => postmaster@localhost
+    [SCRIPT_FILENAME] => C:/xampp/htdocs/misproyectos/ProyectoHiker_prueba/paginasespecializadas/Usuario/javascript/usuario.php
+    [REMOTE_PORT] => 55136
+    [GATEWAY_INTERFACE] => CGI/1.1
+    [SERVER_PROTOCOL] => HTTP/1.1
+    [REQUEST_METHOD] => GET
+    [QUERY_STRING] => action=check_session
+    [REQUEST_URI] => /misproyectos/ProyectoHiker_prueba/paginasespecializadas/Usuario/javascript/usuario.php?action=check_session
+    [SCRIPT_NAME] => /misproyectos/ProyectoHiker_prueba/paginasespecializadas/Usuario/javascript/usuario.php
+    [PHP_SELF] => /misproyectos/ProyectoHiker_prueba/paginasespecializadas/Usuario/javascript/usuario.php
+    [REQUEST_TIME_FLOAT] => 1727189834.2169
+    [REQUEST_TIME] => 1727189834
+)
+
+[2024-09-24 16:57:14] About to require connection files
+[2024-09-24 16:57:14] Connection files included
+[2024-09-24 16:57:14] Database connection successful
+[2024-09-24 16:57:14] Action requested: check_session
+[2024-09-24 16:57:14] Script ended
+[2024-09-24 16:57:14] Script started
+[2024-09-24 16:57:14] SERVER: Array
+(
+    [MIBDIRS] => /xampp/php/extras/mibs
+    [MYSQL_HOME] => \xampp\mysql\bin
+    [OPENSSL_CONF] => /xampp/apache/bin/openssl.cnf
+    [PHP_PEAR_SYSCONF_DIR] => \xampp\php
+    [PHPRC] => \xampp\php
+    [TMP] => \xampp\tmp
+    [HTTP_HOST] => localhost
+    [HTTP_CONNECTION] => keep-alive
+    [HTTP_SEC_CH_UA] => "Chromium";v="128", "Not;A=Brand";v="24", "Google Chrome";v="128"
+    [HTTP_SEC_CH_UA_MOBILE] => ?0
+    [HTTP_USER_AGENT] => Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36
+    [HTTP_SEC_CH_UA_PLATFORM] => "Windows"
+    [HTTP_ACCEPT] => */*
+    [HTTP_SEC_FETCH_SITE] => same-origin
+    [HTTP_SEC_FETCH_MODE] => cors
+    [HTTP_SEC_FETCH_DEST] => empty
+    [HTTP_REFERER] => http://localhost/misproyectos/ProyectoHiker_prueba/paginasespecializadas/Usuario/my_account.html
+    [HTTP_ACCEPT_ENCODING] => gzip, deflate, br, zstd
+    [HTTP_ACCEPT_LANGUAGE] => es-ES,es;q=0.9,fr;q=0.8,en;q=0.7,eu;q=0.6,ro;q=0.5
+    [HTTP_COOKIE] => rol=U; usuario=antton; PHPSESSID=m8t28i5fqsffsfkuffc88mi5hd
+    [PATH] => C:\WINDOWS\system32;C:\WINDOWS;C:\WINDOWS\System32\Wbem;C:\WINDOWS\System32\WindowsPowerShell\v1.0\;C:\WINDOWS\System32\OpenSSH\;C:\Program Files\nodejs\;C:\Users\antto\AppData\Local\Microsoft\WindowsApps;C:\Users\antto\AppData\Local\Programs\Microsoft VS Code\bin;C:\Users\antto\AppData\Roaming\npm
+    [SystemRoot] => C:\WINDOWS
+    [COMSPEC] => C:\WINDOWS\system32\cmd.exe
+    [PATHEXT] => .COM;.EXE;.BAT;.CMD;.VBS;.VBE;.JS;.JSE;.WSF;.WSH;.MSC
+    [WINDIR] => C:\WINDOWS
+    [SERVER_SIGNATURE] => <address>Apache/2.4.58 (Win64) OpenSSL/3.1.3 PHP/8.2.12 Server at localhost Port 80</address>
+
+    [SERVER_SOFTWARE] => Apache/2.4.58 (Win64) OpenSSL/3.1.3 PHP/8.2.12
+    [SERVER_NAME] => localhost
+    [SERVER_ADDR] => ::1
+    [SERVER_PORT] => 80
+    [REMOTE_ADDR] => ::1
+    [DOCUMENT_ROOT] => C:/xampp/htdocs
+    [REQUEST_SCHEME] => http
+    [CONTEXT_PREFIX] => 
+    [CONTEXT_DOCUMENT_ROOT] => C:/xampp/htdocs
+    [SERVER_ADMIN] => postmaster@localhost
+    [SCRIPT_FILENAME] => C:/xampp/htdocs/misproyectos/ProyectoHiker_prueba/paginasespecializadas/Usuario/javascript/usuario.php
+    [REMOTE_PORT] => 55136
+    [GATEWAY_INTERFACE] => CGI/1.1
+    [SERVER_PROTOCOL] => HTTP/1.1
+    [REQUEST_METHOD] => GET
+    [QUERY_STRING] => action=get_user_routes
+    [REQUEST_URI] => /misproyectos/ProyectoHiker_prueba/paginasespecializadas/Usuario/javascript/usuario.php?action=get_user_routes
+    [SCRIPT_NAME] => /misproyectos/ProyectoHiker_prueba/paginasespecializadas/Usuario/javascript/usuario.php
+    [PHP_SELF] => /misproyectos/ProyectoHiker_prueba/paginasespecializadas/Usuario/javascript/usuario.php
+    [REQUEST_TIME_FLOAT] => 1727189834.2489
+    [REQUEST_TIME] => 1727189834
+)
+
+[2024-09-24 16:57:14] About to require connection files
+[2024-09-24 16:57:14] Connection files included
+[2024-09-24 16:57:14] Database connection successful
+[2024-09-24 16:57:14] Action requested: get_user_routes
+[2024-09-24 16:57:14] Exception caught: {"error":"Usuario no autenticado"}
+[2024-09-24 16:57:14] Script ended
+[2024-09-24 16:58:38] Script started
+[2024-09-24 16:58:38] SERVER: Array
+(
+    [MIBDIRS] => /xampp/php/extras/mibs
+    [MYSQL_HOME] => \xampp\mysql\bin
+    [OPENSSL_CONF] => /xampp/apache/bin/openssl.cnf
+    [PHP_PEAR_SYSCONF_DIR] => \xampp\php
+    [PHPRC] => \xampp\php
+    [TMP] => \xampp\tmp
+    [HTTP_HOST] => localhost
+    [HTTP_CONNECTION] => keep-alive
+    [HTTP_SEC_CH_UA] => "Chromium";v="128", "Not;A=Brand";v="24", "Google Chrome";v="128"
+    [HTTP_SEC_CH_UA_MOBILE] => ?0
+    [HTTP_USER_AGENT] => Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36
+    [HTTP_SEC_CH_UA_PLATFORM] => "Windows"
+    [HTTP_ACCEPT] => */*
+    [HTTP_SEC_FETCH_SITE] => same-origin
+    [HTTP_SEC_FETCH_MODE] => cors
+    [HTTP_SEC_FETCH_DEST] => empty
+    [HTTP_REFERER] => http://localhost/misproyectos/ProyectoHiker_prueba/paginasespecializadas/Usuario/my_account.html
+    [HTTP_ACCEPT_ENCODING] => gzip, deflate, br, zstd
+    [HTTP_ACCEPT_LANGUAGE] => es-ES,es;q=0.9,fr;q=0.8,en;q=0.7,eu;q=0.6,ro;q=0.5
+    [HTTP_COOKIE] => rol=U; usuario=antton; PHPSESSID=m8t28i5fqsffsfkuffc88mi5hd
+    [PATH] => C:\WINDOWS\system32;C:\WINDOWS;C:\WINDOWS\System32\Wbem;C:\WINDOWS\System32\WindowsPowerShell\v1.0\;C:\WINDOWS\System32\OpenSSH\;C:\Program Files\nodejs\;C:\Users\antto\AppData\Local\Microsoft\WindowsApps;C:\Users\antto\AppData\Local\Programs\Microsoft VS Code\bin;C:\Users\antto\AppData\Roaming\npm
+    [SystemRoot] => C:\WINDOWS
+    [COMSPEC] => C:\WINDOWS\system32\cmd.exe
+    [PATHEXT] => .COM;.EXE;.BAT;.CMD;.VBS;.VBE;.JS;.JSE;.WSF;.WSH;.MSC
+    [WINDIR] => C:\WINDOWS
+    [SERVER_SIGNATURE] => <address>Apache/2.4.58 (Win64) OpenSSL/3.1.3 PHP/8.2.12 Server at localhost Port 80</address>
+
+    [SERVER_SOFTWARE] => Apache/2.4.58 (Win64) OpenSSL/3.1.3 PHP/8.2.12
+    [SERVER_NAME] => localhost
+    [SERVER_ADDR] => ::1
+    [SERVER_PORT] => 80
+    [REMOTE_ADDR] => ::1
+    [DOCUMENT_ROOT] => C:/xampp/htdocs
+    [REQUEST_SCHEME] => http
+    [CONTEXT_PREFIX] => 
+    [CONTEXT_DOCUMENT_ROOT] => C:/xampp/htdocs
+    [SERVER_ADMIN] => postmaster@localhost
+    [SCRIPT_FILENAME] => C:/xampp/htdocs/misproyectos/ProyectoHiker_prueba/paginasespecializadas/Usuario/javascript/usuario.php
+    [REMOTE_PORT] => 55191
+    [GATEWAY_INTERFACE] => CGI/1.1
+    [SERVER_PROTOCOL] => HTTP/1.1
+    [REQUEST_METHOD] => GET
+    [QUERY_STRING] => action=check_session
+    [REQUEST_URI] => /misproyectos/ProyectoHiker_prueba/paginasespecializadas/Usuario/javascript/usuario.php?action=check_session
+    [SCRIPT_NAME] => /misproyectos/ProyectoHiker_prueba/paginasespecializadas/Usuario/javascript/usuario.php
+    [PHP_SELF] => /misproyectos/ProyectoHiker_prueba/paginasespecializadas/Usuario/javascript/usuario.php
+    [REQUEST_TIME_FLOAT] => 1727189918.1479
+    [REQUEST_TIME] => 1727189918
+)
+
+[2024-09-24 16:58:38] About to require connection files
+[2024-09-24 16:58:38] Connection files included
+[2024-09-24 16:58:38] Database connection successful
+[2024-09-24 16:58:38] Action requested: check_session
+[2024-09-24 16:58:38] Script ended
+[2024-09-24 17:00:21] Script started
+[2024-09-24 17:00:21] SERVER: Array
+(
+    [MIBDIRS] => /xampp/php/extras/mibs
+    [MYSQL_HOME] => \xampp\mysql\bin
+    [OPENSSL_CONF] => /xampp/apache/bin/openssl.cnf
+    [PHP_PEAR_SYSCONF_DIR] => \xampp\php
+    [PHPRC] => \xampp\php
+    [TMP] => \xampp\tmp
+    [HTTP_HOST] => localhost
+    [HTTP_CONNECTION] => keep-alive
+    [HTTP_SEC_CH_UA] => "Chromium";v="128", "Not;A=Brand";v="24", "Google Chrome";v="128"
+    [HTTP_SEC_CH_UA_MOBILE] => ?0
+    [HTTP_USER_AGENT] => Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36
+    [HTTP_SEC_CH_UA_PLATFORM] => "Windows"
+    [HTTP_ACCEPT] => */*
+    [HTTP_SEC_FETCH_SITE] => same-origin
+    [HTTP_SEC_FETCH_MODE] => cors
+    [HTTP_SEC_FETCH_DEST] => empty
+    [HTTP_REFERER] => http://localhost/misproyectos/ProyectoHiker_prueba/paginasespecializadas/Usuario/my_account.html
+    [HTTP_ACCEPT_ENCODING] => gzip, deflate, br, zstd
+    [HTTP_ACCEPT_LANGUAGE] => es-ES,es;q=0.9,fr;q=0.8,en;q=0.7,eu;q=0.6,ro;q=0.5
+    [HTTP_COOKIE] => rol=U; usuario=antton; PHPSESSID=m8t28i5fqsffsfkuffc88mi5hd
+    [PATH] => C:\WINDOWS\system32;C:\WINDOWS;C:\WINDOWS\System32\Wbem;C:\WINDOWS\System32\WindowsPowerShell\v1.0\;C:\WINDOWS\System32\OpenSSH\;C:\Program Files\nodejs\;C:\Users\antto\AppData\Local\Microsoft\WindowsApps;C:\Users\antto\AppData\Local\Programs\Microsoft VS Code\bin;C:\Users\antto\AppData\Roaming\npm
+    [SystemRoot] => C:\WINDOWS
+    [COMSPEC] => C:\WINDOWS\system32\cmd.exe
+    [PATHEXT] => .COM;.EXE;.BAT;.CMD;.VBS;.VBE;.JS;.JSE;.WSF;.WSH;.MSC
+    [WINDIR] => C:\WINDOWS
+    [SERVER_SIGNATURE] => <address>Apache/2.4.58 (Win64) OpenSSL/3.1.3 PHP/8.2.12 Server at localhost Port 80</address>
+
+    [SERVER_SOFTWARE] => Apache/2.4.58 (Win64) OpenSSL/3.1.3 PHP/8.2.12
+    [SERVER_NAME] => localhost
+    [SERVER_ADDR] => ::1
+    [SERVER_PORT] => 80
+    [REMOTE_ADDR] => ::1
+    [DOCUMENT_ROOT] => C:/xampp/htdocs
+    [REQUEST_SCHEME] => http
+    [CONTEXT_PREFIX] => 
+    [CONTEXT_DOCUMENT_ROOT] => C:/xampp/htdocs
+    [SERVER_ADMIN] => postmaster@localhost
+    [SCRIPT_FILENAME] => C:/xampp/htdocs/misproyectos/ProyectoHiker_prueba/paginasespecializadas/Usuario/javascript/usuario.php
+    [REMOTE_PORT] => 55257
+    [GATEWAY_INTERFACE] => CGI/1.1
+    [SERVER_PROTOCOL] => HTTP/1.1
+    [REQUEST_METHOD] => GET
+    [QUERY_STRING] => action=check_session
+    [REQUEST_URI] => /misproyectos/ProyectoHiker_prueba/paginasespecializadas/Usuario/javascript/usuario.php?action=check_session
+    [SCRIPT_NAME] => /misproyectos/ProyectoHiker_prueba/paginasespecializadas/Usuario/javascript/usuario.php
+    [PHP_SELF] => /misproyectos/ProyectoHiker_prueba/paginasespecializadas/Usuario/javascript/usuario.php
+    [REQUEST_TIME_FLOAT] => 1727190021.6032
+    [REQUEST_TIME] => 1727190021
+)
+
+[2024-09-24 17:00:21] About to require connection files
+[2024-09-24 17:00:21] Connection files included
+[2024-09-24 17:00:21] Database connection successful
+[2024-09-24 17:00:21] Action requested: check_session
+[2024-09-24 17:00:21] Script ended
+[2024-09-24 17:00:21] Script started
+[2024-09-24 17:00:21] SERVER: Array
+(
+    [MIBDIRS] => /xampp/php/extras/mibs
+    [MYSQL_HOME] => \xampp\mysql\bin
+    [OPENSSL_CONF] => /xampp/apache/bin/openssl.cnf
+    [PHP_PEAR_SYSCONF_DIR] => \xampp\php
+    [PHPRC] => \xampp\php
+    [TMP] => \xampp\tmp
+    [HTTP_HOST] => localhost
+    [HTTP_CONNECTION] => keep-alive
+    [HTTP_SEC_CH_UA] => "Chromium";v="128", "Not;A=Brand";v="24", "Google Chrome";v="128"
+    [HTTP_SEC_CH_UA_MOBILE] => ?0
+    [HTTP_USER_AGENT] => Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36
+    [HTTP_SEC_CH_UA_PLATFORM] => "Windows"
+    [HTTP_ACCEPT] => */*
+    [HTTP_SEC_FETCH_SITE] => same-origin
+    [HTTP_SEC_FETCH_MODE] => cors
+    [HTTP_SEC_FETCH_DEST] => empty
+    [HTTP_REFERER] => http://localhost/misproyectos/ProyectoHiker_prueba/paginasespecializadas/Usuario/my_account.html
+    [HTTP_ACCEPT_ENCODING] => gzip, deflate, br, zstd
+    [HTTP_ACCEPT_LANGUAGE] => es-ES,es;q=0.9,fr;q=0.8,en;q=0.7,eu;q=0.6,ro;q=0.5
+    [HTTP_COOKIE] => rol=U; usuario=antton; PHPSESSID=m8t28i5fqsffsfkuffc88mi5hd
+    [PATH] => C:\WINDOWS\system32;C:\WINDOWS;C:\WINDOWS\System32\Wbem;C:\WINDOWS\System32\WindowsPowerShell\v1.0\;C:\WINDOWS\System32\OpenSSH\;C:\Program Files\nodejs\;C:\Users\antto\AppData\Local\Microsoft\WindowsApps;C:\Users\antto\AppData\Local\Programs\Microsoft VS Code\bin;C:\Users\antto\AppData\Roaming\npm
+    [SystemRoot] => C:\WINDOWS
+    [COMSPEC] => C:\WINDOWS\system32\cmd.exe
+    [PATHEXT] => .COM;.EXE;.BAT;.CMD;.VBS;.VBE;.JS;.JSE;.WSF;.WSH;.MSC
+    [WINDIR] => C:\WINDOWS
+    [SERVER_SIGNATURE] => <address>Apache/2.4.58 (Win64) OpenSSL/3.1.3 PHP/8.2.12 Server at localhost Port 80</address>
+
+    [SERVER_SOFTWARE] => Apache/2.4.58 (Win64) OpenSSL/3.1.3 PHP/8.2.12
+    [SERVER_NAME] => localhost
+    [SERVER_ADDR] => ::1
+    [SERVER_PORT] => 80
+    [REMOTE_ADDR] => ::1
+    [DOCUMENT_ROOT] => C:/xampp/htdocs
+    [REQUEST_SCHEME] => http
+    [CONTEXT_PREFIX] => 
+    [CONTEXT_DOCUMENT_ROOT] => C:/xampp/htdocs
+    [SERVER_ADMIN] => postmaster@localhost
+    [SCRIPT_FILENAME] => C:/xampp/htdocs/misproyectos/ProyectoHiker_prueba/paginasespecializadas/Usuario/javascript/usuario.php
+    [REMOTE_PORT] => 55257
+    [GATEWAY_INTERFACE] => CGI/1.1
+    [SERVER_PROTOCOL] => HTTP/1.1
+    [REQUEST_METHOD] => GET
+    [QUERY_STRING] => action=get_user_routes
+    [REQUEST_URI] => /misproyectos/ProyectoHiker_prueba/paginasespecializadas/Usuario/javascript/usuario.php?action=get_user_routes
+    [SCRIPT_NAME] => /misproyectos/ProyectoHiker_prueba/paginasespecializadas/Usuario/javascript/usuario.php
+    [PHP_SELF] => /misproyectos/ProyectoHiker_prueba/paginasespecializadas/Usuario/javascript/usuario.php
+    [REQUEST_TIME_FLOAT] => 1727190021.6235
+    [REQUEST_TIME] => 1727190021
+)
+
+[2024-09-24 17:00:21] About to require connection files
+[2024-09-24 17:00:21] Connection files included
+[2024-09-24 17:00:21] Database connection successful
+[2024-09-24 17:00:21] Action requested: get_user_routes
+[2024-09-24 17:00:21] Exception caught: {"error":"Usuario no autenticado"}
+[2024-09-24 17:00:21] Script ended
+[2024-09-24 17:00:37] Script started
+[2024-09-24 17:00:37] SERVER: Array
+(
+    [MIBDIRS] => /xampp/php/extras/mibs
+    [MYSQL_HOME] => \xampp\mysql\bin
+    [OPENSSL_CONF] => /xampp/apache/bin/openssl.cnf
+    [PHP_PEAR_SYSCONF_DIR] => \xampp\php
+    [PHPRC] => \xampp\php
+    [TMP] => \xampp\tmp
+    [HTTP_HOST] => localhost
+    [HTTP_CONNECTION] => keep-alive
+    [HTTP_SEC_CH_UA] => "Chromium";v="128", "Not;A=Brand";v="24", "Google Chrome";v="128"
+    [HTTP_SEC_CH_UA_MOBILE] => ?0
+    [HTTP_USER_AGENT] => Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36
+    [HTTP_SEC_CH_UA_PLATFORM] => "Windows"
+    [HTTP_ACCEPT] => */*
+    [HTTP_SEC_FETCH_SITE] => same-origin
+    [HTTP_SEC_FETCH_MODE] => cors
+    [HTTP_SEC_FETCH_DEST] => empty
+    [HTTP_REFERER] => http://localhost/misproyectos/ProyectoHiker_prueba/paginasespecializadas/Usuario/my_account.html
+    [HTTP_ACCEPT_ENCODING] => gzip, deflate, br, zstd
+    [HTTP_ACCEPT_LANGUAGE] => es-ES,es;q=0.9,fr;q=0.8,en;q=0.7,eu;q=0.6,ro;q=0.5
+    [HTTP_COOKIE] => rol=U; usuario=antton; PHPSESSID=m8t28i5fqsffsfkuffc88mi5hd
+    [PATH] => C:\WINDOWS\system32;C:\WINDOWS;C:\WINDOWS\System32\Wbem;C:\WINDOWS\System32\WindowsPowerShell\v1.0\;C:\WINDOWS\System32\OpenSSH\;C:\Program Files\nodejs\;C:\Users\antto\AppData\Local\Microsoft\WindowsApps;C:\Users\antto\AppData\Local\Programs\Microsoft VS Code\bin;C:\Users\antto\AppData\Roaming\npm
+    [SystemRoot] => C:\WINDOWS
+    [COMSPEC] => C:\WINDOWS\system32\cmd.exe
+    [PATHEXT] => .COM;.EXE;.BAT;.CMD;.VBS;.VBE;.JS;.JSE;.WSF;.WSH;.MSC
+    [WINDIR] => C:\WINDOWS
+    [SERVER_SIGNATURE] => <address>Apache/2.4.58 (Win64) OpenSSL/3.1.3 PHP/8.2.12 Server at localhost Port 80</address>
+
+    [SERVER_SOFTWARE] => Apache/2.4.58 (Win64) OpenSSL/3.1.3 PHP/8.2.12
+    [SERVER_NAME] => localhost
+    [SERVER_ADDR] => ::1
+    [SERVER_PORT] => 80
+    [REMOTE_ADDR] => ::1
+    [DOCUMENT_ROOT] => C:/xampp/htdocs
+    [REQUEST_SCHEME] => http
+    [CONTEXT_PREFIX] => 
+    [CONTEXT_DOCUMENT_ROOT] => C:/xampp/htdocs
+    [SERVER_ADMIN] => postmaster@localhost
+    [SCRIPT_FILENAME] => C:/xampp/htdocs/misproyectos/ProyectoHiker_prueba/paginasespecializadas/Usuario/javascript/usuario.php
+    [REMOTE_PORT] => 55269
+    [GATEWAY_INTERFACE] => CGI/1.1
+    [SERVER_PROTOCOL] => HTTP/1.1
+    [REQUEST_METHOD] => GET
+    [QUERY_STRING] => action=get_favorite_routes
+    [REQUEST_URI] => /misproyectos/ProyectoHiker_prueba/paginasespecializadas/Usuario/javascript/usuario.php?action=get_favorite_routes
+    [SCRIPT_NAME] => /misproyectos/ProyectoHiker_prueba/paginasespecializadas/Usuario/javascript/usuario.php
+    [PHP_SELF] => /misproyectos/ProyectoHiker_prueba/paginasespecializadas/Usuario/javascript/usuario.php
+    [REQUEST_TIME_FLOAT] => 1727190037.943
+    [REQUEST_TIME] => 1727190037
+)
+
+[2024-09-24 17:00:37] About to require connection files
+[2024-09-24 17:00:37] Connection files included
+[2024-09-24 17:00:37] Database connection successful
+[2024-09-24 17:00:37] Action requested: get_favorite_routes
+[2024-09-24 17:00:37] Exception caught: {"error":"Usuario no autenticado"}
+[2024-09-24 17:00:37] Script ended
+[2024-09-24 17:00:41] Script started
+[2024-09-24 17:00:41] SERVER: Array
+(
+    [MIBDIRS] => /xampp/php/extras/mibs
+    [MYSQL_HOME] => \xampp\mysql\bin
+    [OPENSSL_CONF] => /xampp/apache/bin/openssl.cnf
+    [PHP_PEAR_SYSCONF_DIR] => \xampp\php
+    [PHPRC] => \xampp\php
+    [TMP] => \xampp\tmp
+    [HTTP_HOST] => localhost
+    [HTTP_CONNECTION] => keep-alive
+    [HTTP_SEC_CH_UA] => "Chromium";v="128", "Not;A=Brand";v="24", "Google Chrome";v="128"
+    [HTTP_SEC_CH_UA_MOBILE] => ?0
+    [HTTP_USER_AGENT] => Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36
+    [HTTP_SEC_CH_UA_PLATFORM] => "Windows"
+    [HTTP_ACCEPT] => */*
+    [HTTP_SEC_FETCH_SITE] => same-origin
+    [HTTP_SEC_FETCH_MODE] => cors
+    [HTTP_SEC_FETCH_DEST] => empty
+    [HTTP_REFERER] => http://localhost/misproyectos/ProyectoHiker_prueba/paginasespecializadas/Usuario/my_account.html
+    [HTTP_ACCEPT_ENCODING] => gzip, deflate, br, zstd
+    [HTTP_ACCEPT_LANGUAGE] => es-ES,es;q=0.9,fr;q=0.8,en;q=0.7,eu;q=0.6,ro;q=0.5
+    [HTTP_COOKIE] => rol=U; usuario=antton; PHPSESSID=m8t28i5fqsffsfkuffc88mi5hd
+    [PATH] => C:\WINDOWS\system32;C:\WINDOWS;C:\WINDOWS\System32\Wbem;C:\WINDOWS\System32\WindowsPowerShell\v1.0\;C:\WINDOWS\System32\OpenSSH\;C:\Program Files\nodejs\;C:\Users\antto\AppData\Local\Microsoft\WindowsApps;C:\Users\antto\AppData\Local\Programs\Microsoft VS Code\bin;C:\Users\antto\AppData\Roaming\npm
+    [SystemRoot] => C:\WINDOWS
+    [COMSPEC] => C:\WINDOWS\system32\cmd.exe
+    [PATHEXT] => .COM;.EXE;.BAT;.CMD;.VBS;.VBE;.JS;.JSE;.WSF;.WSH;.MSC
+    [WINDIR] => C:\WINDOWS
+    [SERVER_SIGNATURE] => <address>Apache/2.4.58 (Win64) OpenSSL/3.1.3 PHP/8.2.12 Server at localhost Port 80</address>
+
+    [SERVER_SOFTWARE] => Apache/2.4.58 (Win64) OpenSSL/3.1.3 PHP/8.2.12
+    [SERVER_NAME] => localhost
+    [SERVER_ADDR] => ::1
+    [SERVER_PORT] => 80
+    [REMOTE_ADDR] => ::1
+    [DOCUMENT_ROOT] => C:/xampp/htdocs
+    [REQUEST_SCHEME] => http
+    [CONTEXT_PREFIX] => 
+    [CONTEXT_DOCUMENT_ROOT] => C:/xampp/htdocs
+    [SERVER_ADMIN] => postmaster@localhost
+    [SCRIPT_FILENAME] => C:/xampp/htdocs/misproyectos/ProyectoHiker_prueba/paginasespecializadas/Usuario/javascript/usuario.php
+    [REMOTE_PORT] => 55272
+    [GATEWAY_INTERFACE] => CGI/1.1
+    [SERVER_PROTOCOL] => HTTP/1.1
+    [REQUEST_METHOD] => GET
+    [QUERY_STRING] => action=get_completed_routes
+    [REQUEST_URI] => /misproyectos/ProyectoHiker_prueba/paginasespecializadas/Usuario/javascript/usuario.php?action=get_completed_routes
+    [SCRIPT_NAME] => /misproyectos/ProyectoHiker_prueba/paginasespecializadas/Usuario/javascript/usuario.php
+    [PHP_SELF] => /misproyectos/ProyectoHiker_prueba/paginasespecializadas/Usuario/javascript/usuario.php
+    [REQUEST_TIME_FLOAT] => 1727190041.456
+    [REQUEST_TIME] => 1727190041
+)
+
+[2024-09-24 17:00:41] About to require connection files
+[2024-09-24 17:00:41] Connection files included
+[2024-09-24 17:00:41] Database connection successful
+[2024-09-24 17:00:41] Action requested: get_completed_routes
+[2024-09-24 17:00:41] Exception caught: {"error":"Usuario no autenticado"}
+[2024-09-24 17:00:41] Script ended
+[2024-09-24 17:00:42] Script started
+[2024-09-24 17:00:42] SERVER: Array
+(
+    [MIBDIRS] => /xampp/php/extras/mibs
+    [MYSQL_HOME] => \xampp\mysql\bin
+    [OPENSSL_CONF] => /xampp/apache/bin/openssl.cnf
+    [PHP_PEAR_SYSCONF_DIR] => \xampp\php
+    [PHPRC] => \xampp\php
+    [TMP] => \xampp\tmp
+    [HTTP_HOST] => localhost
+    [HTTP_CONNECTION] => keep-alive
+    [HTTP_SEC_CH_UA] => "Chromium";v="128", "Not;A=Brand";v="24", "Google Chrome";v="128"
+    [HTTP_SEC_CH_UA_MOBILE] => ?0
+    [HTTP_USER_AGENT] => Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36
+    [HTTP_SEC_CH_UA_PLATFORM] => "Windows"
+    [HTTP_ACCEPT] => */*
+    [HTTP_SEC_FETCH_SITE] => same-origin
+    [HTTP_SEC_FETCH_MODE] => cors
+    [HTTP_SEC_FETCH_DEST] => empty
+    [HTTP_REFERER] => http://localhost/misproyectos/ProyectoHiker_prueba/paginasespecializadas/Usuario/my_account.html
+    [HTTP_ACCEPT_ENCODING] => gzip, deflate, br, zstd
+    [HTTP_ACCEPT_LANGUAGE] => es-ES,es;q=0.9,fr;q=0.8,en;q=0.7,eu;q=0.6,ro;q=0.5
+    [HTTP_COOKIE] => rol=U; usuario=antton; PHPSESSID=m8t28i5fqsffsfkuffc88mi5hd
+    [PATH] => C:\WINDOWS\system32;C:\WINDOWS;C:\WINDOWS\System32\Wbem;C:\WINDOWS\System32\WindowsPowerShell\v1.0\;C:\WINDOWS\System32\OpenSSH\;C:\Program Files\nodejs\;C:\Users\antto\AppData\Local\Microsoft\WindowsApps;C:\Users\antto\AppData\Local\Programs\Microsoft VS Code\bin;C:\Users\antto\AppData\Roaming\npm
+    [SystemRoot] => C:\WINDOWS
+    [COMSPEC] => C:\WINDOWS\system32\cmd.exe
+    [PATHEXT] => .COM;.EXE;.BAT;.CMD;.VBS;.VBE;.JS;.JSE;.WSF;.WSH;.MSC
+    [WINDIR] => C:\WINDOWS
+    [SERVER_SIGNATURE] => <address>Apache/2.4.58 (Win64) OpenSSL/3.1.3 PHP/8.2.12 Server at localhost Port 80</address>
+
+    [SERVER_SOFTWARE] => Apache/2.4.58 (Win64) OpenSSL/3.1.3 PHP/8.2.12
+    [SERVER_NAME] => localhost
+    [SERVER_ADDR] => ::1
+    [SERVER_PORT] => 80
+    [REMOTE_ADDR] => ::1
+    [DOCUMENT_ROOT] => C:/xampp/htdocs
+    [REQUEST_SCHEME] => http
+    [CONTEXT_PREFIX] => 
+    [CONTEXT_DOCUMENT_ROOT] => C:/xampp/htdocs
+    [SERVER_ADMIN] => postmaster@localhost
+    [SCRIPT_FILENAME] => C:/xampp/htdocs/misproyectos/ProyectoHiker_prueba/paginasespecializadas/Usuario/javascript/usuario.php
+    [REMOTE_PORT] => 55274
+    [GATEWAY_INTERFACE] => CGI/1.1
+    [SERVER_PROTOCOL] => HTTP/1.1
+    [REQUEST_METHOD] => GET
+    [QUERY_STRING] => action=get_user_lists
+    [REQUEST_URI] => /misproyectos/ProyectoHiker_prueba/paginasespecializadas/Usuario/javascript/usuario.php?action=get_user_lists
+    [SCRIPT_NAME] => /misproyectos/ProyectoHiker_prueba/paginasespecializadas/Usuario/javascript/usuario.php
+    [PHP_SELF] => /misproyectos/ProyectoHiker_prueba/paginasespecializadas/Usuario/javascript/usuario.php
+    [REQUEST_TIME_FLOAT] => 1727190042.2135
+    [REQUEST_TIME] => 1727190042
+)
+
+[2024-09-24 17:00:42] About to require connection files
+[2024-09-24 17:00:42] Connection files included
+[2024-09-24 17:00:42] Database connection successful
+[2024-09-24 17:00:42] Action requested: get_user_lists
+[2024-09-24 17:00:42] Exception caught: {"error":"Usuario no autenticado"}
+[2024-09-24 17:00:42] Script ended
+[2024-09-24 17:00:43] Script started
+[2024-09-24 17:00:43] SERVER: Array
+(
+    [MIBDIRS] => /xampp/php/extras/mibs
+    [MYSQL_HOME] => \xampp\mysql\bin
+    [OPENSSL_CONF] => /xampp/apache/bin/openssl.cnf
+    [PHP_PEAR_SYSCONF_DIR] => \xampp\php
+    [PHPRC] => \xampp\php
+    [TMP] => \xampp\tmp
+    [HTTP_HOST] => localhost
+    [HTTP_CONNECTION] => keep-alive
+    [HTTP_SEC_CH_UA] => "Chromium";v="128", "Not;A=Brand";v="24", "Google Chrome";v="128"
+    [HTTP_SEC_CH_UA_MOBILE] => ?0
+    [HTTP_USER_AGENT] => Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36
+    [HTTP_SEC_CH_UA_PLATFORM] => "Windows"
+    [HTTP_ACCEPT] => */*
+    [HTTP_SEC_FETCH_SITE] => same-origin
+    [HTTP_SEC_FETCH_MODE] => cors
+    [HTTP_SEC_FETCH_DEST] => empty
+    [HTTP_REFERER] => http://localhost/misproyectos/ProyectoHiker_prueba/paginasespecializadas/Usuario/my_account.html
+    [HTTP_ACCEPT_ENCODING] => gzip, deflate, br, zstd
+    [HTTP_ACCEPT_LANGUAGE] => es-ES,es;q=0.9,fr;q=0.8,en;q=0.7,eu;q=0.6,ro;q=0.5
+    [HTTP_COOKIE] => rol=U; usuario=antton; PHPSESSID=m8t28i5fqsffsfkuffc88mi5hd
+    [PATH] => C:\WINDOWS\system32;C:\WINDOWS;C:\WINDOWS\System32\Wbem;C:\WINDOWS\System32\WindowsPowerShell\v1.0\;C:\WINDOWS\System32\OpenSSH\;C:\Program Files\nodejs\;C:\Users\antto\AppData\Local\Microsoft\WindowsApps;C:\Users\antto\AppData\Local\Programs\Microsoft VS Code\bin;C:\Users\antto\AppData\Roaming\npm
+    [SystemRoot] => C:\WINDOWS
+    [COMSPEC] => C:\WINDOWS\system32\cmd.exe
+    [PATHEXT] => .COM;.EXE;.BAT;.CMD;.VBS;.VBE;.JS;.JSE;.WSF;.WSH;.MSC
+    [WINDIR] => C:\WINDOWS
+    [SERVER_SIGNATURE] => <address>Apache/2.4.58 (Win64) OpenSSL/3.1.3 PHP/8.2.12 Server at localhost Port 80</address>
+
+    [SERVER_SOFTWARE] => Apache/2.4.58 (Win64) OpenSSL/3.1.3 PHP/8.2.12
+    [SERVER_NAME] => localhost
+    [SERVER_ADDR] => ::1
+    [SERVER_PORT] => 80
+    [REMOTE_ADDR] => ::1
+    [DOCUMENT_ROOT] => C:/xampp/htdocs
+    [REQUEST_SCHEME] => http
+    [CONTEXT_PREFIX] => 
+    [CONTEXT_DOCUMENT_ROOT] => C:/xampp/htdocs
+    [SERVER_ADMIN] => postmaster@localhost
+    [SCRIPT_FILENAME] => C:/xampp/htdocs/misproyectos/ProyectoHiker_prueba/paginasespecializadas/Usuario/javascript/usuario.php
+    [REMOTE_PORT] => 55276
+    [GATEWAY_INTERFACE] => CGI/1.1
+    [SERVER_PROTOCOL] => HTTP/1.1
+    [REQUEST_METHOD] => GET
+    [QUERY_STRING] => action=get_user_routes
+    [REQUEST_URI] => /misproyectos/ProyectoHiker_prueba/paginasespecializadas/Usuario/javascript/usuario.php?action=get_user_routes
+    [SCRIPT_NAME] => /misproyectos/ProyectoHiker_prueba/paginasespecializadas/Usuario/javascript/usuario.php
+    [PHP_SELF] => /misproyectos/ProyectoHiker_prueba/paginasespecializadas/Usuario/javascript/usuario.php
+    [REQUEST_TIME_FLOAT] => 1727190043.4284
+    [REQUEST_TIME] => 1727190043
+)
+
+[2024-09-24 17:00:43] About to require connection files
+[2024-09-24 17:00:43] Connection files included
+[2024-09-24 17:00:43] Database connection successful
+[2024-09-24 17:00:43] Action requested: get_user_routes
+[2024-09-24 17:00:43] Exception caught: {"error":"Usuario no autenticado"}
+[2024-09-24 17:00:43] Script ended
+[2024-09-24 17:01:45] Script started
+[2024-09-24 17:01:45] SERVER: Array
+(
+    [MIBDIRS] => /xampp/php/extras/mibs
+    [MYSQL_HOME] => \xampp\mysql\bin
+    [OPENSSL_CONF] => /xampp/apache/bin/openssl.cnf
+    [PHP_PEAR_SYSCONF_DIR] => \xampp\php
+    [PHPRC] => \xampp\php
+    [TMP] => \xampp\tmp
+    [HTTP_HOST] => localhost
+    [HTTP_CONNECTION] => keep-alive
+    [HTTP_SEC_CH_UA] => "Chromium";v="128", "Not;A=Brand";v="24", "Google Chrome";v="128"
+    [HTTP_SEC_CH_UA_MOBILE] => ?0
+    [HTTP_USER_AGENT] => Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36
+    [HTTP_SEC_CH_UA_PLATFORM] => "Windows"
+    [HTTP_ACCEPT] => */*
+    [HTTP_SEC_FETCH_SITE] => same-origin
+    [HTTP_SEC_FETCH_MODE] => cors
+    [HTTP_SEC_FETCH_DEST] => empty
+    [HTTP_REFERER] => http://localhost/misproyectos/ProyectoHiker_prueba/paginasespecializadas/Usuario/my_account.html
+    [HTTP_ACCEPT_ENCODING] => gzip, deflate, br, zstd
+    [HTTP_ACCEPT_LANGUAGE] => es-ES,es;q=0.9,fr;q=0.8,en;q=0.7,eu;q=0.6,ro;q=0.5
+    [HTTP_COOKIE] => rol=U; usuario=antton; PHPSESSID=m8t28i5fqsffsfkuffc88mi5hd
+    [PATH] => C:\WINDOWS\system32;C:\WINDOWS;C:\WINDOWS\System32\Wbem;C:\WINDOWS\System32\WindowsPowerShell\v1.0\;C:\WINDOWS\System32\OpenSSH\;C:\Program Files\nodejs\;C:\Users\antto\AppData\Local\Microsoft\WindowsApps;C:\Users\antto\AppData\Local\Programs\Microsoft VS Code\bin;C:\Users\antto\AppData\Roaming\npm
+    [SystemRoot] => C:\WINDOWS
+    [COMSPEC] => C:\WINDOWS\system32\cmd.exe
+    [PATHEXT] => .COM;.EXE;.BAT;.CMD;.VBS;.VBE;.JS;.JSE;.WSF;.WSH;.MSC
+    [WINDIR] => C:\WINDOWS
+    [SERVER_SIGNATURE] => <address>Apache/2.4.58 (Win64) OpenSSL/3.1.3 PHP/8.2.12 Server at localhost Port 80</address>
+
+    [SERVER_SOFTWARE] => Apache/2.4.58 (Win64) OpenSSL/3.1.3 PHP/8.2.12
+    [SERVER_NAME] => localhost
+    [SERVER_ADDR] => ::1
+    [SERVER_PORT] => 80
+    [REMOTE_ADDR] => ::1
+    [DOCUMENT_ROOT] => C:/xampp/htdocs
+    [REQUEST_SCHEME] => http
+    [CONTEXT_PREFIX] => 
+    [CONTEXT_DOCUMENT_ROOT] => C:/xampp/htdocs
+    [SERVER_ADMIN] => postmaster@localhost
+    [SCRIPT_FILENAME] => C:/xampp/htdocs/misproyectos/ProyectoHiker_prueba/paginasespecializadas/Usuario/javascript/usuario.php
+    [REMOTE_PORT] => 55358
+    [GATEWAY_INTERFACE] => CGI/1.1
+    [SERVER_PROTOCOL] => HTTP/1.1
+    [REQUEST_METHOD] => GET
+    [QUERY_STRING] => action=get_favorite_routes
+    [REQUEST_URI] => /misproyectos/ProyectoHiker_prueba/paginasespecializadas/Usuario/javascript/usuario.php?action=get_favorite_routes
+    [SCRIPT_NAME] => /misproyectos/ProyectoHiker_prueba/paginasespecializadas/Usuario/javascript/usuario.php
+    [PHP_SELF] => /misproyectos/ProyectoHiker_prueba/paginasespecializadas/Usuario/javascript/usuario.php
+    [REQUEST_TIME_FLOAT] => 1727190105.8282
+    [REQUEST_TIME] => 1727190105
+)
+
+[2024-09-24 17:01:45] About to require connection files
+[2024-09-24 17:01:45] Connection files included
+[2024-09-24 17:01:45] Database connection successful
+[2024-09-24 17:01:45] Action requested: get_favorite_routes
+[2024-09-24 17:01:45] Exception caught: {"error":"Usuario no autenticado"}
+[2024-09-24 17:01:45] Script ended
+[2024-09-24 17:01:46] Script started
+[2024-09-24 17:01:46] SERVER: Array
+(
+    [MIBDIRS] => /xampp/php/extras/mibs
+    [MYSQL_HOME] => \xampp\mysql\bin
+    [OPENSSL_CONF] => /xampp/apache/bin/openssl.cnf
+    [PHP_PEAR_SYSCONF_DIR] => \xampp\php
+    [PHPRC] => \xampp\php
+    [TMP] => \xampp\tmp
+    [HTTP_HOST] => localhost
+    [HTTP_CONNECTION] => keep-alive
+    [HTTP_SEC_CH_UA] => "Chromium";v="128", "Not;A=Brand";v="24", "Google Chrome";v="128"
+    [HTTP_SEC_CH_UA_MOBILE] => ?0
+    [HTTP_USER_AGENT] => Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36
+    [HTTP_SEC_CH_UA_PLATFORM] => "Windows"
+    [HTTP_ACCEPT] => */*
+    [HTTP_SEC_FETCH_SITE] => same-origin
+    [HTTP_SEC_FETCH_MODE] => cors
+    [HTTP_SEC_FETCH_DEST] => empty
+    [HTTP_REFERER] => http://localhost/misproyectos/ProyectoHiker_prueba/paginasespecializadas/Usuario/my_account.html
+    [HTTP_ACCEPT_ENCODING] => gzip, deflate, br, zstd
+    [HTTP_ACCEPT_LANGUAGE] => es-ES,es;q=0.9,fr;q=0.8,en;q=0.7,eu;q=0.6,ro;q=0.5
+    [HTTP_COOKIE] => rol=U; usuario=antton; PHPSESSID=m8t28i5fqsffsfkuffc88mi5hd
+    [PATH] => C:\WINDOWS\system32;C:\WINDOWS;C:\WINDOWS\System32\Wbem;C:\WINDOWS\System32\WindowsPowerShell\v1.0\;C:\WINDOWS\System32\OpenSSH\;C:\Program Files\nodejs\;C:\Users\antto\AppData\Local\Microsoft\WindowsApps;C:\Users\antto\AppData\Local\Programs\Microsoft VS Code\bin;C:\Users\antto\AppData\Roaming\npm
+    [SystemRoot] => C:\WINDOWS
+    [COMSPEC] => C:\WINDOWS\system32\cmd.exe
+    [PATHEXT] => .COM;.EXE;.BAT;.CMD;.VBS;.VBE;.JS;.JSE;.WSF;.WSH;.MSC
+    [WINDIR] => C:\WINDOWS
+    [SERVER_SIGNATURE] => <address>Apache/2.4.58 (Win64) OpenSSL/3.1.3 PHP/8.2.12 Server at localhost Port 80</address>
+
+    [SERVER_SOFTWARE] => Apache/2.4.58 (Win64) OpenSSL/3.1.3 PHP/8.2.12
+    [SERVER_NAME] => localhost
+    [SERVER_ADDR] => ::1
+    [SERVER_PORT] => 80
+    [REMOTE_ADDR] => ::1
+    [DOCUMENT_ROOT] => C:/xampp/htdocs
+    [REQUEST_SCHEME] => http
+    [CONTEXT_PREFIX] => 
+    [CONTEXT_DOCUMENT_ROOT] => C:/xampp/htdocs
+    [SERVER_ADMIN] => postmaster@localhost
+    [SCRIPT_FILENAME] => C:/xampp/htdocs/misproyectos/ProyectoHiker_prueba/paginasespecializadas/Usuario/javascript/usuario.php
+    [REMOTE_PORT] => 55364
+    [GATEWAY_INTERFACE] => CGI/1.1
+    [SERVER_PROTOCOL] => HTTP/1.1
+    [REQUEST_METHOD] => GET
+    [QUERY_STRING] => action=get_completed_routes
+    [REQUEST_URI] => /misproyectos/ProyectoHiker_prueba/paginasespecializadas/Usuario/javascript/usuario.php?action=get_completed_routes
+    [SCRIPT_NAME] => /misproyectos/ProyectoHiker_prueba/paginasespecializadas/Usuario/javascript/usuario.php
+    [PHP_SELF] => /misproyectos/ProyectoHiker_prueba/paginasespecializadas/Usuario/javascript/usuario.php
+    [REQUEST_TIME_FLOAT] => 1727190106.2371
+    [REQUEST_TIME] => 1727190106
+)
+
+[2024-09-24 17:01:46] About to require connection files
+[2024-09-24 17:01:46] Connection files included
+[2024-09-24 17:01:46] Database connection successful
+[2024-09-24 17:01:46] Action requested: get_completed_routes
+[2024-09-24 17:01:46] Exception caught: {"error":"Usuario no autenticado"}
+[2024-09-24 17:01:46] Script ended
+[2024-09-24 17:03:31] Script started
+[2024-09-24 17:03:31] SERVER: Array
+(
+    [MIBDIRS] => /xampp/php/extras/mibs
+    [MYSQL_HOME] => \xampp\mysql\bin
+    [OPENSSL_CONF] => /xampp/apache/bin/openssl.cnf
+    [PHP_PEAR_SYSCONF_DIR] => \xampp\php
+    [PHPRC] => \xampp\php
+    [TMP] => \xampp\tmp
+    [HTTP_HOST] => localhost
+    [HTTP_CONNECTION] => keep-alive
+    [HTTP_SEC_CH_UA] => "Chromium";v="128", "Not;A=Brand";v="24", "Google Chrome";v="128"
+    [HTTP_SEC_CH_UA_MOBILE] => ?0
+    [HTTP_USER_AGENT] => Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36
+    [HTTP_SEC_CH_UA_PLATFORM] => "Windows"
+    [HTTP_ACCEPT] => */*
+    [HTTP_SEC_FETCH_SITE] => same-origin
+    [HTTP_SEC_FETCH_MODE] => cors
+    [HTTP_SEC_FETCH_DEST] => empty
+    [HTTP_REFERER] => http://localhost/misproyectos/ProyectoHiker_prueba/paginasespecializadas/Usuario/my_account.html
+    [HTTP_ACCEPT_ENCODING] => gzip, deflate, br, zstd
+    [HTTP_ACCEPT_LANGUAGE] => es-ES,es;q=0.9,fr;q=0.8,en;q=0.7,eu;q=0.6,ro;q=0.5
+    [HTTP_COOKIE] => rol=U; usuario=antton; PHPSESSID=m8t28i5fqsffsfkuffc88mi5hd
+    [PATH] => C:\WINDOWS\system32;C:\WINDOWS;C:\WINDOWS\System32\Wbem;C:\WINDOWS\System32\WindowsPowerShell\v1.0\;C:\WINDOWS\System32\OpenSSH\;C:\Program Files\nodejs\;C:\Users\antto\AppData\Local\Microsoft\WindowsApps;C:\Users\antto\AppData\Local\Programs\Microsoft VS Code\bin;C:\Users\antto\AppData\Roaming\npm
+    [SystemRoot] => C:\WINDOWS
+    [COMSPEC] => C:\WINDOWS\system32\cmd.exe
+    [PATHEXT] => .COM;.EXE;.BAT;.CMD;.VBS;.VBE;.JS;.JSE;.WSF;.WSH;.MSC
+    [WINDIR] => C:\WINDOWS
+    [SERVER_SIGNATURE] => <address>Apache/2.4.58 (Win64) OpenSSL/3.1.3 PHP/8.2.12 Server at localhost Port 80</address>
+
+    [SERVER_SOFTWARE] => Apache/2.4.58 (Win64) OpenSSL/3.1.3 PHP/8.2.12
+    [SERVER_NAME] => localhost
+    [SERVER_ADDR] => ::1
+    [SERVER_PORT] => 80
+    [REMOTE_ADDR] => ::1
+    [DOCUMENT_ROOT] => C:/xampp/htdocs
+    [REQUEST_SCHEME] => http
+    [CONTEXT_PREFIX] => 
+    [CONTEXT_DOCUMENT_ROOT] => C:/xampp/htdocs
+    [SERVER_ADMIN] => postmaster@localhost
+    [SCRIPT_FILENAME] => C:/xampp/htdocs/misproyectos/ProyectoHiker_prueba/paginasespecializadas/Usuario/javascript/usuario.php
+    [REMOTE_PORT] => 55396
+    [GATEWAY_INTERFACE] => CGI/1.1
+    [SERVER_PROTOCOL] => HTTP/1.1
+    [REQUEST_METHOD] => GET
+    [QUERY_STRING] => action=check_session
+    [REQUEST_URI] => /misproyectos/ProyectoHiker_prueba/paginasespecializadas/Usuario/javascript/usuario.php?action=check_session
+    [SCRIPT_NAME] => /misproyectos/ProyectoHiker_prueba/paginasespecializadas/Usuario/javascript/usuario.php
+    [PHP_SELF] => /misproyectos/ProyectoHiker_prueba/paginasespecializadas/Usuario/javascript/usuario.php
+    [REQUEST_TIME_FLOAT] => 1727190211.4285
+    [REQUEST_TIME] => 1727190211
+)
+
+[2024-09-24 17:03:31] About to require connection files
+[2024-09-24 17:03:31] Connection files included
+[2024-09-24 17:03:31] Database connection successful
+[2024-09-24 17:03:31] Action requested: check_session
+[2024-09-24 17:03:31] Script ended

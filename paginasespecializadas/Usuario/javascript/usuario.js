@@ -3,29 +3,24 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 function checkSession() {
-    fetch('javascript/usuario.php')
-        .then(response => response.json())
+    fetch('javascript/usuario.php?action=check_session')
+        .then(handleResponse)
         .then(data => {
-            if (data.success) {
-                if (data.logged_in) {
-                    // El usuario ha iniciado sesión
-                    document.getElementById('userGreeting').textContent = `Bienvenido, ${data.usuario}`;
-                    document.getElementById('userMenu').style.display = 'block';
-                    loadUserRoutes();
-                    setupEventListeners();
-                } else {
-                    // El usuario no ha iniciado sesión
-                    document.getElementById('loginPrompt').style.display = 'block';
-                }
+            if (data.logged_in) {
+                document.getElementById('userGreeting').textContent = `Bienvenido, ${data.usuario}`;
+                document.getElementById('userMenu').style.display = 'block';
+                document.getElementById('loginPrompt').style.display = 'none';
+                loadUserRoutes();
+                setupEventListeners();
             } else {
-                console.error('Error al verificar la sesión:', data.message);
+                document.getElementById('loginPrompt').style.display = 'block';
+                document.getElementById('userMenu').style.display = 'none';
             }
         })
-        .catch(error => console.error('Error:', error));
+        .catch(handleError);
 }
 
 function setupEventListeners() {
-    // Agregar event listeners a las pestañas
     document.querySelectorAll('.nav-link').forEach(tab => {
         tab.addEventListener('click', function(e) {
             e.preventDefault();
@@ -34,8 +29,7 @@ function setupEventListeners() {
         });
     });
 
-    // Event listener para crear nueva lista
-    document.querySelector('#createListBtn').addEventListener('click', createNewList);
+    document.getElementById('createListBtn').addEventListener('click', createNewList);
 }
 
 function loadContent(contentType) {
@@ -57,59 +51,39 @@ function loadContent(contentType) {
 
 function loadUserRoutes() {
     fetch('usuario.php?action=get_user_routes')
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                displayRoutes(data.routes, 'userRoutes');
-            } else {
-                console.error('Error al cargar las rutas:', data.message);
-            }
-        })
-        .catch(error => console.error('Error:', error));
+        .then(handleResponse)
+        .then(data => displayRoutes(data.routes, 'userRoutes'))
+        .catch(handleError);
 }
 
 function loadFavoriteRoutes() {
     fetch('usuario.php?action=get_favorite_routes')
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                displayRoutes(data.routes, 'favoriteRoutes');
-            } else {
-                console.error('Error al cargar las rutas favoritas:', data.message);
-            }
-        })
-        .catch(error => console.error('Error:', error));
+        .then(handleResponse)
+        .then(data => displayRoutes(data.routes, 'favoriteRoutes'))
+        .catch(handleError);
 }
 
 function loadCompletedRoutes() {
     fetch('usuario.php?action=get_completed_routes')
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                displayRoutes(data.routes, 'completedRoutes');
-            } else {
-                console.error('Error al cargar las rutas completadas:', data.message);
-            }
-        })
-        .catch(error => console.error('Error:', error));
+        .then(handleResponse)
+        .then(data => displayRoutes(data.routes, 'completedRoutes'))
+        .catch(handleError);
 }
 
 function loadUserLists() {
     fetch('usuario.php?action=get_user_lists')
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                displayLists(data.lists);
-            } else {
-                console.error('Error al cargar las listas:', data.message);
-            }
-        })
-        .catch(error => console.error('Error:', error));
+        .then(handleResponse)
+        .then(data => displayLists(data.lists))
+        .catch(handleError);
 }
 
 function displayRoutes(routes, containerId) {
     const container = document.getElementById(containerId);
     container.innerHTML = '';
+    if (routes.length === 0) {
+        container.innerHTML = '<p>No hay rutas para mostrar.</p>';
+        return;
+    }
     routes.forEach(route => {
         const routeElement = document.createElement('div');
         routeElement.className = 'col-md-4 mb-3';
@@ -118,7 +92,7 @@ function displayRoutes(routes, containerId) {
                 <img src="${route.imagen_path}" class="card-img-top" alt="${route.title}">
                 <div class="card-body">
                     <h5 class="card-title">${route.title}</h5>
-                    <p class="card-text">${route.description}</p>
+                    <p class="card-text">${route.description.substring(0, 100)}...</p>
                     <a href="#" class="btn btn-primary" onclick="viewRouteDetails(${route.id})">Ver detalles</a>
                 </div>
             </div>
@@ -130,6 +104,10 @@ function displayRoutes(routes, containerId) {
 function displayLists(lists) {
     const container = document.getElementById('userLists');
     container.innerHTML = '';
+    if (lists.length === 0) {
+        container.innerHTML = '<p>No tienes listas creadas.</p>';
+        return;
+    }
     lists.forEach(list => {
         const listElement = document.createElement('div');
         listElement.className = 'list-group-item d-flex justify-content-between align-items-center';
@@ -153,16 +131,12 @@ function createNewList() {
             method: 'POST',
             body: formData
         })
-        .then(response => response.json())
+        .then(handleResponse)
         .then(data => {
-            if (data.success) {
-                alert('Lista creada con éxito');
-                loadUserLists();
-            } else {
-                alert('Error al crear la lista: ' + data.message);
-            }
+            alert('Lista creada con éxito');
+            loadUserLists();
         })
-        .catch(error => console.error('Error:', error));
+        .catch(handleError);
     }
 }
 
@@ -176,21 +150,29 @@ function deleteList(listId) {
             method: 'POST',
             body: formData
         })
-        .then(response => response.json())
+        .then(handleResponse)
         .then(data => {
-            if (data.success) {
-                alert('Lista eliminada con éxito');
-                loadUserLists();
-            } else {
-                alert('Error al eliminar la lista: ' + data.message);
-            }
+            alert('Lista eliminada con éxito');
+            loadUserLists();
         })
-        .catch(error => console.error('Error:', error));
+        .catch(handleError);
     }
 }
 
 function viewRouteDetails(routeId) {
     // Implementa la lógica para ver los detalles de la ruta
-    // Esto podría ser una redirección a una página de detalles o abrir un modal
-    console.log('Ver detalles de la ruta:', routeId);
+    // Por ejemplo, redirigir a una página de detalles
+    window.location.href = `ruta_detalle.php?id=${routeId}`;
+}
+
+function handleResponse(response) {
+    if (!response.ok) {
+        throw new Error('Network response was not ok');
+    }
+    return response.json();
+}
+
+function handleError(error) {
+    console.error('Error:', error);
+    alert('Ha ocurrido un error. Por favor, intenta de nuevo más tarde.');
 }

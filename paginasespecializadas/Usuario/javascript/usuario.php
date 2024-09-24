@@ -1,43 +1,101 @@
 <?php
-// usuario.php
+ob_start();
 session_start();
-require_once '../../inicio_sesion/conexion.php';
 
-// Verificar si el usuario está autenticado
-if (!isset($_SESSION['user_id']) && $_REQUEST['action'] !== 'check_session') {
-    echo json_encode(['success' => false, 'message' => 'Usuario no autenticado']);
+// Función para registrar mensajes de depuración
+function debug_log($message) {
+    if (is_writable(__DIR__)) {
+        file_put_contents(__DIR__ . '/debug.log', date('[Y-m-d H:i:s] ') . $message . "\n", FILE_APPEND);
+    } else {
+        error_log("No se puede escribir en el archivo debug.log");
+    }
+}
+
+debug_log("Script started");
+debug_log("SERVER: " . print_r($_SERVER, true));
+
+// Configuración de errores
+error_reporting(E_ALL);
+ini_set('display_errors', 0);
+header('Content-Type: application/json');
+
+// Manejo de errores personalizados
+function handleError($errno, $errstr, $errfile, $errline) {
+    $error = array(
+        'error' => 'PHP Error',
+        'message' => $errstr,
+        'file' => $errfile,
+        'line' => $errline
+    );
+    debug_log("Error occurred: " . json_encode($error));
+    echo json_encode($error);
     exit;
 }
 
-$user_id = $_SESSION['user_id'] ?? null;
+set_error_handler('handleError');
 
-// Manejar diferentes acciones basadas en la solicitud
-$action = $_REQUEST['action'] ?? '';
+set_exception_handler(function($e) {
+    $error = [
+        'error' => 'Uncaught Exception',
+        'message' => $e->getMessage(),
+        'file' => $e->getFile(),
+        'line' => $e->getLine()
+    ];
+    debug_log("Uncaught exception: " . json_encode($error));
+    echo json_encode($error);
+    exit;
+});
 
-switch ($action) {
-    case 'check_session':
-        checkSession();
-        break;
-    case 'get_user_routes':
-        getUserRoutes($conn, $user_id);
-        break;
-    case 'get_favorite_routes':
-        getFavoriteRoutes($conn, $user_id);
-        break;
-    case 'get_completed_routes':
-        getCompletedRoutes($conn, $user_id);
-        break;
-    case 'get_user_lists':
-        getUserLists($conn, $user_id);
-        break;
-    case 'create_list':
-        createList($conn, $user_id);
-        break;
-    case 'delete_list':
-        deleteList($conn, $user_id);
-        break;
-    default:
-        echo json_encode(['success' => false, 'message' => 'Acción no válida']);
+try {
+    debug_log("About to require connection files");
+    require_once '../../inicio_sesion/conexion.php';
+    require_once '../../inicio_sesion/config.php';
+    debug_log("Connection files included");
+
+    if (!$conn) {
+        throw new Exception('Database connection error');
+    }
+    debug_log("Database connection successful");
+
+    $action = $_REQUEST['action'] ?? '';
+    debug_log("Action requested: " . $action);
+
+    switch ($action) {
+        case 'check_session':
+            checkSession();
+            break;
+        case 'get_user_routes':
+            getUserRoutes($conn);
+            break;
+        case 'get_favorite_routes':
+            getFavoriteRoutes($conn);
+            break;
+        case 'get_completed_routes':
+            getCompletedRoutes($conn);
+            break;
+        case 'get_user_lists':
+            getUserLists($conn);
+            break;
+        case 'create_list':
+            createList($conn);
+            break;
+        case 'delete_list':
+            deleteList($conn);
+            break;
+        default:
+            throw new Exception('Acción no válida');
+    }
+
+} catch (Exception $e) {
+    http_response_code(500);
+    $error = ['error' => $e->getMessage()];
+    debug_log("Exception caught: " . json_encode($error));
+    echo json_encode($error);
+} finally {
+    if (isset($conn) && $conn instanceof mysqli) {
+        $conn->close();
+    }
+    debug_log("Script ended");
 }
 
 function checkSession() {
@@ -55,7 +113,12 @@ function checkSession() {
     }
 }
 
-function getUserRoutes($conn, $user_id) {
+function getUserRoutes($conn) {
+    $user_id = $_SESSION['user_id'] ?? null;
+    if (!$user_id) {
+        throw new Exception('Usuario no autenticado');
+    }
+
     $query = "SELECT r.*, ri.imagen_path 
               FROM rutas r 
               LEFT JOIN (
@@ -72,13 +135,19 @@ function getUserRoutes($conn, $user_id) {
 
     $routes = [];
     while ($row = $result->fetch_assoc()) {
+        $row['imagen_path'] = getImageUrl(BASE_URL, $row['imagen_path']);
         $routes[] = $row;
     }
 
     echo json_encode(['success' => true, 'routes' => $routes]);
 }
 
-function getFavoriteRoutes($conn, $user_id) {
+function getFavoriteRoutes($conn) {
+    $user_id = $_SESSION['user_id'] ?? null;
+    if (!$user_id) {
+        throw new Exception('Usuario no autenticado');
+    }
+
     $query = "SELECT r.*, ri.imagen_path 
               FROM rutas r 
               LEFT JOIN (
@@ -96,13 +165,19 @@ function getFavoriteRoutes($conn, $user_id) {
 
     $routes = [];
     while ($row = $result->fetch_assoc()) {
+        $row['imagen_path'] = getImageUrl(BASE_URL, $row['imagen_path']);
         $routes[] = $row;
     }
 
     echo json_encode(['success' => true, 'routes' => $routes]);
 }
 
-function getCompletedRoutes($conn, $user_id) {
+function getCompletedRoutes($conn) {
+    $user_id = $_SESSION['user_id'] ?? null;
+    if (!$user_id) {
+        throw new Exception('Usuario no autenticado');
+    }
+
     $query = "SELECT r.*, ri.imagen_path 
               FROM rutas r 
               LEFT JOIN (
@@ -120,13 +195,19 @@ function getCompletedRoutes($conn, $user_id) {
 
     $routes = [];
     while ($row = $result->fetch_assoc()) {
+        $row['imagen_path'] = getImageUrl(BASE_URL, $row['imagen_path']);
         $routes[] = $row;
     }
 
     echo json_encode(['success' => true, 'routes' => $routes]);
 }
 
-function getUserLists($conn, $user_id) {
+function getUserLists($conn) {
+    $user_id = $_SESSION['user_id'] ?? null;
+    if (!$user_id) {
+        throw new Exception('Usuario no autenticado');
+    }
+
     $query = "SELECT ul.*, COUNT(lr.route_id) as route_count 
               FROM user_lists ul
               LEFT JOIN list_routes lr ON ul.id = lr.list_id
@@ -146,10 +227,14 @@ function getUserLists($conn, $user_id) {
     echo json_encode(['success' => true, 'lists' => $lists]);
 }
 
-function createList($conn, $user_id) {
+function createList($conn) {
+    $user_id = $_SESSION['user_id'] ?? null;
+    if (!$user_id) {
+        throw new Exception('Usuario no autenticado');
+    }
+
     if (!isset($_POST['list_name']) || empty(trim($_POST['list_name']))) {
-        echo json_encode(['success' => false, 'message' => 'Nombre de lista no válido']);
-        return;
+        throw new Exception('Nombre de lista no válido');
     }
 
     $list_name = trim($_POST['list_name']);
@@ -161,14 +246,18 @@ function createList($conn, $user_id) {
     if ($stmt->execute()) {
         echo json_encode(['success' => true, 'message' => 'Lista creada con éxito', 'list_id' => $stmt->insert_id]);
     } else {
-        echo json_encode(['success' => false, 'message' => 'Error al crear la lista: ' . $stmt->error]);
+        throw new Exception('Error al crear la lista: ' . $stmt->error);
     }
 }
 
-function deleteList($conn, $user_id) {
+function deleteList($conn) {
+    $user_id = $_SESSION['user_id'] ?? null;
+    if (!$user_id) {
+        throw new Exception('Usuario no autenticado');
+    }
+
     if (!isset($_POST['list_id']) || !is_numeric($_POST['list_id'])) {
-        echo json_encode(['success' => false, 'message' => 'ID de lista no válido']);
-        return;
+        throw new Exception('ID de lista no válido');
     }
 
     $list_id = intval($_POST['list_id']);
@@ -188,12 +277,14 @@ function deleteList($conn, $user_id) {
         if ($stmt->affected_rows > 0) {
             echo json_encode(['success' => true, 'message' => 'Lista eliminada con éxito']);
         } else {
-            echo json_encode(['success' => false, 'message' => 'No se encontró la lista o no tienes permiso para eliminarla']);
+            throw new Exception('No se encontró la lista o no tienes permiso para eliminarla');
         }
     } else {
-        echo json_encode(['success' => false, 'message' => 'Error al eliminar la lista: ' . $stmt->error]);
+        throw new Exception('Error al eliminar la lista: ' . $stmt->error);
     }
 }
 
-// No cerramos la conexión aquí, ya que se maneja en conexion.php
+function getImageUrl($baseUrl, $path) {
+    return rtrim($baseUrl, '/') . '/paginasespecializadas/skitouring/' . ltrim($path, '/');
+}
 ?>
