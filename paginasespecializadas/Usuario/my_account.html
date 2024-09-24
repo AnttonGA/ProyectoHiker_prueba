@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Perfil de Usuario</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css">
+    <style>
+        .route-card {
+            margin-bottom: 20px;
+        }
+        .tab-pane {
+            padding-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container mt-5">
+        <h1>Perfil de Usuario</h1>
+        
+        <ul class="nav nav-tabs" id="myTab" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="routes-tab" data-bs-toggle="tab" data-bs-target="#routes" type="button" role="tab" aria-controls="routes" aria-selected="true">Mis Rutas</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="favorites-tab" data-bs-toggle="tab" data-bs-target="#favorites" type="button" role="tab" aria-controls="favorites" aria-selected="false">Favoritas</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="completed-tab" data-bs-toggle="tab" data-bs-target="#completed" type="button" role="tab" aria-controls="completed" aria-selected="false">Completadas</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="lists-tab" data-bs-toggle="tab" data-bs-target="#lists" type="button" role="tab" aria-controls="lists" aria-selected="false">Mis Listas</button>
+            </li>
+        </ul>
+        
+        <div class="tab-content" id="myTabContent">
+            <div class="tab-pane fade show active" id="routes" role="tabpanel" aria-labelledby="routes-tab">
+                <div id="userRoutes" class="row">
+                    <!-- Las rutas del usuario se cargarán aquí -->
+                </div>
+            </div>
+            <div class="tab-pane fade" id="favorites" role="tabpanel" aria-labelledby="favorites-tab">
+                <div id="favoriteRoutes" class="row">
+                    <!-- Las rutas favoritas se cargarán aquí -->
+                </div>
+            </div>
+            <div class="tab-pane fade" id="completed" role="tabpanel" aria-labelledby="completed-tab">
+                <div id="completedRoutes" class="row">
+                    <!-- Las rutas completadas se cargarán aquí -->
+                </div>
+            </div>
+            <div class="tab-pane fade" id="lists" role="tabpanel" aria-labelledby="lists-tab">
+                <div id="userLists">
+                    <!-- Las listas del usuario se cargarán aquí -->
+                </div>
+                <button class="btn btn-primary mt-3" id="createListBtn">Crear Nueva Lista</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            loadUserRoutes();
+            loadFavoriteRoutes();
+            loadCompletedRoutes();
+            loadUserLists();
+
+            $('#createListBtn').click(function() {
+                const listName = prompt("Ingrese el nombre de la nueva lista:");
+                if (listName) {
+                    createNewList(listName);
+                }
+            });
+        });
+
+        function loadUserRoutes() {
+            $.ajax({
+                url: 'get_user_routes.php',
+                type: 'GET',
+                dataType: 'json',
+                success: function(routes) {
+                    const routesContainer = $('#userRoutes');
+                    routesContainer.empty();
+                    routes.forEach(function(route) {
+                        routesContainer.append(createRouteCard(route, true));
+                    });
+                },
+                error: function(xhr, status, error) {
+                    console.error("Error loading user routes:", error);
+                }
+            });
+        }
+
+        function loadFavoriteRoutes() {
+            $.ajax({
+                url: 'get_favorite_routes.php',
+                type: 'GET',
+                dataType: 'json',
+                success: function(routes) {
+                    const routesContainer = $('#favoriteRoutes');
+                    routesContainer.empty();
+                    routes.forEach(function(route) {
+                        routesContainer.append(createRouteCard(route, false));
+                    });
+                },
+                error: function(xhr, status, error) {
+                    console.error("Error loading favorite routes:", error);
+                }
+            });
+        }
+
+        function loadCompletedRoutes() {
+            $.ajax({
+                url: 'get_completed_routes.php',
+                type: 'GET',
+                dataType: 'json',
+                success: function(routes) {
+                    const routesContainer = $('#completedRoutes');
+                    routesContainer.empty();
+                    routes.forEach(function(route) {
+                        routesContainer.append(createRouteCard(route, false));
+                    });
+                },
+                error: function(xhr, status, error) {
+                    console.error("Error loading completed routes:", error);
+                }
+            });
+        }
+
+        function loadUserLists() {
+            $.ajax({
+                url: 'get_user_lists.php',
+                type: 'GET',
+                dataType: 'json',
+                success: function(lists) {
+                    const listsContainer = $('#userLists');
+                    listsContainer.empty();
+                    lists.forEach(function(list) {
+                        listsContainer.append(createListItem(list));
+                    });
+                },
+                error: function(xhr, status, error) {
+                    console.error("Error loading user lists:", error);
+                }
+            });
+        }
+
+        function createRouteCard(route, isUserRoute) {
+            let card = `
+                <div class="col-md-4 route-card">
+                    <div class="card">
+                        <img src="${route.imagen_path}" class="card-img-top" alt="${route.title}">
+                        <div class="card-body">
+                            <h5 class="card-title">${route.title}</h5>
+                            <p class="card-text">${route.description}</p>
+                            <a href="view_route.php?id=${route.id}" class="btn btn-primary">Ver Ruta</a>
+            `;
+            if (isUserRoute) {
+                card += `<a href="edit_route.php?id=${route.id}" class="btn btn-secondary">Editar</a>`;
+            }
+            card += `
+                        </div>
+                    </div>
+                </div>
+            `;
+            return card;
+        }
+
+        function createListItem(list) {
+            return `
+                <div class="list-item mb-3">
+                    <h4>${list.list_name}</h4>
+                    <button class="btn btn-sm btn-info view-list-btn" data-list-id="${list.id}">Ver rutas</button>
+                    <button class="btn btn-sm btn-danger delete-list-btn" data-list-id="${list.id}">Eliminar lista</button>
+                </div>
+            `;
+        }
+
+        function createNewList(listName) {
+            $.ajax({
+                url: 'create_list.php',
+                type: 'POST',
+                data: { list_name: listName },
+                dataType: 'json',
+                success: function(response) {
+                    if (response.success) {
+                        alert("Lista creada con éxito");
+                        loadUserLists();
+                    } else {
+                        alert("Error al crear la lista: " + response.message);
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error("Error creating list:", error);
+                    alert("Error al crear la lista");
+                }
+            });
+        }
+
+        $(document).on('click', '.view-list-btn', function() {
+            const listId = $(this).data('list-id');
+            // Aquí puedes implementar la lógica para ver las rutas de la lista
+            alert("Ver rutas de la lista con ID: " + listId);
+        });
+
+        $(document).on('click', '.delete-list-btn', function() {
+            const listId = $(this).data('list-id');
+            if (confirm("¿Estás seguro de que quieres eliminar esta lista?")) {
+                deleteList(listId);
+            }
+        });
+
+        function deleteList(listId) {
+            $.ajax({
+                url: 'delete_list.php',
+                type: 'POST',
+                data: { list_id: listId },
+                dataType: 'json',
+                success: function(response) {
+                    if (response.success) {
+                        alert("Lista eliminada con éxito");
+                        loadUserLists();
+                    } else {
+                        alert("Error al eliminar la lista: " + response.message);
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error("Error deleting list:", error);
+                    alert("Error al eliminar la lista");
+                }
+            });
+        }
+    </script>
+</body>
+</html>
