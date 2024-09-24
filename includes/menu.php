@@ -61,7 +61,7 @@
             <li class="nav-item dropdown">
               <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" role="button" data-bs-toggle="dropdown" aria-expanded="false">' . $_SESSION['usuario'] . '</a>
               <ul class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
-                <li><a class="dropdown-item" href="#">My account</a></li>
+                <li><a class="dropdown-item" href="' . root_path('paginasespecializadas/Usuario/my_account.html') . '">My account</a></li>
                 <li><a class="dropdown-item" href="#">Configuration</a></li>
                 <li><a class="dropdown-item" href="' . root_path('paginasespecializadas/Usuario/subir_ruta.html') . '">Upload your route</a></li>
                 <li><a class="dropdown-item" href="' . root_path('paginasespecializadas/Usuario/my_routes.php') . '">Manage your routes</a></li>

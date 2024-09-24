@@ -1,1 +1,0 @@
-C:\xampp\php\php.exe -f "C:\xampp\htdocs\misproyectos\ProyectoHiker_prueba\paginasespecializadas\skitouring\javascript\user_preferences.php"
