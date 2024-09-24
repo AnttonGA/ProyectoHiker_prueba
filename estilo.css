@@ -1,0 +1,93 @@
+
+/* index page */
+.full-height {
+  height: 50vh;
+  position: relative;
+}
+
+.overlay-text {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: white;
+  font-size: 2em;
+  font-weight: bold;
+  text-align: center; /* Asegura que el texto esté centrado */
+}
+
+.image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: opacity 0.3s ease; /* Transición suave para el efecto hover */
+}
+
+.image-container {
+  width: 100%; /* Asegura que el contenedor de la imagen ocupe todo el ancho */
+  height: 100%; /* Asegura que el contenedor de la imagen ocupe todo el alto */
+  overflow: hidden; /* Oculta cualquier parte de la imagen que sobresalga del contenedor */
+  position: relative; /* Asegura que los elementos posicionados absolutamente dentro de este contenedor funcionen correctamente */
+}
+
+.p-1 {
+  padding: 0.5rem !important;
+}
+
+a:hover .image {
+  opacity: 0.7; /* Cambiar la opacidad de la imagen al 70% cuando se hace hover */
+}
+
+/* Cabezera */
+.header {
+  background-image: url('skitouring/bannerski.jpg'); /* Ruta de tu imagen de fondo */
+  background-size: cover;
+  background-position: center;
+  height: 400px; /* Altura de la cabecera, ajusta según sea necesario */
+  color: white;
+  text-align: center;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 20px; /* Espacio inferior */
+  position: relative;
+}
+
+.header .overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5); /* Fondo semi-transparente */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.header h1 {
+  font-size: 4rem; /* Tamaño del título */
+  margin: 0; /* Elimina el margen para un aspecto más limpio */
+}
+
+/* Media queries para hacerlo responsive */
+@media (max-width: 768px) {
+  .header {
+    height: 300px; /* Reducir la altura para pantallas más pequeñas */
+  }
+
+  .header h1 {
+    font-size: 2.5rem; /* Reducir el tamaño del título para pantallas más pequeñas */
+  }
+}
+
+@media (max-width: 576px) {
+  .header {
+    height: 200px; /* Reducir aún más la altura para pantallas muy pequeñas */
+  }
+
+  .header h1 {
+    font-size: 2rem; /* Reducir aún más el tamaño del título para pantallas muy pequeñas */
+  }
+}
+  

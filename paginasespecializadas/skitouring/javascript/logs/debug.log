@@ -1,0 +1,331 @@
+[2024-09-17 16:02:47] [DEBUG] Iniciando transacción para procesar 1 interacciones
+[2024-09-17 16:02:47] [DEBUG] Respuesta enviada: {"success":false,"messages":["Missing required fields for an interaction"]}
+[2024-09-17 16:02:51] [DEBUG] Iniciando transacción para procesar 1 interacciones
+[2024-09-17 16:02:51] [DEBUG] Respuesta enviada: {"success":false,"messages":["Missing required fields for an interaction"]}
+[2024-09-17 16:03:01] [DEBUG] Iniciando transacción para procesar 1 interacciones
+[2024-09-17 16:03:01] [DEBUG] Respuesta enviada: {"success":false,"messages":["Missing required fields for an interaction"]}
+[2024-09-17 16:03:23] [DEBUG] Iniciando transacción para procesar 1 interacciones
+[2024-09-17 16:03:23] [DEBUG] Respuesta enviada: {"success":false,"messages":["Missing required fields for an interaction"]}
+[2024-09-17 16:03:23] [DEBUG] Iniciando transacción para procesar 1 interacciones
+[2024-09-17 16:03:23] [DEBUG] Respuesta enviada: {"success":false,"messages":["Missing required fields for an interaction"]}
+[2024-09-17 16:04:07] [DEBUG] Iniciando transacción para procesar 1 interacciones
+[2024-09-17 16:04:07] [DEBUG] Respuesta enviada: {"success":false,"messages":["Missing required fields for an interaction"]}
+[2024-09-17 16:04:07] [DEBUG] Iniciando transacción para procesar 1 interacciones
+[2024-09-17 16:04:07] [DEBUG] Respuesta enviada: {"success":false,"messages":["Missing required fields for an interaction"]}
+[2024-09-17 16:04:35] [DEBUG] Iniciando transacción para procesar 1 interacciones
+[2024-09-17 16:04:35] [DEBUG] Respuesta enviada: {"success":false,"messages":["Missing required fields for an interaction"]}
+[2024-09-17 16:08:42] [DEBUG] Iniciando transacción para procesar 1 interacciones
+[2024-09-17 16:08:42] [DEBUG] Respuesta enviada: {"success":false,"messages":["Missing required fields for an interaction"]}
+[2024-09-17 16:08:42] [DEBUG] Iniciando transacción para procesar 1 interacciones
+[2024-09-17 16:08:42] [DEBUG] Respuesta enviada: {"success":false,"messages":["Missing required fields for an interaction"]}
+[2024-09-17 19:15:24] [DEBUG] Iniciando transacción para procesar 1 interacciones
+[2024-09-17 19:15:24] [DEBUG] Respuesta enviada: {"success":false,"messages":["Missing required fields for an interaction"]}
+[2024-09-17 19:15:26] [DEBUG] Iniciando transacción para procesar 1 interacciones
+[2024-09-17 19:15:26] [DEBUG] Respuesta enviada: {"success":false,"messages":["Missing required fields for an interaction"]}
+[2024-09-17 19:25:42] [DEBUG] Iniciando transacción para procesar 1 interacciones
+[2024-09-17 19:25:42] [DEBUG] Procesando interacción: User 6, Route 75, Type view, Duration 
+[2024-09-17 19:25:42] [DEBUG] Interacción procesada exitosamente para la ruta 75
+[2024-09-17 19:25:42] [DEBUG] Transacción completada exitosamente
+[2024-09-17 19:25:42] [DEBUG] Respuesta enviada: {"success":true,"messages":[]}
+[2024-09-17 19:25:55] [DEBUG] Iniciando transacción para procesar 1 interacciones
+[2024-09-17 19:25:55] [DEBUG] Procesando interacción: User 6, Route 75, Type complete, Duration 
+[2024-09-17 19:25:55] [DEBUG] Interacción procesada exitosamente para la ruta 75
+[2024-09-17 19:25:55] [DEBUG] Transacción completada exitosamente
+[2024-09-17 19:25:55] [DEBUG] Respuesta enviada: {"success":true,"messages":[]}
+[2024-09-17 19:26:14] [DEBUG] Iniciando transacción para procesar 1 interacciones
+[2024-09-17 19:26:14] [DEBUG] Procesando interacción: User 6, Route 75, Type favorite, Duration 
+[2024-09-17 19:26:14] [DEBUG] Interacción procesada exitosamente para la ruta 75
+[2024-09-17 19:26:14] [DEBUG] Transacción completada exitosamente
+[2024-09-17 19:26:14] [DEBUG] Respuesta enviada: {"success":true,"messages":[]}
+[2024-09-17 19:26:33] [DEBUG] Iniciando transacción para procesar 1 interacciones
+[2024-09-17 19:26:33] [DEBUG] Procesando interacción: User 6, Route 75, Type favorite, Duration 
+[2024-09-17 19:26:33] [DEBUG] Interacción procesada exitosamente para la ruta 75
+[2024-09-17 19:26:33] [DEBUG] Transacción completada exitosamente
+[2024-09-17 19:26:33] [DEBUG] Respuesta enviada: {"success":true,"messages":[]}
+[2024-09-17 19:26:45] [DEBUG] Iniciando transacción para procesar 1 interacciones
+[2024-09-17 19:26:45] [DEBUG] Procesando interacción: User 6, Route 75, Type view, Duration 63
+[2024-09-17 19:26:45] [DEBUG] Interacción procesada exitosamente para la ruta 75
+[2024-09-17 19:26:45] [DEBUG] Transacción completada exitosamente
+[2024-09-17 19:26:45] [DEBUG] Respuesta enviada: {"success":true,"messages":[]}
+[2024-09-17 19:27:33] [DEBUG] Iniciando transacción para procesar 1 interacciones
+[2024-09-17 19:27:33] [DEBUG] Procesando interacción: User 6, Route 76, Type view, Duration 
+[2024-09-17 19:27:33] [DEBUG] Interacción procesada exitosamente para la ruta 76
+[2024-09-17 19:27:33] [DEBUG] Transacción completada exitosamente
+[2024-09-17 19:27:33] [DEBUG] Respuesta enviada: {"success":true,"messages":[]}
+[2024-09-17 19:27:43] [DEBUG] Iniciando transacción para procesar 1 interacciones
+[2024-09-17 19:27:43] [DEBUG] Procesando interacción: User 6, Route 76, Type download, Duration 
+[2024-09-17 19:27:43] [DEBUG] Interacción procesada exitosamente para la ruta 76
+[2024-09-17 19:27:43] [DEBUG] Transacción completada exitosamente
+[2024-09-17 19:27:43] [DEBUG] Respuesta enviada: {"success":true,"messages":[]}
+[2024-09-17 19:27:43] [DEBUG] Iniciando transacción para procesar 1 interacciones
+[2024-09-17 19:27:43] [DEBUG] Procesando interacción: User 6, Route 76, Type view, Duration 10
+[2024-09-17 19:27:43] [DEBUG] Interacción procesada exitosamente para la ruta 76
+[2024-09-17 19:27:43] [DEBUG] Transacción completada exitosamente
+[2024-09-17 19:27:43] [DEBUG] Respuesta enviada: {"success":true,"messages":[]}
+[2024-09-17 19:28:45] [DEBUG] Iniciando transacción para procesar 1 interacciones
+[2024-09-17 19:28:45] [DEBUG] Procesando interacción: User 6, Route 76, Type complete, Duration 
+[2024-09-17 19:28:45] [DEBUG] Interacción procesada exitosamente para la ruta 76
+[2024-09-17 19:28:45] [DEBUG] Transacción completada exitosamente
+[2024-09-17 19:28:45] [DEBUG] Respuesta enviada: {"success":true,"messages":[]}
+[2024-09-17 19:29:01] [DEBUG] Iniciando transacción para procesar 1 interacciones
+[2024-09-17 19:29:01] [DEBUG] Procesando interacción: User 6, Route 76, Type complete, Duration 
+[2024-09-17 19:29:01] [DEBUG] Interacción procesada exitosamente para la ruta 76
+[2024-09-17 19:29:01] [DEBUG] Transacción completada exitosamente
+[2024-09-17 19:29:01] [DEBUG] Respuesta enviada: {"success":true,"messages":[]}
+[2024-09-17 19:35:55] [DEBUG] Iniciando transacción para procesar 1 interacciones
+[2024-09-17 19:35:55] [DEBUG] Procesando interacción: User 6, Route 76, Type complete, Duration 
+[2024-09-17 19:35:55] [DEBUG] Interacción procesada exitosamente para la ruta 76
+[2024-09-17 19:35:55] [DEBUG] Transacción completada exitosamente
+[2024-09-17 19:35:55] [DEBUG] Respuesta enviada: {"success":true,"messages":[]}
+[2024-09-17 19:44:32] [DEBUG] Iniciando transacción para procesar 1 interacciones
+[2024-09-17 19:44:32] [DEBUG] Procesando interacción: User 6, Route 76, Type complete, Duration 
+[2024-09-17 19:44:32] [DEBUG] Interacción procesada exitosamente para la ruta 76
+[2024-09-17 19:44:32] [DEBUG] Transacción completada exitosamente
+[2024-09-17 19:44:32] [DEBUG] Respuesta enviada: {"success":true,"messages":[]}
+[2024-09-17 19:47:27] [DEBUG] Iniciando transacción para procesar 1 interacciones
+[2024-09-17 19:47:27] [DEBUG] Procesando interacción: User 6, Route 76, Type complete, Duration , Map Interaction Time 
+[2024-09-17 19:47:27] [DEBUG] Interacción procesada exitosamente para la ruta 76
+[2024-09-17 19:47:27] [DEBUG] Transacción completada exitosamente
+[2024-09-17 19:47:27] [DEBUG] Respuesta enviada: {"success":true,"messages":[]}
+[2024-09-17 19:48:57] [DEBUG] Iniciando transacción para procesar 1 interacciones
+[2024-09-17 19:48:57] [DEBUG] Procesando interacción: User 6, Route 76, Type view, Duration 1285, Map Interaction Time 
+[2024-09-17 19:48:57] [DEBUG] Interacción procesada exitosamente para la ruta 76
+[2024-09-17 19:48:57] [DEBUG] Transacción completada exitosamente
+[2024-09-17 19:48:57] [DEBUG] Respuesta enviada: {"success":true,"messages":[]}
+[2024-09-17 19:48:58] [DEBUG] Iniciando transacción para procesar 1 interacciones
+[2024-09-17 19:48:58] [DEBUG] Procesando interacción: User 6, Route 76, Type view, Duration , Map Interaction Time 
+[2024-09-17 19:48:58] [DEBUG] Interacción procesada exitosamente para la ruta 76
+[2024-09-17 19:48:58] [DEBUG] Transacción completada exitosamente
+[2024-09-17 19:48:58] [DEBUG] Respuesta enviada: {"success":true,"messages":[]}
+[2024-09-17 19:48:58] [DEBUG] Iniciando transacción para procesar 1 interacciones
+[2024-09-17 19:48:58] [DEBUG] Procesando interacción: User 6, Route 76, Type map_interaction, Duration , Map Interaction Time 0
+[2024-09-17 19:48:58] [DEBUG] Interacción procesada exitosamente para la ruta 76
+[2024-09-17 19:48:58] [DEBUG] Transacción completada exitosamente
+[2024-09-17 19:48:58] [DEBUG] Respuesta enviada: {"success":true,"messages":[]}
+[2024-09-17 19:49:00] [DEBUG] Iniciando transacción para procesar 1 interacciones
+[2024-09-17 19:49:00] [DEBUG] Procesando interacción: User 6, Route 76, Type complete, Duration , Map Interaction Time 
+[2024-09-17 19:49:00] [DEBUG] Interacción procesada exitosamente para la ruta 76
+[2024-09-17 19:49:00] [DEBUG] Transacción completada exitosamente
+[2024-09-17 19:49:00] [DEBUG] Respuesta enviada: {"success":true,"messages":[]}
+[2024-09-17 19:49:13] [DEBUG] Iniciando transacción para procesar 1 interacciones
+[2024-09-17 19:49:13] [DEBUG] Procesando interacción: User 6, Route 76, Type favorite, Duration , Map Interaction Time 
+[2024-09-17 19:49:13] [DEBUG] Interacción procesada exitosamente para la ruta 76
+[2024-09-17 19:49:13] [DEBUG] Transacción completada exitosamente
+[2024-09-17 19:49:13] [DEBUG] Respuesta enviada: {"success":true,"messages":[]}
+[2024-09-17 19:49:41] [DEBUG] Iniciando transacción para procesar 1 interacciones
+[2024-09-17 19:49:41] [DEBUG] Procesando interacción: User 6, Route 76, Type favorite, Duration , Map Interaction Time 
+[2024-09-17 19:49:41] [DEBUG] Interacción procesada exitosamente para la ruta 76
+[2024-09-17 19:49:41] [DEBUG] Transacción completada exitosamente
+[2024-09-17 19:49:41] [DEBUG] Respuesta enviada: {"success":true,"messages":[]}
+[2024-09-17 19:49:45] [DEBUG] Iniciando transacción para procesar 1 interacciones
+[2024-09-17 19:49:45] [DEBUG] Procesando interacción: User 6, Route 76, Type complete, Duration , Map Interaction Time 
+[2024-09-17 19:49:45] [DEBUG] Interacción procesada exitosamente para la ruta 76
+[2024-09-17 19:49:45] [DEBUG] Transacción completada exitosamente
+[2024-09-17 19:49:45] [DEBUG] Respuesta enviada: {"success":true,"messages":[]}
+[2024-09-17 19:50:42] [DEBUG] Iniciando transacción para procesar 1 interacciones
+[2024-09-17 19:50:42] [DEBUG] Procesando interacción: User 6, Route 76, Type complete, Duration , Map Interaction Time 
+[2024-09-17 19:50:42] [DEBUG] Interacción procesada exitosamente para la ruta 76
+[2024-09-17 19:50:42] [DEBUG] Transacción completada exitosamente
+[2024-09-17 19:50:42] [DEBUG] Respuesta enviada: {"success":true,"messages":[]}
+[2024-09-17 19:50:52] [DEBUG] Iniciando transacción para procesar 1 interacciones
+[2024-09-17 19:50:52] [DEBUG] Procesando interacción: User 6, Route 76, Type complete, Duration , Map Interaction Time 
+[2024-09-17 19:50:52] [DEBUG] Interacción procesada exitosamente para la ruta 76
+[2024-09-17 19:50:52] [DEBUG] Transacción completada exitosamente
+[2024-09-17 19:50:52] [DEBUG] Respuesta enviada: {"success":true,"messages":[]}
+[2024-09-17 19:50:53] [DEBUG] Iniciando transacción para procesar 1 interacciones
+[2024-09-17 19:50:53] [DEBUG] Procesando interacción: User 6, Route 76, Type favorite, Duration , Map Interaction Time 
+[2024-09-17 19:50:53] [DEBUG] Interacción procesada exitosamente para la ruta 76
+[2024-09-17 19:50:53] [DEBUG] Transacción completada exitosamente
+[2024-09-17 19:50:53] [DEBUG] Respuesta enviada: {"success":true,"messages":[]}
+[2024-09-17 19:52:34] [DEBUG] Iniciando transacción para procesar 1 interacciones
+[2024-09-17 19:52:34] [DEBUG] Procesando interacción: User 6, Route 76, Type view, Duration 216, Map Interaction Time 
+[2024-09-17 19:52:34] [DEBUG] Interacción procesada exitosamente para la ruta 76
+[2024-09-17 19:52:34] [DEBUG] Transacción completada exitosamente
+[2024-09-17 19:52:34] [DEBUG] Respuesta enviada: {"success":true,"messages":[]}
+[2024-09-17 19:52:35] [DEBUG] Iniciando transacción para procesar 1 interacciones
+[2024-09-17 19:52:35] [DEBUG] Procesando interacción: User 6, Route 76, Type view, Duration , Map Interaction Time 
+[2024-09-17 19:52:35] [DEBUG] Interacción procesada exitosamente para la ruta 76
+[2024-09-17 19:52:35] [DEBUG] Transacción completada exitosamente
+[2024-09-17 19:52:35] [DEBUG] Respuesta enviada: {"success":true,"messages":[]}
+[2024-09-17 19:52:35] [DEBUG] Iniciando transacción para procesar 1 interacciones
+[2024-09-17 19:52:35] [DEBUG] Procesando interacción: User 6, Route 76, Type map_interaction, Duration , Map Interaction Time 0
+[2024-09-17 19:52:35] [DEBUG] Interacción procesada exitosamente para la ruta 76
+[2024-09-17 19:52:35] [DEBUG] Transacción completada exitosamente
+[2024-09-17 19:52:35] [DEBUG] Respuesta enviada: {"success":true,"messages":[]}
+[2024-09-17 19:52:39] [DEBUG] Iniciando transacción para procesar 1 interacciones
+[2024-09-17 19:52:39] [DEBUG] Procesando interacción: User 6, Route 76, Type view, Duration 5, Map Interaction Time 
+[2024-09-17 19:52:39] [DEBUG] Interacción procesada exitosamente para la ruta 76
+[2024-09-17 19:52:39] [DEBUG] Transacción completada exitosamente
+[2024-09-17 19:52:39] [DEBUG] Respuesta enviada: {"success":true,"messages":[]}
+[2024-09-17 19:52:43] [DEBUG] Iniciando transacción para procesar 1 interacciones
+[2024-09-17 19:52:43] [DEBUG] Procesando interacción: User 6, Route 79, Type view, Duration , Map Interaction Time 
+[2024-09-17 19:52:43] [DEBUG] Interacción procesada exitosamente para la ruta 79
+[2024-09-17 19:52:43] [DEBUG] Transacción completada exitosamente
+[2024-09-17 19:52:43] [DEBUG] Respuesta enviada: {"success":true,"messages":[]}
+[2024-09-17 19:52:44] [DEBUG] Iniciando transacción para procesar 1 interacciones
+[2024-09-17 19:52:44] [DEBUG] Procesando interacción: User 6, Route 79, Type map_interaction, Duration , Map Interaction Time 0
+[2024-09-17 19:52:44] [DEBUG] Interacción procesada exitosamente para la ruta 79
+[2024-09-17 19:52:44] [DEBUG] Transacción completada exitosamente
+[2024-09-17 19:52:44] [DEBUG] Respuesta enviada: {"success":true,"messages":[]}
+[2024-09-17 19:52:46] [DEBUG] Iniciando transacción para procesar 1 interacciones
+[2024-09-17 19:52:46] [DEBUG] Procesando interacción: User 6, Route 79, Type complete, Duration , Map Interaction Time 
+[2024-09-17 19:52:46] [DEBUG] Interacción procesada exitosamente para la ruta 79
+[2024-09-17 19:52:46] [DEBUG] Transacción completada exitosamente
+[2024-09-17 19:52:46] [DEBUG] Respuesta enviada: {"success":true,"messages":[]}
+[2024-09-17 19:53:21] [DEBUG] Iniciando transacción para procesar 1 interacciones
+[2024-09-17 19:53:21] [DEBUG] Procesando interacción: User 6, Route 79, Type complete, Duration , Map Interaction Time 
+[2024-09-17 19:53:21] [DEBUG] Interacción procesada exitosamente para la ruta 79
+[2024-09-17 19:53:21] [DEBUG] Transacción completada exitosamente
+[2024-09-17 19:53:21] [DEBUG] Respuesta enviada: {"success":true,"messages":[]}
+[2024-09-17 19:53:22] [DEBUG] Iniciando transacción para procesar 1 interacciones
+[2024-09-17 19:53:22] [DEBUG] Procesando interacción: User 6, Route 79, Type favorite, Duration , Map Interaction Time 
+[2024-09-17 19:53:22] [DEBUG] Interacción procesada exitosamente para la ruta 79
+[2024-09-17 19:53:22] [DEBUG] Transacción completada exitosamente
+[2024-09-17 19:53:22] [DEBUG] Respuesta enviada: {"success":true,"messages":[]}
+[2024-09-17 19:53:54] [DEBUG] Iniciando transacción para procesar 1 interacciones
+[2024-09-17 19:53:54] [DEBUG] Procesando interacción: User 6, Route 76, Type view, Duration , Map Interaction Time 
+[2024-09-17 19:53:54] [DEBUG] Interacción procesada exitosamente para la ruta 76
+[2024-09-17 19:53:54] [DEBUG] Transacción completada exitosamente
+[2024-09-17 19:53:54] [DEBUG] Respuesta enviada: {"success":true,"messages":[]}
+[2024-09-17 19:53:55] [DEBUG] Iniciando transacción para procesar 1 interacciones
+[2024-09-17 19:53:55] [DEBUG] Procesando interacción: User 6, Route 76, Type map_interaction, Duration , Map Interaction Time 0
+[2024-09-17 19:53:55] [DEBUG] Interacción procesada exitosamente para la ruta 76
+[2024-09-17 19:53:55] [DEBUG] Transacción completada exitosamente
+[2024-09-17 19:53:55] [DEBUG] Respuesta enviada: {"success":true,"messages":[]}
+[2024-09-17 19:53:58] [DEBUG] Iniciando transacción para procesar 1 interacciones
+[2024-09-17 19:53:58] [DEBUG] Procesando interacción: User 6, Route 76, Type complete, Duration , Map Interaction Time 
+[2024-09-17 19:53:58] [DEBUG] Interacción procesada exitosamente para la ruta 76
+[2024-09-17 19:53:58] [DEBUG] Transacción completada exitosamente
+[2024-09-17 19:53:58] [DEBUG] Respuesta enviada: {"success":true,"messages":[]}
+[2024-09-17 19:54:08] [DEBUG] Iniciando transacción para procesar 1 interacciones
+[2024-09-17 19:54:08] [DEBUG] Procesando interacción: User 6, Route 79, Type download, Duration , Map Interaction Time 
+[2024-09-17 19:54:08] [DEBUG] Interacción procesada exitosamente para la ruta 79
+[2024-09-17 19:54:08] [DEBUG] Transacción completada exitosamente
+[2024-09-17 19:54:08] [DEBUG] Respuesta enviada: {"success":true,"messages":[]}
+[2024-09-17 19:54:09] [DEBUG] Iniciando transacción para procesar 1 interacciones
+[2024-09-17 19:54:09] [DEBUG] Procesando interacción: User 6, Route 79, Type view, Duration 85, Map Interaction Time 
+[2024-09-17 19:54:09] [DEBUG] Interacción procesada exitosamente para la ruta 79
+[2024-09-17 19:54:09] [DEBUG] Transacción completada exitosamente
+[2024-09-17 19:54:09] [DEBUG] Respuesta enviada: {"success":true,"messages":[]}
+[2024-09-17 19:54:40] [DEBUG] Iniciando transacción para procesar 1 interacciones
+[2024-09-17 19:54:40] [DEBUG] Procesando interacción: User 6, Route 76, Type view, Duration 46
+[2024-09-17 19:54:40] [DEBUG] Interacción procesada exitosamente para la ruta 76
+[2024-09-17 19:54:40] [DEBUG] Transacción completada exitosamente
+[2024-09-17 19:54:40] [DEBUG] Respuesta enviada: {"success":true,"messages":[]}
+[2024-09-17 19:54:41] [DEBUG] Iniciando transacción para procesar 1 interacciones
+[2024-09-17 19:54:41] [DEBUG] Procesando interacción: User 6, Route 76, Type view, Duration 
+[2024-09-17 19:54:41] [DEBUG] Interacción procesada exitosamente para la ruta 76
+[2024-09-17 19:54:41] [DEBUG] Transacción completada exitosamente
+[2024-09-17 19:54:41] [DEBUG] Respuesta enviada: {"success":true,"messages":[]}
+[2024-09-17 19:54:42] [DEBUG] Iniciando transacción para procesar 1 interacciones
+[2024-09-17 19:54:42] [DEBUG] Procesando interacción: User 6, Route 79, Type view, Duration 118
+[2024-09-17 19:54:42] [DEBUG] Interacción procesada exitosamente para la ruta 79
+[2024-09-17 19:54:42] [DEBUG] Transacción completada exitosamente
+[2024-09-17 19:54:42] [DEBUG] Respuesta enviada: {"success":true,"messages":[]}
+[2024-09-17 19:54:42] [DEBUG] Iniciando transacción para procesar 1 interacciones
+[2024-09-17 19:54:42] [DEBUG] Procesando interacción: User 6, Route 79, Type view, Duration 
+[2024-09-17 19:54:42] [DEBUG] Interacción procesada exitosamente para la ruta 79
+[2024-09-17 19:54:42] [DEBUG] Transacción completada exitosamente
+[2024-09-17 19:54:42] [DEBUG] Respuesta enviada: {"success":true,"messages":[]}
+[2024-09-17 19:54:42] [DEBUG] Iniciando transacción para procesar 1 interacciones
+[2024-09-17 19:54:42] [DEBUG] Procesando interacción: User 6, Route 79, Type map_interaction, Duration 
+[2024-09-17 19:54:42] [DEBUG] Interacción procesada exitosamente para la ruta 79
+[2024-09-17 19:54:42] [DEBUG] Transacción completada exitosamente
+[2024-09-17 19:54:42] [DEBUG] Respuesta enviada: {"success":true,"messages":[]}
+[2024-09-17 19:54:47] [DEBUG] Iniciando transacción para procesar 1 interacciones
+[2024-09-17 19:54:47] [DEBUG] Procesando interacción: User 6, Route 76, Type map_interaction, Duration 
+[2024-09-17 19:54:47] [DEBUG] Interacción procesada exitosamente para la ruta 76
+[2024-09-17 19:54:47] [DEBUG] Transacción completada exitosamente
+[2024-09-17 19:54:47] [DEBUG] Respuesta enviada: {"success":true,"messages":[]}
+[2024-09-17 19:54:48] [DEBUG] Iniciando transacción para procesar 1 interacciones
+[2024-09-17 19:54:48] [DEBUG] Procesando interacción: User 6, Route 76, Type favorite, Duration 
+[2024-09-17 19:54:48] [DEBUG] Interacción procesada exitosamente para la ruta 76
+[2024-09-17 19:54:48] [DEBUG] Transacción completada exitosamente
+[2024-09-17 19:54:48] [DEBUG] Respuesta enviada: {"success":true,"messages":[]}
+[2024-09-17 19:55:55] [DEBUG] Iniciando transacción para procesar 1 interacciones
+[2024-09-17 19:55:55] [DEBUG] Procesando interacción: User 6, Route 79, Type complete, Duration , Map Interaction Time 
+[2024-09-17 19:55:55] [DEBUG] Interacción procesada exitosamente para la ruta 79
+[2024-09-17 19:55:55] [DEBUG] Transacción completada exitosamente
+[2024-09-17 19:55:55] [DEBUG] Respuesta enviada: {"success":true,"messages":[]}
+[2024-09-17 19:56:27] [DEBUG] Iniciando transacción para procesar 1 interacciones
+[2024-09-17 19:56:27] [DEBUG] Procesando interacción: User 6, Route 79, Type complete, Duration , Map Interaction Time 
+[2024-09-17 19:56:27] [DEBUG] Interacción procesada exitosamente para la ruta 79
+[2024-09-17 19:56:27] [DEBUG] Transacción completada exitosamente
+[2024-09-17 19:56:27] [DEBUG] Respuesta enviada: {"success":true,"messages":[]}
+[2024-09-23 15:21:05] [DEBUG] Transacción completada exitosamente
+[2024-09-23 15:21:05] [DEBUG] Respuesta enviada: {"success":true,"messages":[]}
+[2024-09-23 15:21:06] [DEBUG] Respuesta enviada: {"success":false,"error":"Invalid interaction type: map_interaction"}
+[2024-09-23 15:33:40] [DEBUG] Transacción completada exitosamente
+[2024-09-23 15:33:40] [DEBUG] Respuesta enviada: {"success":true,"messages":[]}
+[2024-09-23 15:33:40] [DEBUG] Transacción completada exitosamente
+[2024-09-23 15:33:40] [DEBUG] Respuesta enviada: {"success":true,"messages":[]}
+[2024-09-23 15:33:40] [DEBUG] Respuesta enviada: {"success":false,"error":"Invalid interaction type: map_interaction"}
+[2024-09-23 15:33:55] [DEBUG] Transacción completada exitosamente
+[2024-09-23 15:33:55] [DEBUG] Respuesta enviada: {"success":true,"messages":[]}
+[2024-09-23 15:33:55] [DEBUG] Transacción completada exitosamente
+[2024-09-23 15:33:55] [DEBUG] Respuesta enviada: {"success":true,"isCompleted":false,"isFavorite":false}
+[2024-09-23 15:33:55] [DEBUG] Transacción completada exitosamente
+[2024-09-23 15:33:55] [DEBUG] Respuesta enviada: {"success":true,"isCompleted":false,"isFavorite":false}
+[2024-09-23 15:33:56] [DEBUG] Transacción completada exitosamente
+[2024-09-23 15:33:56] [DEBUG] Respuesta enviada: {"success":true,"messages":[]}
+[2024-09-23 15:33:56] [DEBUG] Respuesta enviada: {"success":false,"error":"Invalid interaction type: map_interaction"}
+[2024-09-23 15:33:57] [DEBUG] Transacción completada exitosamente
+[2024-09-23 15:33:57] [DEBUG] Respuesta enviada: {"success":true,"messages":[]}
+[2024-09-23 15:33:59] [DEBUG] Transacción completada exitosamente
+[2024-09-23 15:33:59] [DEBUG] Respuesta enviada: {"success":true,"messages":[]}
+[2024-09-23 15:34:34] [DEBUG] Transacción completada exitosamente
+[2024-09-23 15:34:34] [DEBUG] Respuesta enviada: {"success":true,"messages":[]}
+[2024-09-23 15:34:35] [DEBUG] Transacción completada exitosamente
+[2024-09-23 15:34:35] [DEBUG] Respuesta enviada: {"success":true,"messages":[]}
+[2024-09-23 15:35:44] [DEBUG] Transacción completada exitosamente
+[2024-09-23 15:35:44] [DEBUG] Respuesta enviada: {"success":true,"messages":[]}
+[2024-09-23 15:35:44] [DEBUG] Transacción completada exitosamente
+[2024-09-23 15:35:44] [DEBUG] Respuesta enviada: {"success":true,"messages":[]}
+[2024-09-23 16:23:57] [DEBUG] Transacción completada exitosamente
+[2024-09-23 16:23:57] [DEBUG] Respuesta enviada: {"success":true,"isCompleted":false,"isFavorite":false}
+[2024-09-23 16:23:57] [DEBUG] Transacción completada exitosamente
+[2024-09-23 16:23:57] [DEBUG] Respuesta enviada: {"success":true,"isCompleted":false,"isFavorite":false}
+[2024-09-23 16:23:57] [DEBUG] Transacción completada exitosamente
+[2024-09-23 16:23:57] [DEBUG] Respuesta enviada: {"success":true,"messages":[]}
+[2024-09-23 16:24:10] [DEBUG] Transacción completada exitosamente
+[2024-09-23 16:24:10] [DEBUG] Respuesta enviada: {"success":true,"messages":[]}
+[2024-09-24 15:09:27] [DEBUG] Transacción completada exitosamente
+[2024-09-24 15:09:27] [DEBUG] Respuesta enviada: {"success":true,"isCompleted":false,"isFavorite":false}
+[2024-09-24 15:09:27] [DEBUG] Transacción completada exitosamente
+[2024-09-24 15:09:27] [DEBUG] Respuesta enviada: {"success":true,"isCompleted":false,"isFavorite":false}
+[2024-09-24 15:09:28] [DEBUG] Transacción completada exitosamente
+[2024-09-24 15:09:28] [DEBUG] Respuesta enviada: {"success":true,"messages":[]}
+[2024-09-24 15:10:21] [DEBUG] Respuesta enviada: {"success":false,"error":"Invalid interaction type: map_interaction"}
+[2024-09-24 15:10:24] [DEBUG] Transacción completada exitosamente
+[2024-09-24 15:10:24] [DEBUG] Respuesta enviada: {"success":true,"messages":[]}
+[2024-09-24 15:11:20] [DEBUG] Transacción completada exitosamente
+[2024-09-24 15:11:20] [DEBUG] Respuesta enviada: {"success":true,"messages":[]}
+[2024-09-24 15:11:26] [DEBUG] Transacción completada exitosamente
+[2024-09-24 15:11:26] [DEBUG] Respuesta enviada: {"success":true,"messages":[]}
+[2024-09-24 15:11:35] [DEBUG] Transacción completada exitosamente
+[2024-09-24 15:11:35] [DEBUG] Respuesta enviada: {"success":true,"messages":[]}
+[2024-09-24 15:11:43] [DEBUG] Transacción completada exitosamente
+[2024-09-24 15:11:43] [DEBUG] Respuesta enviada: {"success":true,"messages":[]}
+[2024-09-24 15:11:43] [DEBUG] Transacción completada exitosamente
+[2024-09-24 15:11:43] [DEBUG] Respuesta enviada: {"success":true,"isCompleted":false,"isFavorite":false}
+[2024-09-24 15:11:43] [DEBUG] Transacción completada exitosamente
+[2024-09-24 15:11:43] [DEBUG] Respuesta enviada: {"success":true,"isCompleted":false,"isFavorite":false}
+[2024-09-24 15:11:43] [DEBUG] Transacción completada exitosamente
+[2024-09-24 15:11:43] [DEBUG] Respuesta enviada: {"success":true,"messages":[]}
+[2024-09-24 15:11:44] [DEBUG] Respuesta enviada: {"success":false,"error":"Invalid interaction type: map_interaction"}
+[2024-09-24 15:15:13] [DEBUG] Transacción completada exitosamente
+[2024-09-24 15:15:13] [DEBUG] Respuesta enviada: {"success":true,"messages":[]}
+[2024-09-24 15:15:13] [DEBUG] Transacción completada exitosamente
+[2024-09-24 15:15:13] [DEBUG] Respuesta enviada: {"success":true,"isCompleted":false,"isFavorite":false}
+[2024-09-24 15:15:13] [DEBUG] Transacción completada exitosamente
+[2024-09-24 15:15:13] [DEBUG] Respuesta enviada: {"success":true,"isCompleted":false,"isFavorite":false}
+[2024-09-24 15:15:13] [DEBUG] Transacción completada exitosamente
+[2024-09-24 15:15:13] [DEBUG] Respuesta enviada: {"success":true,"messages":[]}
+[2024-09-24 15:15:13] [DEBUG] Respuesta enviada: {"success":false,"error":"Invalid interaction type: map_interaction"}
+[2024-09-24 15:15:14] [DEBUG] Transacción completada exitosamente
+[2024-09-24 15:15:14] [DEBUG] Respuesta enviada: {"success":true,"messages":[]}
+[2024-09-24 15:15:15] [DEBUG] Transacción completada exitosamente
+[2024-09-24 15:15:15] [DEBUG] Respuesta enviada: {"success":true,"messages":[]}
+[2024-09-24 15:19:34] [DEBUG] Respuesta enviada: {"success":false,"error":"Invalid interaction type: map_interaction"}
+[2024-09-24 15:33:55] [DEBUG] Transacción completada exitosamente
+[2024-09-24 15:33:55] [DEBUG] Respuesta enviada: {"success":true,"messages":[]}

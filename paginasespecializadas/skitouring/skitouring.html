@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SkiTouring</title>
+  <!-- Mapa Leaflet -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+  <link href='https://api.mapbox.com/mapbox.js/plugins/leaflet-fullscreen/v1.0.1/leaflet.fullscreen.css' rel='stylesheet' />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.css" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.Default.css" />
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Custom CSS -->
+  <link href="../estilos2.css" rel="stylesheet">
+  <!-- Bootstrap icons -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.10.0/font/bootstrap-icons.min.css" rel="stylesheet">
+  <!-- Swiper CSS -->
+<link rel="stylesheet" href="https://unpkg.com/swiper/swiper-bundle.min.css" />
+
+</head>
+ <!-- Navbar -->
+ <div id="menu"></div>
+<body>
+   
+
+  <!-- Header -->
+  <div class="header">
+    <div class="overlay">
+      <h1>FIND YOUR NEXT ADVENTURE</h1>
+    </div>
+  </div>
+
+  <ul class="nav nav-tabs" id="myTab" role="tablist">
+  <li class="nav-item" role="presentation">
+    <button class="nav-link active" id="inicio-sesion-tab" data-bs-toggle="tab" data-bs-target="#inicio-sesion" type="button" role="tab" aria-controls="inicio-sesion" aria-selected="true">Map</button>
+  </li>
+  <li class="nav-item" role="presentation">
+    <button class="nav-link" id="registro-tab" data-bs-toggle="tab" data-bs-target="#registro" type="button" role="tab" aria-controls="registro" aria-selected="false">List</button>
+  </li>
+</ul>
+  <!-- Contenido de las pestañas -->
+  <div class="tab-content mb-4">
+    <!-- Pestaña de Inicio de Sesión -->
+    <div class="tab-pane fade show active" id="inicio-sesion" role="tabpanel" aria-labelledby="inicio-sesion-tab">
+    <!-- Routes Section -->
+<div class="container-fluid mt-4" id="routes">
+        <div class="row">
+          <!-- Filters Section (Left Column) -->
+          <div class="col-md-2" style="margin: 10px;">
+            <div class="mt-4 mb-4">
+              <div class="row">
+                <div class="col-12 mb-3">
+                  <label for="difficultyFilter" class="form-label">Difficulty:</label>
+                  <select class="form-select" id="difficultyFilter">
+                    <option value="">All</option>
+                    <option value="beginner">Beginner</option>
+                    <option value="intermediate">Intermediate</option>
+                    <option value="advanced">Advanced</option>
+                  </select>
+                </div>
+                <div class="col-12 mb-3">
+                  <label for="minElevation" class="form-label">Minimun Elevation Gain (m):</label>
+                  <input type="number" class="form-control" id="minElevation" min="0">
+                </div>
+                <div class="col-12 mb-3">
+                  <label for="maxDuration" class="form-label">Maximun Duration (hours):</label>
+                  <input type="number" class="form-control" id="maxDuration" min="0">
+                </div>
+              </div>
+              <div class="row mb-4">
+                <div class="col-12">
+                  <label class="form-label">Activities:</label>
+                  <div id="activityFilter" class="d-flex flex-wrap gap-3">
+                    <div class="form-check">
+                      <input class="form-check-input" type="checkbox" value="ski_touring" id="skiTouring">
+                      <label class="form-check-label" for="skiTouring">Ski Touring</label>
+                    </div>
+                    <div class="form-check">
+                      <input class="form-check-input" type="checkbox" value="cycle_touring" id="cycleTouring">
+                      <label class="form-check-label" for="cycleTouring">Cycle Touring</label>
+                    </div>
+                    <div class="form-check">
+                      <input class="form-check-input" type="checkbox" value="hiking" id="hiking">
+                      <label class="form-check-label" for="hiking">Hiking</label>
+                    </div>
+                    <div class="form-check">
+                      <input class="form-check-input" type="checkbox" value="mountaineering" id="mountaineering">
+                      <label class="form-check-label" for="mountaineering">Mountaineering</label>
+                    </div>
+                    <div class="form-check">
+                      <input class="form-check-input" type="checkbox" value="trail_running" id="trailRunning">
+                      <label class="form-check-label" for="trailRunning">Trail Running</label>
+                    </div>
+                    <div class="form-check">
+                      <input class="form-check-input" type="checkbox" value="rock_climbing" id="rockClimbing">
+                      <label class="form-check-label" for="rockClimbing">Rock Climbing</label>
+                    </div>
+                    <div class="form-check">
+                      <input class="form-check-input" type="checkbox" value="road_cycling" id="roadCycling">
+                      <label class="form-check-label" for="roadCycling">Road Cycling</label>
+                    </div>
+                    <div class="form-check">
+                      <input class="form-check-input" type="checkbox" value="btt" id="btt">
+                      <label class="form-check-label" for="btt">BTT</label>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-md-12">
+                  <button class="btn btn-primary" id="filterButton">Apply Filters</button>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Map Section (Right Column) -->
+          <div class="col-md-9" style="margin-left: 5px;">
+            <div id="map" style="height: 80vh; width: 100%; max-width: 100%;"></div>
+          </div>
+        </div>
+
+        <!-- Carousel Section -->
+        <div class="row mt-4">
+          <div class="col-12">
+            <h3>SUGGESTED ADVENTURES</h3>
+            <div class="swiper-container">
+              <div id="cards-container" class="swiper-wrapper">
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Pestaña de Registro -->
+    <div class="tab-pane fade" id="registro" role="tabpanel" aria-labelledby="registro-tab">
+    
+    <style>
+        .card {
+            height: 100%;
+        }
+        .card-img-top {
+            height: 200px;
+            object-fit: cover;
+        }
+    </style>
+    <div class="container-fluid">
+        <h1 class="my-4">Rutas de Aventura</h1>
+        
+        <form id="filter-form" class="mb-4">
+            <div class="row g-3">
+                <div class="col-sm-6 col-md-3">
+                    <select id="filter-difficulty" class="form-select">
+                        <option value="all">Todas las dificultades</option>
+                        <option value="beginner">Principiante</option>
+                        <option value="intermediate">Intermedio</option>
+                        <option value="advanced">Avanzado</option>
+                    </select>
+                </div>
+
+                <div class="col-sm-6 col-md-3">
+                  <input type="number" id="filter-min-elevation" class="form-control" placeholder="Minimun elevation gain (m)">
+              </div>
+
+              <div class="col-sm-6 col-md-3">
+                  <input type="number" id="filter-max-duration" class="form-control" placeholder="Max duration (hours)">
+              </div>
+
+                <div class="row mt-3 mb-4">
+                  <div class="col-12">
+                      <label class="form-label">Activities:</label>
+                      <div id="activityFilter" class="d-flex flex-wrap gap-3">
+                          <div class="form-check">
+                              <input class="form-check-input" type="checkbox" value="ski_touring" id="skiTouring">
+                              <label class="form-check-label" for="skiTouring">Ski Touring</label>
+                          </div>
+                          <div class="form-check">
+                              <input class="form-check-input" type="checkbox" value="cycle_touring" id="cycleTouring">
+                              <label class="form-check-label" for="cycleTouring">Cycle Touring</label>
+                          </div>
+                          <div class="form-check">
+                              <input class="form-check-input" type="checkbox" value="hiking" id="hiking">
+                              <label class="form-check-label" for="hiking">Hiking</label>
+                          </div>
+                          <div class="form-check">
+                              <input class="form-check-input" type="checkbox" value="mountaineering" id="mountaineering">
+                              <label class="form-check-label" for="mountaineering">Mountaineering</label>
+                          </div>
+                          <div class="form-check">
+                              <input class="form-check-input" type="checkbox" value="trail_running" id="trailRunning">
+                              <label class="form-check-label" for="trailRunning">Trail Running</label>
+                          </div>
+                          <div class="form-check">
+                              <input class="form-check-input" type="checkbox" value="rock_climbing" id="rockClimbing">
+                              <label class="form-check-label" for="rockClimbing">Rock Climbing</label>
+                          </div>
+                          <div class="form-check">
+                              <input class="form-check-input" type="checkbox" value="road_cycling" id="roadCycling">
+                              <label class="form-check-label" for="roadCycling">Road Cycling</label>
+                          </div>
+                          <div class="form-check">
+                              <input class="form-check-input" type="checkbox" value="btt" id="btt">
+                              <label class="form-check-label" for="btt">BTT</label>
+                          </div>
+                      </div>
+                  </div>
+              </div>
+              
+                <div class="col-12">
+                    <button type="submit" class="btn btn-primary">Aplicar filtros</button>
+                </div>
+            </div>
+        </form>
+
+         <!-- Carousel Section -->
+         <div class="row mt-4">
+          <div class="col-12">
+            <h3>SUGGESTED ADVENTURES</h3>
+            <div class="swiper-container">
+              <div id="cards-container2" class="swiper-wrapper">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div id="routes-list" class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 row-cols-xl-5 g-4"></div>
+        
+        <div id="pagination" class="my-4 text-center"></div>
+    </div>
+    
+  </div>
+
+
+
+
+
+
+<!-- Footer -->
+  <div id="footer"></div>
+
+
+  <!-- Scripts al final del body para mejorar el rendimiento de carga -->
+  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+ <script src="javascript/mapa.js"></script>
+  <script src="javascript/carrusel.js"></script>
+  <script src="javascript/lista.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.min.js"></script>
+  <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/leaflet-gpx/gpx.min.js"></script>
+  <script src='https://api.mapbox.com/mapbox.js/plugins/leaflet-fullscreen/v1.0.1/Leaflet.fullscreen.min.js'></script>
+  <script src="https://unpkg.com/leaflet.markercluster@1.4.1/dist/leaflet.markercluster.js"></script>
+  <script src="../../include.js"></script>
+  
+  <!-- Swiper JS -->
+<script src="https://unpkg.com/swiper/swiper-bundle.min.js"></script>
+  
+
+</body>
+</html>
