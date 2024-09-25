@@ -1,0 +1,330 @@
+[2024-09-25 15:44:46] Script started
+[2024-09-25 15:44:46] Checking user session
+[2024-09-25 15:44:46] Exception caught: {"success":false,"error":"Usuario no autenticado"}
+[2024-09-25 15:44:46] Script ended
+[2024-09-25 15:50:36] Script started
+[2024-09-25 15:50:36] Exception caught: Usuario no autenticado
+[2024-09-25 15:50:36] Script ended
+[2024-09-25 15:51:20] Script started
+[2024-09-25 15:51:20] User authenticated: 
+[2024-09-25 15:51:20] Number of routes fetched: 0
+[2024-09-25 15:51:20] Script ended
+[2024-09-25 15:51:45] Script started
+[2024-09-25 15:51:45] User authenticated: 
+[2024-09-25 15:51:45] Number of routes fetched: 0
+[2024-09-25 15:51:45] Script ended
+[2024-09-25 15:53:32] Script started
+[2024-09-25 15:53:36] Script started
+[2024-09-25 15:53:48] Script started
+[2024-09-25 15:54:07] Script started
+[2024-09-25 15:54:07] User authenticated: 
+[2024-09-25 15:54:07] Number of routes fetched: 0
+[2024-09-25 15:54:07] Script ended
+[2024-09-25 15:54:43] Script started
+[2024-09-25 15:54:43] User authenticated: 
+[2024-09-25 15:54:43] Number of routes fetched: 0
+[2024-09-25 15:54:43] Script ended
+[2024-09-25 15:55:43] Script started
+[2024-09-25 15:56:17] Script started
+[2024-09-25 15:56:39] Script started
+[2024-09-25 15:57:20] Script started
+[2024-09-25 15:57:20] User authenticated: antton
+[2024-09-25 15:57:20] Number of routes fetched: 0
+[2024-09-25 15:57:20] Script ended
+[2024-09-25 16:00:29] Script started
+[2024-09-25 16:00:29] Exception caught: Usuario no autenticado
+[2024-09-25 16:00:29] Script ended
+[2024-09-25 16:00:43] Script started
+[2024-09-25 16:00:43] User authenticated: ID 
+[2024-09-25 16:00:43] Number of routes fetched: 0
+[2024-09-25 16:00:43] Script ended
+[2024-09-25 16:01:02] Script started
+[2024-09-25 16:01:02] User authenticated: antton
+[2024-09-25 16:01:02] Number of routes fetched: 0
+[2024-09-25 16:01:02] Script ended
+[2024-09-25 16:01:40] Script started
+[2024-09-25 16:01:40] User authenticated: antton
+[2024-09-25 16:01:40] Number of routes fetched: 0
+[2024-09-25 16:01:40] Script ended
+[2024-09-25 16:03:12] Script started
+[2024-09-25 16:03:12] User authenticated: antton
+[2024-09-25 16:03:12] Number of routes fetched: 0
+[2024-09-25 16:03:12] Script ended
+[2024-09-25 16:03:14] Script started
+[2024-09-25 16:03:14] User authenticated: antton
+[2024-09-25 16:03:14] Number of routes fetched: 0
+[2024-09-25 16:03:14] Script ended
+[2024-09-25 16:06:37] Script started
+[2024-09-25 16:06:37] User authenticated: antton
+[2024-09-25 16:06:37] User ID: 1
+[2024-09-25 16:06:37] Number of routes found for user: 2
+[2024-09-25 16:06:37] Number of routes fetched: 2
+[2024-09-25 16:06:37] Script ended
+[2024-09-25 16:06:48] Script started
+[2024-09-25 16:06:48] User authenticated: antton
+[2024-09-25 16:06:48] User ID: 1
+[2024-09-25 16:06:48] Number of routes found for user: 2
+[2024-09-25 16:06:49] Number of routes fetched: 2
+[2024-09-25 16:06:49] Script ended
+[2024-09-25 16:08:01] Script started
+[2024-09-25 16:08:01] User authenticated: antton1
+[2024-09-25 16:08:01] User ID: 2
+[2024-09-25 16:08:01] Number of routes found for user: 0
+[2024-09-25 16:08:01] Number of routes fetched: 0
+[2024-09-25 16:08:01] Script ended
+[2024-09-25 16:08:20] Script started
+[2024-09-25 16:08:20] User authenticated: antton
+[2024-09-25 16:08:20] User ID: 1
+[2024-09-25 16:08:20] Number of routes found for user: 2
+[2024-09-25 16:08:20] Number of routes fetched: 2
+[2024-09-25 16:08:20] Script ended
+[2024-09-25 16:20:45] Script started
+[2024-09-25 16:20:45] User authenticated: antton
+[2024-09-25 16:20:45] User ID: 1
+[2024-09-25 16:20:45] Number of routes found for user: 2
+[2024-09-25 16:20:45] Number of routes fetched: 2
+[2024-09-25 16:20:45] Script ended
+[2024-09-25 16:21:23] Script started
+[2024-09-25 16:21:23] User authenticated: antton
+[2024-09-25 16:21:23] User ID: 1
+[2024-09-25 16:21:23] Number of routes found for user: 2
+[2024-09-25 16:21:23] Number of routes fetched: 2
+[2024-09-25 16:21:23] Script ended
+[2024-09-25 16:22:37] Script started
+[2024-09-25 16:22:37] User authenticated: antton
+[2024-09-25 16:22:37] User ID: 1
+[2024-09-25 16:22:37] Number of routes found for user: 2
+[2024-09-25 16:22:37] Number of routes fetched: 2
+[2024-09-25 16:22:37] Script ended
+[2024-09-25 16:22:43] Script started
+[2024-09-25 16:22:43] User authenticated: antton
+[2024-09-25 16:22:43] User ID: 1
+[2024-09-25 16:22:43] Number of routes found for user: 2
+[2024-09-25 16:22:43] Number of routes fetched: 2
+[2024-09-25 16:22:43] Script ended
+[2024-09-25 16:23:09] Script started
+[2024-09-25 16:23:09] User authenticated: antton
+[2024-09-25 16:23:09] User ID: 1
+[2024-09-25 16:23:09] Number of routes found for user: 2
+[2024-09-25 16:23:09] Number of routes fetched: 2
+[2024-09-25 16:23:09] Script ended
+[2024-09-25 16:23:24] Script started
+[2024-09-25 16:23:24] User authenticated: antton
+[2024-09-25 16:23:24] User ID: 1
+[2024-09-25 16:23:24] Number of routes found for user: 2
+[2024-09-25 16:23:24] Number of routes fetched: 2
+[2024-09-25 16:23:24] Script ended
+[2024-09-25 16:23:35] Script started
+[2024-09-25 16:23:35] User authenticated: antton
+[2024-09-25 16:23:35] User ID: 1
+[2024-09-25 16:23:35] Number of routes found for user: 2
+[2024-09-25 16:23:35] Number of routes fetched: 2
+[2024-09-25 16:23:35] Script ended
+[2024-09-25 16:23:45] Script started
+[2024-09-25 16:23:45] User authenticated: antton
+[2024-09-25 16:23:45] User ID: 1
+[2024-09-25 16:23:45] Number of routes found for user: 2
+[2024-09-25 16:23:45] Number of routes fetched: 2
+[2024-09-25 16:23:45] Script ended
+[2024-09-25 16:26:19] Script started
+[2024-09-25 16:26:19] User authenticated: antton
+[2024-09-25 16:26:19] User ID: 1
+[2024-09-25 16:26:19] Number of routes found for user: 2
+[2024-09-25 16:26:19] Number of routes fetched: 2
+[2024-09-25 16:26:19] Script ended
+[2024-09-25 16:26:36] Script started
+[2024-09-25 16:26:36] User authenticated: antton
+[2024-09-25 16:26:36] User ID: 1
+[2024-09-25 16:26:36] Number of routes found for user: 2
+[2024-09-25 16:26:36] Number of routes fetched: 2
+[2024-09-25 16:26:36] Script ended
+[2024-09-25 16:27:17] Script started
+[2024-09-25 16:27:17] User authenticated: antton
+[2024-09-25 16:27:17] User ID: 1
+[2024-09-25 16:27:17] Number of routes found for user: 2
+[2024-09-25 16:27:17] Number of routes fetched: 2
+[2024-09-25 16:27:17] Script ended
+[2024-09-25 16:27:19] Script started
+[2024-09-25 16:27:19] User authenticated: antton
+[2024-09-25 16:27:19] User ID: 1
+[2024-09-25 16:27:19] Number of routes found for user: 2
+[2024-09-25 16:27:19] Number of routes fetched: 2
+[2024-09-25 16:27:19] Script ended
+[2024-09-25 16:27:26] Script started
+[2024-09-25 16:27:26] User authenticated: antton
+[2024-09-25 16:27:26] User ID: 1
+[2024-09-25 16:27:26] Number of routes found for user: 2
+[2024-09-25 16:27:26] Number of routes fetched: 2
+[2024-09-25 16:27:26] Script ended
+[2024-09-25 16:27:42] Script started
+[2024-09-25 16:27:42] User authenticated: antton
+[2024-09-25 16:27:42] User ID: 1
+[2024-09-25 16:27:42] Number of routes found for user: 2
+[2024-09-25 16:27:42] Number of routes fetched: 2
+[2024-09-25 16:27:42] Script ended
+[2024-09-25 16:27:42] Favorite routes script started
+[2024-09-25 16:27:42] User authenticated: antton
+[2024-09-25 16:27:42] User ID: 1
+[2024-09-25 16:27:42] Number of favorite routes fetched: 1
+[2024-09-25 16:27:42] Favorite routes script ended
+[2024-09-25 16:29:10] Script started
+[2024-09-25 16:29:10] User authenticated: antton
+[2024-09-25 16:29:10] User ID: 1
+[2024-09-25 16:29:10] Number of routes found for user: 2
+[2024-09-25 16:29:10] Number of routes fetched: 2
+[2024-09-25 16:29:10] Script ended
+[2024-09-25 16:29:10] Favorite routes script started
+[2024-09-25 16:29:10] User authenticated: antton
+[2024-09-25 16:29:10] User ID: 1
+[2024-09-25 16:29:11] Number of favorite routes fetched: 1
+[2024-09-25 16:29:11] Favorite routes script ended
+[2024-09-25 16:29:13] Script started
+[2024-09-25 16:29:13] User authenticated: antton
+[2024-09-25 16:29:13] User ID: 1
+[2024-09-25 16:29:13] Number of routes found for user: 2
+[2024-09-25 16:29:13] Number of routes fetched: 2
+[2024-09-25 16:29:13] Script ended
+[2024-09-25 16:29:13] Favorite routes script started
+[2024-09-25 16:29:13] User authenticated: antton
+[2024-09-25 16:29:13] User ID: 1
+[2024-09-25 16:29:13] Number of favorite routes fetched: 1
+[2024-09-25 16:29:13] Favorite routes script ended
+[2024-09-25 16:29:28] Favorite routes script started
+[2024-09-25 16:29:28] User authenticated: antton
+[2024-09-25 16:29:28] User ID: 1
+[2024-09-25 16:29:28] Number of favorite routes fetched: 1
+[2024-09-25 16:29:28] Favorite routes script ended
+[2024-09-25 16:29:28] Script started
+[2024-09-25 16:29:28] User authenticated: antton
+[2024-09-25 16:29:28] User ID: 1
+[2024-09-25 16:29:28] Number of routes found for user: 2
+[2024-09-25 16:29:28] Number of routes fetched: 2
+[2024-09-25 16:29:28] Script ended
+[2024-09-25 16:30:29] Script started
+[2024-09-25 16:30:29] User authenticated: antton
+[2024-09-25 16:30:29] User ID: 1
+[2024-09-25 16:30:29] Number of routes found for user: 2
+[2024-09-25 16:30:29] Number of routes fetched: 2
+[2024-09-25 16:30:29] Script ended
+[2024-09-25 16:30:29] Favorite routes script started
+[2024-09-25 16:30:29] User authenticated: antton
+[2024-09-25 16:30:29] User ID: 1
+[2024-09-25 16:30:29] Number of favorite routes fetched: 1
+[2024-09-25 16:30:29] Favorite routes script ended
+[2024-09-25 16:30:29] Completed routes script started
+[2024-09-25 16:30:29] User authenticated: antton
+[2024-09-25 16:30:29] User ID: 1
+[2024-09-25 16:30:29] Number of completed routes fetched: 1
+[2024-09-25 16:30:29] Completed routes script ended
+[2024-09-25 16:33:40] Completed routes script started
+[2024-09-25 16:33:40] User authenticated: antton
+[2024-09-25 16:33:40] User ID: 1
+[2024-09-25 16:33:40] Number of completed routes fetched: 1
+[2024-09-25 16:33:40] Completed routes script ended
+[2024-09-25 16:33:40] Script started
+[2024-09-25 16:33:40] User authenticated: antton
+[2024-09-25 16:33:40] User ID: 1
+[2024-09-25 16:33:40] Number of routes found for user: 2
+[2024-09-25 16:33:40] Number of routes fetched: 2
+[2024-09-25 16:33:40] Script ended
+[2024-09-25 16:33:40] Favorite routes script started
+[2024-09-25 16:33:40] User authenticated: antton
+[2024-09-25 16:33:40] User ID: 1
+[2024-09-25 16:33:40] Number of favorite routes fetched: 1
+[2024-09-25 16:33:40] Favorite routes script ended
+[2024-09-25 16:34:57] Completed routes script started
+[2024-09-25 16:34:57] User authenticated: antton
+[2024-09-25 16:34:57] User ID: 1
+[2024-09-25 16:34:57] Number of completed routes fetched: 1
+[2024-09-25 16:34:57] Completed routes script ended
+[2024-09-25 16:34:57] Script started
+[2024-09-25 16:34:57] User authenticated: antton
+[2024-09-25 16:34:57] User ID: 1
+[2024-09-25 16:34:57] Number of routes found for user: 2
+[2024-09-25 16:34:58] Number of routes fetched: 2
+[2024-09-25 16:34:58] Script ended
+[2024-09-25 16:34:58] Favorite routes script started
+[2024-09-25 16:34:58] User authenticated: antton
+[2024-09-25 16:34:58] User ID: 1
+[2024-09-25 16:34:58] Number of favorite routes fetched: 1
+[2024-09-25 16:34:58] Favorite routes script ended
+[2024-09-25 16:35:28] Completed routes script started
+[2024-09-25 16:35:28] User authenticated: antton
+[2024-09-25 16:35:28] User ID: 1
+[2024-09-25 16:35:28] Number of completed routes fetched: 1
+[2024-09-25 16:35:28] Completed routes script ended
+[2024-09-25 16:35:28] Script started
+[2024-09-25 16:35:28] User authenticated: antton
+[2024-09-25 16:35:28] User ID: 1
+[2024-09-25 16:35:28] Number of routes found for user: 2
+[2024-09-25 16:35:28] Number of routes fetched: 2
+[2024-09-25 16:35:28] Script ended
+[2024-09-25 16:35:28] Favorite routes script started
+[2024-09-25 16:35:28] User authenticated: antton
+[2024-09-25 16:35:28] User ID: 1
+[2024-09-25 16:35:28] Number of favorite routes fetched: 1
+[2024-09-25 16:35:28] Favorite routes script ended
+[2024-09-25 16:35:47] Completed routes script started
+[2024-09-25 16:35:47] User authenticated: antton
+[2024-09-25 16:35:47] User ID: 1
+[2024-09-25 16:35:47] Number of completed routes fetched: 1
+[2024-09-25 16:35:47] Completed routes script ended
+[2024-09-25 16:35:47] Favorite routes script started
+[2024-09-25 16:35:47] User authenticated: antton
+[2024-09-25 16:35:47] User ID: 1
+[2024-09-25 16:35:48] Number of favorite routes fetched: 1
+[2024-09-25 16:35:48] Favorite routes script ended
+[2024-09-25 16:35:48] Script started
+[2024-09-25 16:35:48] User authenticated: antton
+[2024-09-25 16:35:48] User ID: 1
+[2024-09-25 16:35:48] Number of routes found for user: 2
+[2024-09-25 16:35:48] Number of routes fetched: 2
+[2024-09-25 16:35:48] Script ended
+[2024-09-25 16:40:08] Completed routes script started
+[2024-09-25 16:40:08] User authenticated: antton1
+[2024-09-25 16:40:08] User ID: 2
+[2024-09-25 16:40:08] Number of completed routes fetched: 0
+[2024-09-25 16:40:08] Completed routes script ended
+[2024-09-25 16:40:08] Script started
+[2024-09-25 16:40:08] User authenticated: antton1
+[2024-09-25 16:40:08] User ID: 2
+[2024-09-25 16:40:08] Number of routes found for user: 0
+[2024-09-25 16:40:08] Number of routes fetched: 0
+[2024-09-25 16:40:08] Script ended
+[2024-09-25 16:40:08] Favorite routes script started
+[2024-09-25 16:40:08] User authenticated: antton1
+[2024-09-25 16:40:08] User ID: 2
+[2024-09-25 16:40:08] Number of favorite routes fetched: 0
+[2024-09-25 16:40:08] Favorite routes script ended
+[2024-09-25 16:43:19] Completed routes script started
+[2024-09-25 16:43:19] User authenticated: antton
+[2024-09-25 16:43:19] User ID: 1
+[2024-09-25 16:43:19] Number of completed routes fetched: 1
+[2024-09-25 16:43:19] Completed routes script ended
+[2024-09-25 16:43:19] Script started
+[2024-09-25 16:43:19] User authenticated: antton
+[2024-09-25 16:43:19] User ID: 1
+[2024-09-25 16:43:19] Number of routes found for user: 2
+[2024-09-25 16:43:19] Number of routes fetched: 2
+[2024-09-25 16:43:19] Script ended
+[2024-09-25 16:43:19] Favorite routes script started
+[2024-09-25 16:43:19] User authenticated: antton
+[2024-09-25 16:43:19] User ID: 1
+[2024-09-25 16:43:19] Number of favorite routes fetched: 1
+[2024-09-25 16:43:19] Favorite routes script ended
+[2024-09-25 16:43:22] Completed routes script started
+[2024-09-25 16:43:22] User authenticated: antton
+[2024-09-25 16:43:22] User ID: 1
+[2024-09-25 16:43:22] Number of completed routes fetched: 1
+[2024-09-25 16:43:22] Completed routes script ended
+[2024-09-25 16:43:22] Script started
+[2024-09-25 16:43:22] User authenticated: antton
+[2024-09-25 16:43:22] User ID: 1
+[2024-09-25 16:43:22] Number of routes found for user: 2
+[2024-09-25 16:43:22] Number of routes fetched: 2
+[2024-09-25 16:43:22] Script ended
+[2024-09-25 16:43:22] Favorite routes script started
+[2024-09-25 16:43:22] User authenticated: antton
+[2024-09-25 16:43:22] User ID: 1
+[2024-09-25 16:43:22] Number of favorite routes fetched: 1
+[2024-09-25 16:43:22] Favorite routes script ended
