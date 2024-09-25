@@ -10,32 +10,37 @@ $(document).ready(function() {
 
     function loadUserLists() {
         $.ajax({
-            url: 'paginasespecializadas/skitouring/user_lists_handler.php?action=getLists',
+            url: '../usuario/javascript/user_lists_handler.php?action=getLists',
             type: 'GET',
             dataType: 'json',
             success: function(lists) {
                 const listsContainer = $('#userLists');
                 listsContainer.empty();
 
-                lists.forEach(function(list) {
-                    const listItem = $('<div class="list-item mb-3">')
-                        .append($('<h3>').text(list.list_name))
-                        .append($('<button class="btn btn-primary btn-sm view-routes">').text('Ver Rutas')
-                            .click(function() {
-                                viewListRoutes(list.id, list.list_name);
-                            }));
-                    listsContainer.append(listItem);
-                });
+                if (lists.length === 0) {
+                    listsContainer.append('<p>No tienes listas creadas aún.</p>');
+                } else {
+                    lists.forEach(function(list) {
+                        const listItem = $('<div class="list-item mb-3">')
+                            .append($('<h3>').text(list.list_name))
+                            .append($('<button class="btn btn-primary btn-sm view-routes">').text('Ver Rutas')
+                                .click(function() {
+                                    viewListRoutes(list.id, list.list_name);
+                                }));
+                        listsContainer.append(listItem);
+                    });
+                }
             },
             error: function(xhr, status, error) {
                 console.error("Error al cargar las listas:", error);
+                $('#userLists').append('<p>Error al cargar las listas. Por favor, intenta de nuevo más tarde.</p>');
             }
         });
     }
 
     function viewListRoutes(listId, listName) {
         $.ajax({
-            url: 'paginasespecializadas/skitouring/user_lists_handler.php?action=getListRoutes&list_id=' + listId,
+            url: '../usuario/javascript/user_lists_handler.php?action=getListRoutes&list_id=' + listId,
             type: 'GET',
             dataType: 'json',
             success: function(routes) {
@@ -64,13 +69,14 @@ $(document).ready(function() {
             },
             error: function(xhr, status, error) {
                 console.error("Error al cargar las rutas de la lista:", error);
+                alert('Error al cargar las rutas de la lista. Por favor, intenta de nuevo.');
             }
         });
     }
 
     function removeRouteFromList(listId, routeId, listItem) {
         $.ajax({
-            url: 'paginasespecializadas/skitouring/user_lists_handler.php?action=removeRouteFromList',
+            url: '../usuario/javascript/user_lists_handler.php?action=removeRouteFromList',
             type: 'POST',
             data: { list_id: listId, route_id: routeId },
             dataType: 'json',
@@ -86,25 +92,28 @@ $(document).ready(function() {
             },
             error: function(xhr, status, error) {
                 console.error("Error al quitar la ruta de la lista:", error);
+                alert('Error al quitar la ruta de la lista. Por favor, intenta de nuevo.');
             }
         });
     }
 
     function createNewList(listName) {
         $.ajax({
-            url: 'paginasespecializadas/skitouring/user_lists_handler.php?action=createList',
+            url: '../usuario/javascript/user_lists_handler.php?action=createList',
             type: 'POST',
             data: { list_name: listName },
             dataType: 'json',
             success: function(response) {
                 if (response.success) {
                     loadUserLists();
+                    alert('Lista creada con éxito.');
                 } else {
-                    alert('Error al crear la lista.');
+                    alert('Error al crear la lista: ' + (response.error || 'Ocurrió un error desconocido.'));
                 }
             },
             error: function(xhr, status, error) {
                 console.error("Error al crear la lista:", error);
+                alert('Error al crear la lista. Por favor, intenta de nuevo.');
             }
         });
     }
