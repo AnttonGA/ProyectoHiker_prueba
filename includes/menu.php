@@ -58,17 +58,7 @@
         if (isset($_SESSION['usuario'])) {
           // Si la sesión está iniciada, mostrar nombre de usuario y menú desplegable
           echo '
-            <li class="nav-item dropdown">
-              <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" role="button" data-bs-toggle="dropdown" aria-expanded="false">' . $_SESSION['usuario'] . '</a>
-              <ul class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
-                <li><a class="dropdown-item" href="' . root_path('paginasespecializadas/Usuario/my_account.php') . '">My account</a></li>
-                <li><a class="dropdown-item" href="#">Configuration</a></li>
-                <li><a class="dropdown-item" href="' . root_path('paginasespecializadas/Usuario/subir_ruta.html') . '">Upload your route</a></li>
-                <li><hr class="dropdown-divider"></li>
-                <li><a class="dropdown-item" href="' . root_path('cerrar_sesion.php?return_url=' . urlencode($_SERVER['REQUEST_URI'])) . '">Cerrar sesión</a></li>
-              </ul>
-            </li>
-          ';
+            <li class="nav-item"><a class="nav-link" href="' . root_path('paginasespecializadas/Usuario/my_account.php') . '">' . $_SESSION['usuario'] . '</a>';
           // Mostrar opciones adicionales para el rol de administrador
           if (isset($_SESSION['rol']) && $_SESSION['rol'] == 'A') {
             echo '<li class="nav-item"><a class="nav-link" href="' . root_path('paginasespecializadas/Admin/admin_dashboard.php') . '">Admin Dashboard</a></li>';

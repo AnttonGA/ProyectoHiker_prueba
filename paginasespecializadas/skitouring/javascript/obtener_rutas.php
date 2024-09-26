@@ -51,7 +51,7 @@ set_exception_handler(function($e) {
 try {
     debug_log("About to require connection files");
     require_once '../../inicio_sesion/conexion.php';
-    require_once '../../inicio_sesion/config.php';  // Incluye config.php para obtener BASE_URL
+    require_once '../../inicio_sesion/config.php'; 
     debug_log("Connection files included");
 
     // Verificar conexión con la base de datos

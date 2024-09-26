@@ -389,3 +389,52 @@
 [2024-09-25 16:58:51] [DEBUG] Respuesta enviada: {"success":false,"error":"Invalid interaction type: map_interaction"}
 [2024-09-25 16:58:53] [DEBUG] Transacción completada exitosamente
 [2024-09-25 16:58:53] [DEBUG] Respuesta enviada: {"success":true,"messages":[]}
+[2024-09-25 17:28:45] [DEBUG] Transacción completada exitosamente
+[2024-09-25 17:28:45] [DEBUG] Respuesta enviada: {"success":true,"isCompleted":false,"isFavorite":false}
+[2024-09-25 17:28:45] [DEBUG] Transacción completada exitosamente
+[2024-09-25 17:28:45] [DEBUG] Respuesta enviada: {"success":true,"isCompleted":false,"isFavorite":false}
+[2024-09-25 17:28:45] [DEBUG] Transacción completada exitosamente
+[2024-09-25 17:28:45] [DEBUG] Respuesta enviada: {"success":true,"messages":[]}
+[2024-09-25 17:28:46] [DEBUG] Respuesta enviada: {"success":false,"error":"Invalid interaction type: map_interaction"}
+[2024-09-25 17:28:47] [DEBUG] Transacción completada exitosamente
+[2024-09-25 17:28:47] [DEBUG] Respuesta enviada: {"success":true,"messages":[]}
+[2024-09-25 17:28:53] [DEBUG] Transacción completada exitosamente
+[2024-09-25 17:28:53] [DEBUG] Respuesta enviada: {"success":true,"messages":[]}
+[2024-09-25 17:29:04] [DEBUG] Transacción completada exitosamente
+[2024-09-25 17:29:04] [DEBUG] Respuesta enviada: {"success":true,"messages":[]}
+[2024-09-25 21:39:08] [DEBUG] Transacción completada exitosamente
+[2024-09-25 21:39:08] [DEBUG] Respuesta enviada: {"success":true,"isCompleted":false,"isFavorite":false}
+[2024-09-25 21:39:08] [DEBUG] Transacción completada exitosamente
+[2024-09-25 21:39:08] [DEBUG] Respuesta enviada: {"success":true,"isCompleted":false,"isFavorite":false}
+[2024-09-25 21:39:08] [DEBUG] Transacción completada exitosamente
+[2024-09-25 21:39:08] [DEBUG] Respuesta enviada: {"success":true,"messages":[]}
+[2024-09-25 21:39:08] [DEBUG] Respuesta enviada: {"success":false,"error":"Invalid interaction type: map_interaction"}
+[2024-09-25 21:39:10] [DEBUG] Transacción completada exitosamente
+[2024-09-25 21:39:10] [DEBUG] Respuesta enviada: {"success":true,"messages":[]}
+[2024-09-25 21:46:19] [DEBUG] Transacción completada exitosamente
+[2024-09-25 21:46:19] [DEBUG] Respuesta enviada: {"success":true,"isCompleted":true,"isFavorite":true}
+[2024-09-25 21:46:19] [DEBUG] Transacción completada exitosamente
+[2024-09-25 21:46:19] [DEBUG] Respuesta enviada: {"success":true,"isCompleted":true,"isFavorite":true}
+[2024-09-25 21:46:19] [DEBUG] Transacción completada exitosamente
+[2024-09-25 21:46:19] [DEBUG] Respuesta enviada: {"success":true,"messages":[]}
+[2024-09-25 21:46:19] [DEBUG] Respuesta enviada: {"success":false,"error":"Invalid interaction type: map_interaction"}
+[2024-09-25 21:46:22] [DEBUG] Transacción completada exitosamente
+[2024-09-25 21:46:22] [DEBUG] Respuesta enviada: {"success":true,"messages":[]}
+[2024-09-26 16:16:09] [DEBUG] Transacción completada exitosamente
+[2024-09-26 16:16:09] [DEBUG] Respuesta enviada: {"success":true,"isCompleted":true,"isFavorite":true}
+[2024-09-26 16:16:09] [DEBUG] Transacción completada exitosamente
+[2024-09-26 16:16:09] [DEBUG] Respuesta enviada: {"success":true,"isCompleted":true,"isFavorite":true}
+[2024-09-26 16:16:09] [DEBUG] Transacción completada exitosamente
+[2024-09-26 16:16:09] [DEBUG] Respuesta enviada: {"success":true,"messages":[]}
+[2024-09-26 16:16:10] [DEBUG] Respuesta enviada: {"success":false,"error":"Invalid interaction type: map_interaction"}
+[2024-09-26 16:16:10] [DEBUG] Transacción completada exitosamente
+[2024-09-26 16:16:10] [DEBUG] Respuesta enviada: {"success":true,"messages":[]}
+[2024-09-26 16:20:20] [DEBUG] Transacción completada exitosamente
+[2024-09-26 16:20:20] [DEBUG] Respuesta enviada: {"success":true,"isCompleted":true,"isFavorite":true}
+[2024-09-26 16:20:20] [DEBUG] Transacción completada exitosamente
+[2024-09-26 16:20:20] [DEBUG] Respuesta enviada: {"success":true,"isCompleted":true,"isFavorite":true}
+[2024-09-26 16:20:20] [DEBUG] Transacción completada exitosamente
+[2024-09-26 16:20:20] [DEBUG] Respuesta enviada: {"success":true,"messages":[]}
+[2024-09-26 16:20:20] [DEBUG] Respuesta enviada: {"success":false,"error":"Invalid interaction type: map_interaction"}
+[2024-09-26 16:20:21] [DEBUG] Transacción completada exitosamente
+[2024-09-26 16:20:21] [DEBUG] Respuesta enviada: {"success":true,"messages":[]}
