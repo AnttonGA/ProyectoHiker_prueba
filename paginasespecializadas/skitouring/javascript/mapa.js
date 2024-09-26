@@ -5,7 +5,7 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   const idParam = new URLSearchParams(window.location.search).get('id');
-  let map, markers, allRoutes = [];
+  let map, routeMarkers, shelterMarkers, allRoutes = [], shelterLayer;
 
   function initMap(lat, lng, zoom) {
     map = L.map('map').setView([lat, lng], zoom);
@@ -16,14 +16,21 @@ document.addEventListener('DOMContentLoaded', function() {
 
     L.control.fullscreen().addTo(map);
 
-    markers = L.markerClusterGroup({
+    routeMarkers = L.markerClusterGroup({
       disableClusteringAtZoom: 12,
       spiderfyOnMaxZoom: true,
       showCoverageOnHover: false,
       zoomToBoundsOnClick: true
     });
 
-    map.addLayer(markers);
+    shelterMarkers = L.markerClusterGroup({
+      disableClusteringAtZoom: 12,
+      spiderfyOnMaxZoom: true,
+      showCoverageOnHover: false,
+      zoomToBoundsOnClick: true
+    });
+
+    map.addLayer(routeMarkers);
     
     cargarRutas();
   }
@@ -101,7 +108,7 @@ document.addEventListener('DOMContentLoaded', function() {
       });
 
       ruta.marker = marker;
-      markers.addLayer(marker);
+      routeMarkers.addLayer(marker);
     });
   }
 
@@ -127,10 +134,79 @@ document.addEventListener('DOMContentLoaded', function() {
     }).addTo(map);
   }
 
-  window.cargarRutas = cargarRutas;
-  window.mostrarMarcadorInicio = mostrarMarcadorInicio;
+  // Shelter related functions
+  function loadShelters(selectedType) {
+    fetch('javascript/pyrenees.geojson')
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('Error loading the GeoJSON file');
+        }
+        return response.json();
+      })
+      .then(data => {
+        if (shelterLayer) {
+          map.removeLayer(shelterLayer);
+          shelterMarkers.clearLayers();
+        }
+        shelterLayer = L.geoJSON(data, {
+          filter: function(feature) {
+            return selectedType === 'all' || feature.properties.type_hebergement.toLowerCase() === selectedType.toLowerCase();
+          },
+          pointToLayer: function(feature, latlng) {
+            var fillColor = getShelterColor(feature.properties.type_hebergement.toLowerCase());
+            return L.circleMarker(latlng, {
+              radius: 8,
+              fillColor: fillColor,
+              color: "#000",
+              weight: 1,
+              opacity: 1,
+              fillOpacity: 0.8
+            }).bindPopup(createShelterPopup(feature.properties));
+          }
+        });
+        shelterMarkers.addLayer(shelterLayer);
+        map.addLayer(shelterMarkers);
+      })
+      .catch(error => {
+        console.error('Error loading the GeoJSON file:', error);
+      });
+  }
 
+  function getShelterColor(type) {
+    switch (type) {
+      case 'cabane ouverte': return '#337DFF';
+      case 'cabane fermee': return '#FF5733';
+      case 'cabane ouverte mais ocupee par le berger l ete': return '#FFA500';
+      case 'orri toue abri en pierre': return '#FFFF00';
+      case 'refuge garde l ete partie hivernal': return '#00FF00';
+      case 'refuge garde toute l annee': return '#FF1493';
+      case 'ruine': return '#8C8C8C';
+      default: return '#198754';
+    }
+  }
+
+  function createShelterPopup(props) {
+    return `
+      <div class="card border-0">
+        <div class="card-header bg-primary text-dark">
+          <h5 class="card-title">${props.name || 'N/A'}</h5>
+        </div>
+        <div class="card-body">
+          <p class="card-text"><b>Region:</b> ${props.region || 'N/A'}</p>
+          <p class="card-text"><b>Altitude:</b> ${props.altitude || 'N/A'}</p>
+          <p class="card-text"><b>Capacity (summer):</b> ${props.cap_ete || 'N/A'}</p>
+          <p class="card-text"><b>Capacity (winter):</b> ${props.cap_hiver || 'N/A'}</p>
+          <a href="${props.url}" class="btn btn-primary text-dark" target="_blank">More info</a>
+        </div>
+      </div>`;
+  }
+
+  // Event Listeners
   document.getElementById('filterButton').addEventListener('click', filtrarYMostrarRutas);
+  document.getElementById('aplicarFiltro').addEventListener('click', function() {
+    var selectedType = document.getElementById('filtroRefugio').value;
+    loadShelters(selectedType);
+  });
 
   function filtrarYMostrarRutas() {
     const difficultyFilter = document.getElementById('difficultyFilter').value.toLowerCase();
@@ -138,7 +214,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const maxDuration = parseInt(document.getElementById('maxDuration').value) || Infinity;
     const activityFilters = Array.from(document.querySelectorAll('#activityFilter input:checked')).map(input => input.value);
 
-    markers.clearLayers();
+    routeMarkers.clearLayers();
 
     allRoutes.forEach(ruta => {
       if (ruta.loadedLayer && map.hasLayer(ruta.loadedLayer)) {
@@ -171,7 +247,7 @@ document.addEventListener('DOMContentLoaded', function() {
         `;
         ruta.marker.bindPopup(popupContent);
       }
-      markers.addLayer(ruta.marker);
+      routeMarkers.addLayer(ruta.marker);
     });
   }
 });

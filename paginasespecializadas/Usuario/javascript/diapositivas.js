@@ -8,7 +8,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
             if (isFirstVisit) {
                 // En la primera visita, mostrar las primeras 4 diapositivas
-                diapositivasAMostrar = data.slice(0, 4);
+                diapositivasAMostrar = data.slice(0, 6);
                 localStorage.setItem('hasVisitedBefore', 'true');
             } else {
                 // En visitas posteriores, seleccionar 4 diapositivas aleatorias

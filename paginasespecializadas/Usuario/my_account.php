@@ -227,13 +227,16 @@ $username = htmlspecialchars($_SESSION['usuario']);
                 </div>
             </div>
             <div class="tab-pane fade" id="lists" role="tabpanel" aria-labelledby="lists-tab">
+                <h2 class="mb-4">Mis Listas</h2>
                 <div id="userLists">
                     <!-- Las listas del usuario se cargarán aquí -->
                 </div>
-                <button class="btn btn-primary mt-3" id="createListBtn">Crear Nueva Lista</button>
+                <br> 
+                <button class="btn btn-primary" id="createListBtn">Crear Nueva Lista</button>
             </div>
         </div>
     </div>
+
 
     <!-- Modal para ver rutas de una lista -->
     <div class="modal fade" id="listRoutesModal" tabindex="-1" aria-labelledby="listRoutesModalLabel" aria-hidden="true">
@@ -249,6 +252,27 @@ $username = htmlspecialchars($_SESSION['usuario']);
             </div>
         </div>
     </div>
+
+            <!-- Modal para crear nueva lista -->
+        <div class="modal fade" id="createListModal" tabindex="-1" aria-labelledby="createListModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="createListModalLabel">Crear Nueva Lista</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="createListForm">
+                            <div class="mb-3">
+                                <label for="listName" class="form-label">Nombre de la lista:</label>
+                                <input type="text" class="form-control" id="listName" required>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Crear Lista</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
 
     <!-- Footer -->
     <div id="footer"></div>

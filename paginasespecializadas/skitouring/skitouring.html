@@ -31,214 +31,134 @@
     </div>
   </div>
 
-  <ul class="nav nav-tabs" id="myTab" role="tablist">
-  <li class="nav-item" role="presentation">
-    <button class="nav-link active" id="inicio-sesion-tab" data-bs-toggle="tab" data-bs-target="#inicio-sesion" type="button" role="tab" aria-controls="inicio-sesion" aria-selected="true">Map</button>
-  </li>
-  <li class="nav-item" role="presentation">
-    <button class="nav-link" id="registro-tab" data-bs-toggle="tab" data-bs-target="#registro" type="button" role="tab" aria-controls="registro" aria-selected="false">List</button>
-  </li>
-</ul>
-  <!-- Contenido de las pestañas -->
-  <div class="tab-content mb-4">
-    <!-- Pestaña de Inicio de Sesión -->
-    <div class="tab-pane fade show active" id="inicio-sesion" role="tabpanel" aria-labelledby="inicio-sesion-tab">
-    <!-- Routes Section -->
-<div class="container-fluid mt-4" id="routes">
-        <div class="row">
-          <!-- Filters Section (Left Column) -->
-          <div class="col-md-2" style="margin: 10px;">
-            <div class="mt-4 mb-4">
-              <div class="row">
-                <div class="col-12 mb-3">
-                  <label for="difficultyFilter" class="form-label">Difficulty:</label>
-                  <select class="form-select" id="difficultyFilter">
-                    <option value="">All</option>
-                    <option value="beginner">Beginner</option>
-                    <option value="intermediate">Intermediate</option>
-                    <option value="advanced">Advanced</option>
-                  </select>
-                </div>
-                <div class="col-12 mb-3">
-                  <label for="minElevation" class="form-label">Minimun Elevation Gain (m):</label>
-                  <input type="number" class="form-control" id="minElevation" min="0">
-                </div>
-                <div class="col-12 mb-3">
-                  <label for="maxDuration" class="form-label">Maximun Duration (hours):</label>
-                  <input type="number" class="form-control" id="maxDuration" min="0">
-                </div>
-              </div>
-              <div class="row mb-4">
-                <div class="col-12">
-                  <label class="form-label">Activities:</label>
-                  <div id="activityFilter" class="d-flex flex-wrap gap-3">
-                    <div class="form-check">
-                      <input class="form-check-input" type="checkbox" value="ski_touring" id="skiTouring">
-                      <label class="form-check-label" for="skiTouring">Ski Touring</label>
-                    </div>
-                    <div class="form-check">
-                      <input class="form-check-input" type="checkbox" value="cycle_touring" id="cycleTouring">
-                      <label class="form-check-label" for="cycleTouring">Cycle Touring</label>
-                    </div>
-                    <div class="form-check">
-                      <input class="form-check-input" type="checkbox" value="hiking" id="hiking">
-                      <label class="form-check-label" for="hiking">Hiking</label>
-                    </div>
-                    <div class="form-check">
-                      <input class="form-check-input" type="checkbox" value="mountaineering" id="mountaineering">
-                      <label class="form-check-label" for="mountaineering">Mountaineering</label>
-                    </div>
-                    <div class="form-check">
-                      <input class="form-check-input" type="checkbox" value="trail_running" id="trailRunning">
-                      <label class="form-check-label" for="trailRunning">Trail Running</label>
-                    </div>
-                    <div class="form-check">
-                      <input class="form-check-input" type="checkbox" value="rock_climbing" id="rockClimbing">
-                      <label class="form-check-label" for="rockClimbing">Rock Climbing</label>
-                    </div>
-                    <div class="form-check">
-                      <input class="form-check-input" type="checkbox" value="road_cycling" id="roadCycling">
-                      <label class="form-check-label" for="roadCycling">Road Cycling</label>
-                    </div>
-                    <div class="form-check">
-                      <input class="form-check-input" type="checkbox" value="btt" id="btt">
-                      <label class="form-check-label" for="btt">BTT</label>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div class="row">
-                <div class="col-md-12">
-                  <button class="btn btn-primary" id="filterButton">Apply Filters</button>
-                </div>
-              </div>
-            </div>
-          </div>
-          
-          <!-- Map Section (Right Column) -->
-          <div class="col-md-9" style="margin-left: 5px;">
-            <div id="map" style="height: 80vh; width: 100%; max-width: 100%;"></div>
-          </div>
-        </div>
+  <nav>
+    <ul class="nav nav-tabs" id="myTab" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="map-tab" data-bs-toggle="tab" data-bs-target="#map-content" type="button" role="tab" aria-controls="map-content" aria-selected="true">Map</button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="list-tab" data-bs-toggle="tab" data-bs-target="#list-content" type="button" role="tab" aria-controls="list-content" aria-selected="false">List</button>
+        </li>
+    </ul>
+</nav>
 
-        <!-- Carousel Section -->
+<div class="tab-content" id="myTabContent">
+    <!-- Map Tab -->
+    <div class="tab-pane fade show active" id="map-content" role="tabpanel" aria-labelledby="map-tab">
+        <div id="routes" class="container-fluid mt-4">
+            <div class="row">
+                <div class="col-md-3">
+                    <!-- Filters -->
+                    <div class="mb-3">
+                        <label for="filtroRefugio" class="form-label">Filter by shelter type:</label>
+                        <select id="filtroRefugio" class="form-select">
+                            <option value="all" selected>All types</option>
+                            <option value="cabane ouverte">Open shelter</option>
+                            <option value="cabane fermee">Closed shelter</option>
+                            <option value="cabane ouverte mais ocupee par le berger l ete">Open shelter occupied by shepherd in summer</option>
+                            <option value="orri toue abri en pierre">Stone shelter</option>
+                            <option value="refuge garde l ete partie hivernal">Summer-manned refuge, partly open in winter</option>
+                            <option value="refuge garde toute l annee">Year-round manned refuge</option>
+                            <option value="ruine">Ruin</option>
+                            <option value="none">None</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <button id="aplicarFiltro" class="btn btn-primary w-100">Apply Shelter Filter</button>
+                    </div>
+                    <div class="mb-3">
+                        <label for="difficultyFilter" class="form-label">Difficulty:</label>
+                        <select id="difficultyFilter" class="form-select">
+                            <option value="all">All</option>
+                            <option value="beginner">Beginner</option>
+                            <option value="intermediate">Intermediate</option>
+                            <option value="advanced">Advanced</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="minElevation" class="form-label">Minimum Elevation Gain (m):</label>
+                        <input type="number" id="minElevation" class="form-control" min="0">
+                    </div>
+                    <div class="mb-3">
+                        <label for="maxDuration" class="form-label">Maximum Duration (hours):</label>
+                        <input type="number" id="maxDuration" class="form-control" min="0">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Activities:</label>
+                        <div id="activityFilter" class="d-flex flex-wrap gap-3">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" value="ski_touring" id="skiTouring">
+                                <label class="form-check-label" for="skiTouring">Ski Touring</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" value="cycle_touring" id="cycleTouring">
+                                <label class="form-check-label" for="cycleTouring">Cycle Touring</label>
+                            </div>
+                            <!-- Add more activities as needed -->
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <button id="filterButton" class="btn btn-primary w-100">Apply Route Filters</button>
+                    </div>
+                </div>
+                <div class="col-md-9">
+                    <div id="map" style="height: 80vh; width: 100%;"></div>
+                </div>
+            </div>
+        </div>
+        
         <div class="row mt-4">
-          <div class="col-12">
-            <h3>SUGGESTED ADVENTURES</h3>
-            <div class="swiper-container">
-              <div id="cards-container" class="swiper-wrapper">
-              </div>
+            <div class="col-12">
+                <h3>SUGGESTED ADVENTURES</h3>
+                <div class="swiper-container">
+                    <div id="cards-container" class="swiper-wrapper">
+                        <!-- Cards will be populated here by JavaScript -->
+                    </div>
+                </div>
             </div>
-          </div>
         </div>
-      </div>
     </div>
 
-    <!-- Pestaña de Registro -->
-    <div class="tab-pane fade" id="registro" role="tabpanel" aria-labelledby="registro-tab">
-    
-    <style>
-        .card {
-            height: 100%;
-        }
-        .card-img-top {
-            height: 200px;
-            object-fit: cover;
-        }
-    </style>
-    <div class="container-fluid">
-        <h1 class="my-4">Rutas de Aventura</h1>
-        
-        <form id="filter-form" class="mb-4">
-            <div class="row g-3">
-                <div class="col-sm-6 col-md-3">
-                    <select id="filter-difficulty" class="form-select">
-                        <option value="all">Todas las dificultades</option>
-                        <option value="beginner">Principiante</option>
-                        <option value="intermediate">Intermedio</option>
-                        <option value="advanced">Avanzado</option>
-                    </select>
-                </div>
-
-                <div class="col-sm-6 col-md-3">
-                  <input type="number" id="filter-min-elevation" class="form-control" placeholder="Minimun elevation gain (m)">
-              </div>
-
-              <div class="col-sm-6 col-md-3">
-                  <input type="number" id="filter-max-duration" class="form-control" placeholder="Max duration (hours)">
-              </div>
-
-                <div class="row mt-3 mb-4">
-                  <div class="col-12">
-                      <label class="form-label">Activities:</label>
-                      <div id="activityFilter" class="d-flex flex-wrap gap-3">
-                          <div class="form-check">
-                              <input class="form-check-input" type="checkbox" value="ski_touring" id="skiTouring">
-                              <label class="form-check-label" for="skiTouring">Ski Touring</label>
-                          </div>
-                          <div class="form-check">
-                              <input class="form-check-input" type="checkbox" value="cycle_touring" id="cycleTouring">
-                              <label class="form-check-label" for="cycleTouring">Cycle Touring</label>
-                          </div>
-                          <div class="form-check">
-                              <input class="form-check-input" type="checkbox" value="hiking" id="hiking">
-                              <label class="form-check-label" for="hiking">Hiking</label>
-                          </div>
-                          <div class="form-check">
-                              <input class="form-check-input" type="checkbox" value="mountaineering" id="mountaineering">
-                              <label class="form-check-label" for="mountaineering">Mountaineering</label>
-                          </div>
-                          <div class="form-check">
-                              <input class="form-check-input" type="checkbox" value="trail_running" id="trailRunning">
-                              <label class="form-check-label" for="trailRunning">Trail Running</label>
-                          </div>
-                          <div class="form-check">
-                              <input class="form-check-input" type="checkbox" value="rock_climbing" id="rockClimbing">
-                              <label class="form-check-label" for="rockClimbing">Rock Climbing</label>
-                          </div>
-                          <div class="form-check">
-                              <input class="form-check-input" type="checkbox" value="road_cycling" id="roadCycling">
-                              <label class="form-check-label" for="roadCycling">Road Cycling</label>
-                          </div>
-                          <div class="form-check">
-                              <input class="form-check-input" type="checkbox" value="btt" id="btt">
-                              <label class="form-check-label" for="btt">BTT</label>
-                          </div>
-                      </div>
-                  </div>
-              </div>
-              
+    <!-- List Tab -->
+    <div class="tab-pane fade" id="list-content" role="tabpanel" aria-labelledby="list-tab">
+        <div class="container-fluid">
+            <h2 class="my-4">Adventure Routes</h2>
+            
+            <!-- Filter form -->
+            <form id="filter-form" class="row g-3 mb-4">
+                <!-- Add your filter inputs here -->
                 <div class="col-12">
-                    <button type="submit" class="btn btn-primary">Aplicar filtros</button>
+                    <button type="submit" class="btn btn-primary">Apply Filters</button>
+                </div>
+            </form>
+
+            <div class="row mt-4">
+                <div class="col-12">
+                    <h3>SUGGESTED ADVENTURES</h3>
+                    <div class="swiper-container">
+                        <div id="cards-container2" class="swiper-wrapper">
+                            <!-- Cards will be populated here by JavaScript -->
+                        </div>
+                    </div>
                 </div>
             </div>
-        </form>
 
-         <!-- Carousel Section -->
-         <div class="row mt-4">
-          <div class="col-12">
-            <h3>SUGGESTED ADVENTURES</h3>
-            <div class="swiper-container">
-              <div id="cards-container2" class="swiper-wrapper">
-              </div>
+            <h3>ADVENTURES LIST</h3>
+            <div id="routes-list" class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 row-cols-xl-5 g-4">
+                <!-- Routes will be populated here by JavaScript -->
             </div>
-          </div>
+
+            <div id="pagination" class="my-4 text-center">
+                <!-- Pagination will be populated here by JavaScript -->
+            </div>
         </div>
-        <h3>ADVENTUREs LIST</h3>
-        <div id="routes-list" class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 row-cols-xl-5 g-4"></div>
-        
-        <div id="pagination" class="my-4 text-center"></div>
     </div>
-    
-  </div>
+</div>
 
+<div id="footer">
+    <!-- Your footer content -->
+</div>
 
-
-
-
-
-<!-- Footer -->
-  <div id="footer"></div>
 
 
   <!-- Scripts al final del body para mejorar el rendimiento de carga -->
