@@ -120,18 +120,48 @@
     </div>
 
     <!-- List Tab -->
-    <div class="tab-pane fade" id="list-content" role="tabpanel" aria-labelledby="list-tab">
+    <div id="list-content" class="tab-pane fade" role="tabpanel" aria-labelledby="list-tab">
         <div class="container-fluid">
             <h2 class="my-4">Adventure Routes</h2>
             
             <!-- Filter form -->
             <form id="filter-form" class="row g-3 mb-4">
-                <!-- Add your filter inputs here -->
+                <div class="col-md-3">
+                    <label for="filter-difficulty" class="form-label">Difficulty:</label>
+                    <select id="filter-difficulty" class="form-select">
+                        <option value="all">All</option>
+                        <option value="beginner">Beginner</option>
+                        <option value="intermediate">Intermediate</option>
+                        <option value="advanced">Advanced</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label for="filter-min-elevation" class="form-label">Minimum Elevation Gain (m):</label>
+                    <input type="number" class="form-control" id="filter-min-elevation" min="0">
+                </div>
+                <div class="col-md-3">
+                    <label for="filter-max-duration" class="form-label">Maximum Duration (hours):</label>
+                    <input type="number" class="form-control" id="filter-max-duration" min="0">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Activities:</label>
+                    <div id="activityFilter" class="d-flex flex-wrap gap-3">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" value="ski_touring" id="skiTouring">
+                            <label class="form-check-label" for="skiTouring">Ski Touring</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" value="cycle_touring" id="cycleTouring">
+                            <label class="form-check-label" for="cycleTouring">Cycle Touring</label>
+                        </div>
+                        <!-- Add more activities as needed -->
+                    </div>
+                </div>
                 <div class="col-12">
                     <button type="submit" class="btn btn-primary">Apply Filters</button>
                 </div>
             </form>
-
+    
             <div class="row mt-4">
                 <div class="col-12">
                     <h3>SUGGESTED ADVENTURES</h3>
@@ -142,18 +172,17 @@
                     </div>
                 </div>
             </div>
-
-            <h3>ADVENTURES LIST</h3>
+    
+            <h3 class="mt-4">ADVENTURES LIST</h3>
             <div id="routes-list" class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 row-cols-xl-5 g-4">
                 <!-- Routes will be populated here by JavaScript -->
             </div>
-
+    
             <div id="pagination" class="my-4 text-center">
                 <!-- Pagination will be populated here by JavaScript -->
             </div>
         </div>
     </div>
-</div>
 
 <div id="footer">
     <!-- Your footer content -->

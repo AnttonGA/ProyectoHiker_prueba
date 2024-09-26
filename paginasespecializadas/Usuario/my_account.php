@@ -169,8 +169,8 @@ $username = htmlspecialchars($_SESSION['usuario']);
                 <div id="advancedOptions" class="d-none position-fixed" style="background-color: #f8f9fa; padding: 15px; border: 1px solid #ddd; border-radius: 5px;">
                     <ul class="list-group">
                         <li class="list-group-item"><a href="#">Ajustes</a></li>
-                        <li class="list-group-item"><a href="#">Perfil</a></li>
-                        <li class="list-group-item"><a href="logout.php">Cerrar sesión</a></li>
+                        <li class="list-group-item"><a href="#">Sobre mi</a></li>
+                        <li class="list-group-item"><a href="../../cerrar_sesion.php">Cerrar sesión</a></li>
                     </ul>
                 </div>
             </li>

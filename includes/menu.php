@@ -50,9 +50,6 @@
         <li class="nav-item">
           <a class="nav-link" href="<?php echo root_path('paginasespecializadas/skitouring/skitouring.html'); ?>">Map</a>
         </li>
-        <li class="nav-item">
-          <a class="nav-link" href="<?php echo root_path('paginasespecializadas/huts/huts.html'); ?>">Huts</a>
-        </li>
         <!-- PHP para mostrar "Log in" o nombre de usuario dependiendo de la sesión -->
         <?php
         if (isset($_SESSION['usuario'])) {
