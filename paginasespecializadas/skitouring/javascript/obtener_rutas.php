@@ -63,8 +63,8 @@ try {
     $id = isset($_GET['id']) ? filter_input(INPUT_GET, 'id', FILTER_SANITIZE_NUMBER_INT) : null;
 
     // Función modificada para construir las URLs de las imágenes
-    function getImageUrl($baseUrl, $path) {
-        return rtrim($baseUrl, '/') . '/' . ltrim($path, '/');
+    function getImageUrl($baseUrl, $rutaCarpeta, $filename) {
+        return rtrim($baseUrl, '/') . '/paginasespecializadas/skitouring/rutas_st/' . $rutaCarpeta . '/' . $filename;
     }
 
     debug_log("About to execute query");
@@ -96,8 +96,9 @@ try {
         $ruta['imagenes'] = $ruta['imagenes'] ? explode(',', $ruta['imagenes']) : [];
         
         // Actualizar las rutas de las imágenes
-        $ruta['imagenes'] = array_map(function($path) use ($ruta) {
-            return getImageUrl(BASE_URL, $path);
+        $ruta['imagenes'] = array_map(function($imagePath) use ($ruta) {
+            $filename = basename($imagePath);
+            return getImageUrl(BASE_URL, $ruta['ruta_carpeta'], $filename);
         }, $ruta['imagenes']);
         
         debug_log("Single route processed");
@@ -124,8 +125,9 @@ try {
             $row['imagenes'] = $row['imagenes'] ? explode(',', $row['imagenes']) : [];
             
             // Actualizar las rutas de las imágenes
-            $row['imagenes'] = array_map(function($path) use ($row) {
-                return getImageUrl(BASE_URL, $path);
+            $row['imagenes'] = array_map(function($imagePath) use ($row) {
+                $filename = basename($imagePath);
+                return getImageUrl(BASE_URL, $row['ruta_carpeta'], $filename);
             }, $row['imagenes']);
             
             $rutas[] = $row;
