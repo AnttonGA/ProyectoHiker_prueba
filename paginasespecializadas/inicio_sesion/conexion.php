@@ -20,10 +20,10 @@ if ($tipoConexion == 'local') {
     $password = "";
     $dbname = "peliculas";
 } else {
-    $servername = "zpj83vpaccjer3ah.chr7pe7iynqr.eu-west-1.rds.amazonaws.com";
-    $username = "nbjr9xh3zmf4a6pn";
-    $password = "hnpacxfc79grmpa6";
-    $dbname = "rp5mw8s5obgkn97d";
+    $servername = "e7qyahb3d90mletd.chr7pe7iynqr.eu-west-1.rds.amazonaws.com";
+    $username = "fuhxc1b2puo3h9vr";
+    $password = "yoprvznbepboa7kd";
+    $dbname = "nk42rz9xshfxdbkd";
 }
 
 // Intentamos conectar a la base de datos
