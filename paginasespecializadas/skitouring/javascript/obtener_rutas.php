@@ -65,7 +65,7 @@ try {
 
     // Función para construir las URLs de las imágenes
     function getImageUrl($baseUrl, $path) {
-        return rtrim($baseUrl, '/') . '../../../paginasespecializadas/skitouring/' . ltrim($path, '/');
+        return rtrim($baseUrl, '/') . '../../../../../paginasespecializadas/skitouring/' . ltrim($path, '/');
     }
 
     debug_log("About to execute query");
