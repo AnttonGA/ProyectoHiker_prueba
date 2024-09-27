@@ -19,7 +19,7 @@ document.addEventListener("DOMContentLoaded", function() {
     // Determinar la ruta base dependiendo del archivo HTML actual para el servidor 2 para el local 4
     const pathArray = window.location.pathname.split('/');
     let basePath = '';
-    for (let i = 0; i < pathArray.length - 4; i++) {
+    for (let i = 0; i < pathArray.length - 2; i++) {
         basePath += '../';
     }
     basePath += 'includes/';
