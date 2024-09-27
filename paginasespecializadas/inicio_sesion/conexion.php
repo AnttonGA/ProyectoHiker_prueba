@@ -20,10 +20,10 @@ if ($tipoConexion == 'local') {
     $password = "";
     $dbname = "peliculas";
 } else {
-    $servername = "sql300.infinityfree.com";
-    $username = "if0_36636778";
-    $password = "lU9fyeWRZGh";
-    $dbname = "if0_36636778_peliculas";
+    $servername = "zpj83vpaccjer3ah.chr7pe7iynqr.eu-west-1.rds.amazonaws.com:3306";
+    $username = "nbjr9xh3zmf4a6pn";
+    $password = "hnpacxfc79grmpa6";
+    $dbname = "rp5mw8s5obgkn97d";
 }
 
 // Intentamos conectar a la base de datos
