@@ -20,7 +20,7 @@ if ($tipoConexion == 'local') {
     $password = "";
     $dbname = "peliculas";
 } else {
-    $servername = "zpj83vpaccjer3ah.chr7pe7iynqr.eu-west-1.rds.amazonaws.com:3306";
+    $servername = "zpj83vpaccjer3ah.chr7pe7iynqr.eu-west-1.rds.amazonaws.com";
     $username = "nbjr9xh3zmf4a6pn";
     $password = "hnpacxfc79grmpa6";
     $dbname = "rp5mw8s5obgkn97d";
