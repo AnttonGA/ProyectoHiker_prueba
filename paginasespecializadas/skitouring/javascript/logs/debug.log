@@ -512,3 +512,12 @@
 [2024-09-26 18:18:02] [DEBUG] Respuesta enviada: {"success":false,"error":"Invalid interaction type: map_interaction"}
 [2024-09-26 18:18:05] [DEBUG] Transacción completada exitosamente
 [2024-09-26 18:18:05] [DEBUG] Respuesta enviada: {"success":true,"messages":[]}
+[2024-09-27 09:57:25] [DEBUG] Transacción completada exitosamente
+[2024-09-27 09:57:25] [DEBUG] Respuesta enviada: {"success":true,"isCompleted":true,"isFavorite":true}
+[2024-09-27 09:57:25] [DEBUG] Transacción completada exitosamente
+[2024-09-27 09:57:25] [DEBUG] Respuesta enviada: {"success":true,"isCompleted":true,"isFavorite":true}
+[2024-09-27 09:57:25] [DEBUG] Transacción completada exitosamente
+[2024-09-27 09:57:25] [DEBUG] Respuesta enviada: {"success":true,"messages":[]}
+[2024-09-27 09:57:26] [DEBUG] Respuesta enviada: {"success":false,"error":"Invalid interaction type: map_interaction"}
+[2024-09-27 09:57:42] [DEBUG] Transacción completada exitosamente
+[2024-09-27 09:57:42] [DEBUG] Respuesta enviada: {"success":true,"messages":[]}

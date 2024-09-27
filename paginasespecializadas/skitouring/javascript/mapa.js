@@ -207,29 +207,28 @@ document.addEventListener('DOMContentLoaded', function() {
     var selectedType = document.getElementById('filtroRefugio').value;
     loadShelters(selectedType);
   });
-
   function filtrarYMostrarRutas() {
     const difficultyFilter = document.getElementById('difficultyFilter').value.toLowerCase();
     const minElevation = parseInt(document.getElementById('minElevation').value) || 0;
     const maxDuration = parseInt(document.getElementById('maxDuration').value) || Infinity;
     const activityFilters = Array.from(document.querySelectorAll('#activityFilter input:checked')).map(input => input.value);
-
+  
     routeMarkers.clearLayers();
-
+  
     allRoutes.forEach(ruta => {
       if (ruta.loadedLayer && map.hasLayer(ruta.loadedLayer)) {
         map.removeLayer(ruta.loadedLayer);
         ruta.loadedLayer = null;
       }
     });
-
+  
     const rutasFiltradas = allRoutes.filter(ruta => 
-      (!difficultyFilter || ruta.difficulty.toLowerCase() === difficultyFilter) &&
+      (difficultyFilter === 'all' || ruta.difficulty.toLowerCase() === difficultyFilter) &&
       (parseFloat(ruta.elevation) >= minElevation) &&
       (parseFloat(ruta.duration) <= maxDuration) &&
       (activityFilters.length === 0 || activityFilters.includes(ruta.tipo_ruta))
     );
-
+  
     rutasFiltradas.forEach(ruta => {
       if (!ruta.marker) {
         const startIcon = createBootstrapIcon('bi-geo-alt-fill');

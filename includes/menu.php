@@ -54,15 +54,19 @@
         <?php
         if (isset($_SESSION['usuario'])) {
           // Si la sesión está iniciada, mostrar nombre de usuario y menú desplegable
-          echo '
-            <li class="nav-item"><a class="nav-link" href="' . root_path('paginasespecializadas/Usuario/my_account.php') . '">' . $_SESSION['usuario'] . '</a>';
+          echo '<li class="nav-item"><a class="nav-link" href="' . root_path('paginasespecializadas/Usuario/my_account.php') . '">' . $_SESSION['usuario'] . '</a>';
           // Mostrar opciones adicionales para el rol de administrador
-          if (isset($_SESSION['rol']) && $_SESSION['rol'] == 'A') {
-            echo '<li class="nav-item"><a class="nav-link" href="' . root_path('paginasespecializadas/Admin/admin_dashboard.php') . '">Admin Dashboard</a></li>';
-          }
         } else {
           // Si la sesión no está iniciada, mostrar "Log in"
           echo '<li class="nav-item"><a class="nav-link" href="' . root_path('paginasespecializadas/inicio_sesion/gestion.php') . '">Log in</a></li>';
+        }
+        if (isset($_SESSION['usuario'])) {
+          // Si la sesión está iniciada, mostrar nombre de usuario y menú desplegable
+          echo '<li class="nav-item"><a class="nav-link" href="' . root_path('paginasespecializadas/Usuario/subir_ruta.html') . '"> upload route</a>';
+          // Mostrar opciones adicionales para el rol de administrador
+        }
+        if (isset($_SESSION['rol']) && $_SESSION['rol'] == 'A') {
+          echo '<li class="nav-item"><a class="nav-link" href="' . root_path('paginasespecializadas/Admin/admin_dashboard.php') . '">Admin Dashboard</a></li>';
         }
         ?>
       </ul>
