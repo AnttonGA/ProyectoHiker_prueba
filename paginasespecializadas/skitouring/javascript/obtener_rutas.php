@@ -3,7 +3,6 @@ ob_start();
 
 // Función para registrar mensajes de depuración
 function debug_log($message) {
-    // Verificar si el archivo de log es escribible
     if (is_writable(__DIR__)) {
         file_put_contents(__DIR__ . '/debug.log', date('[Y-m-d H:i:s] ') . $message . "\n", FILE_APPEND);
     } else {
@@ -63,9 +62,9 @@ try {
     // Obtener y filtrar ID
     $id = isset($_GET['id']) ? filter_input(INPUT_GET, 'id', FILTER_SANITIZE_NUMBER_INT) : null;
 
-    // Función para construir las URLs de las imágenes
+    // Función modificada para construir las URLs de las imágenes
     function getImageUrl($baseUrl, $path) {
-        return rtrim($baseUrl, '/') . '/paginasespecializadas/skitouring/' . ltrim($path, '/');
+        return rtrim($baseUrl, '/') . '/' . ltrim($path, '/');
     }
 
     debug_log("About to execute query");
