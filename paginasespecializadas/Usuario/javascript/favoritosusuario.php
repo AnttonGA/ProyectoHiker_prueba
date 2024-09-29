@@ -64,7 +64,7 @@ try {
     while ($row = $result->fetch_assoc()) {
         $row['imagenes'] = $row['imagenes'] ? explode(',', $row['imagenes']) : [];
         $row['imagenes'] = array_map(function($path) {
-            return rtrim(BASE_URL, '/') . '/paginasespecializadas/skitouring/' . ltrim($path, '/');
+            return rtrim(BASE_URL, '/') . '../../../../../paginasespecializadas/skitouring/' . ltrim($path, '/');
         }, $row['imagenes']);
         $routes[] = $row;
     }
