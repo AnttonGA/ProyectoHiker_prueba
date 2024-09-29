@@ -14,10 +14,10 @@ require_once 'config.php';
 // Incluir la conexión a la base de datos u otras configuraciones necesarias
 require_once 'conexion.php';
 
-// Variables para mensajes de error
-$emailErr = "";
-$usuarioErr = "";
-$message = "";
+// Variables para mensajes de error y éxito
+$alertMessage = "";
+$alertType = "";
+
 // Variables para los campos de entrada
 $email = "";
 $usuario = "";
@@ -31,11 +31,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     // Validación y limpieza del campo de correo electrónico
     if (empty($_POST['mail'])) {
-        $emailErr = "Email es requerido";
+        $alertMessage = "Email es requerido";
+        $alertType = "danger";
     } else {
         $email = mysqli_real_escape_string($conn, $_POST['mail']);
         if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-            $emailErr = "Formato de email inválido";
+            $alertMessage = "Formato de email inválido";
+            $alertType = "danger";
         } else {
             // Validación y consulta para verificar si el correo y usuario existen
             $usuario = mysqli_real_escape_string($conn, $_POST['usuario']);
@@ -48,7 +50,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             if ($stmt->num_rows > 0) {
                 $usuarioExiste = true;
             } else {
-                $emailErr = "El correo electrónico y/o usuario no están registrados o no coinciden";
+                $alertMessage = "El correo electrónico y/o usuario no están registrados o no coinciden";
+                $alertType = "danger";
             }
 
             $stmt->close();
@@ -89,9 +92,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $mail->Body = "Hola $usuario,<br><br>Haz clic en el siguiente enlace para restablecer tu contraseña:<br><a href='$resetLink'>Restablecer contraseña</a>";
 
             $mail->send();
-            echo 'El mensaje ha sido enviado con instrucciones para restablecer tu contraseña.';
+            $alertMessage = 'El mensaje ha sido enviado con instrucciones para restablecer tu contraseña.';
+            $alertType = 'success';
         } catch (Exception $e) {
-            echo "No se pudo enviar el mensaje. Error de Mailer: {$mail->ErrorInfo}";
+            $alertMessage = "No se pudo enviar el mensaje. Error de Mailer: {$mail->ErrorInfo}";
+            $alertType = 'danger';
         }
     }
 }
@@ -105,45 +110,77 @@ mysqli_close($conn);
     <meta charset="UTF-8">
     <title>Recuperar contraseña</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet">
-  <!-- Estilos adicionales -->
-  <link href="../estilos2.css" rel="stylesheet">
+    <!-- Estilos adicionales -->
+    <link href="../estilos2.css" rel="stylesheet">
 </head>
 <body>
     <!-- Navbar -->
-  <div id="menu"></div>
+    <div id="menu"></div>
 
-<!-- Header -->
-<div class="header">
-  <div class="overlay">
-    <h1>TU CUENTA</h1>
-  </div>
-</div>
-<h2 class="text-center mb-4">Recuperar contraseña</h2>
-    <div class="container">
+    <!-- Header -->
+    <div class="header">
+        <div class="overlay">
+            <h1>TU CUENTA</h1>
+        </div>
+    </div>
+
+    <div class="container mt-5">
+        <h2 class="text-center mb-4">Recuperar contraseña</h2>
+
+        <?php if (!empty($alertMessage)): ?>
+            <div class="alert alert-<?php echo $alertType; ?> alert-dismissible fade show" role="alert">
+                <?php echo $alertMessage; ?>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        <?php endif; ?>
+
         <form method="post" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>" class="needs-validation" novalidate>
             <div class="mb-3">
                 <label for="mail" class="form-label">Email asociado a tu cuenta:</label>
-                <input type="email" name="mail" id="mail" class="form-control">
-                <span class="error-message"><?php echo $emailErr; ?></span>
+                <input type="email" name="mail" id="mail" class="form-control" required>
+                <div class="invalid-feedback">
+                    Por favor, introduce un email válido.
+                </div>
             </div>
             <div class="mb-3">
                 <label for="usuario" class="form-label">Usuario:</label>
-                <input type="text" name="usuario" id="usuario" class="form-control">
-                <span class="error-message"><?php echo $usuarioErr; ?></span>
+                <input type="text" name="usuario" id="usuario" class="form-control" required>
+                <div class="invalid-feedback">
+                    Por favor, introduce tu nombre de usuario.
+                </div>
             </div>
             <button type="submit" class="btn btn-primary">Recuperar Contraseña</button>
         </form>
     </div>
 
-
     <!-- Footer -->
-  <div id="footer"></div>
+    <div id="footer"></div>
 
-<!-- Enlace a Bootstrap 5.2.3 JS (opcional, para funcionalidades avanzadas) -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
-<script src="../../include.js"></script>
+    <!-- Enlace a Bootstrap 5.2.3 JS (opcional, para funcionalidades avanzadas) -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="../../include.js"></script>
 
+    <script>
+    // Example starter JavaScript for disabling form submissions if there are invalid fields
+    (function () {
+      'use strict'
 
+      // Fetch all the forms we want to apply custom Bootstrap validation styles to
+      var forms = document.querySelectorAll('.needs-validation')
+
+      // Loop over them and prevent submission
+      Array.prototype.slice.call(forms)
+        .forEach(function (form) {
+          form.addEventListener('submit', function (event) {
+            if (!form.checkValidity()) {
+              event.preventDefault()
+              event.stopPropagation()
+            }
+
+            form.classList.add('was-validated')
+          }, false)
+        })
+    })()
+    </script>
 </body>
-
 </html>
