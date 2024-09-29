@@ -47,7 +47,7 @@ if ($numFilas > 0) {
 
     $response['success'] = true;
     $response['message'] = '¡Bienvenido! Has iniciado sesión correctamente.';
-    $response['redirect'] = root_path('paginasespecializadas/Usuario/my_account.php');
+    $response['redirect'] = root_path('../../paginasespecializadas/Usuario/my_account.php');
 } else {
     $response['message'] = 'El usuario o la contraseña son incorrectos. Por favor, verifica tus datos e intenta de nuevo.';
 }
