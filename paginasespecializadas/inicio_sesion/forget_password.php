@@ -85,7 +85,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
            // Contenido del correo
             $mail->isHTML(true);
             $mail->Subject = 'Recuperación de contraseña';
-            $resetLink = BASE_URL . "/paginasespecializadas/inicio_sesion/change_password.php?token=$token";
+            $resetLink = BASE_URL . "../paginasespecializadas/inicio_sesion/change_password.php?token=$token";
             $mail->Body = "Hola $usuario,<br><br>Haz clic en el siguiente enlace para restablecer tu contraseña:<br><a href='$resetLink'>Restablecer contraseña</a>";
 
             $mail->send();

@@ -170,7 +170,7 @@ if (empty($_POST['usuario'])) {
                 $mail->Subject = 'Verificación de correo electrónico';
                 
                 // Usar BASE_URL para construir el enlace de verificación
-                $verificationLink = BASE_URL . "paginasespecializadas/inicio_sesion/verificar.php?token=$token";
+                $verificationLink = BASE_URL . "../paginasespecializadas/inicio_sesion/verificar.php?token=$token";
                 $mail->Body = "Hola $nombre,<br><br>Por favor, haz clic en el siguiente enlace para verificar tu correo electrónico:<br><a href='$verificationLink'>Verificar correo</a>";
 
                 $mail->send();
