@@ -1,0 +1,42 @@
+# ── Credenciales y secretos — NUNCA subir ──────────────────────────────────
+.env
+àpi_key
+
+# ── Dependencias ────────────────────────────────────────────────────────────
+/vendor/
+
+# ── Logs, caché y temporales ─────────────────────────────────────────────────
+hiker_ai/logs/
+hiker_ai/cache/
+hiker_ai/temp/
+logs/
+*.log
+
+# ── Archivos de datos de rutas (GPX) — demasiado grandes para el repo ───────
+paginasespecializadas/skitouring/rutas_st/*/
+paginasespecializadas/huts/rutas_huts/*/
+paginasespecializadas/huts/rutas/
+*.gpx
+
+# ── Archivos temporales del proyecto ────────────────────────────────────────
+*.zip
+add_elevation_*.log
+osm_import.log
+import_*.log
+
+# ── Claude Code (session/task state) ────────────────────────────────────────
+hiker_ai/.claude/
+.claude/
+
+# ── Sistema operativo ────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+
+# ── IDEs ─────────────────────────────────────────────────────────────────────
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# ── PHP ──────────────────────────────────────────────────────────────────────
+*.cache

@@ -1,0 +1,268 @@
+/* ══════════════════════════════════════════════════════════════
+   RUTA.HTML — page-specific styles
+   (General styles live in ../estilos2.css)
+══════════════════════════════════════════════════════════════ */
+
+/* ── Hero ─────────────────────────────────────────────── */
+.ruta-hero {
+  background-image: url('../bannerski.jpg');
+  background-size: cover;
+  background-position: center;
+  min-height: 220px;
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+}
+.ruta-hero__overlay {
+  width: 100%;
+  padding: 28px 0 24px;
+  background: linear-gradient(to top, rgba(0,0,0,.75) 0%, rgba(0,0,0,.3) 100%);
+}
+.ruta-breadcrumb .breadcrumb-item a {
+  color: rgba(255,255,255,.75);
+  text-decoration: none;
+  font-size: .82rem;
+}
+.ruta-breadcrumb .breadcrumb-item a:hover { color: #fff; }
+.ruta-breadcrumb .breadcrumb-item.active { color: rgba(255,255,255,.55); font-size:.82rem; }
+.ruta-breadcrumb .breadcrumb-item + .breadcrumb-item::before { color: rgba(255,255,255,.4); }
+.ruta-hero__title {
+  color: #fff;
+  font-size: clamp(1.4rem, 3.5vw, 2.2rem);
+  font-weight: 800;
+  margin: 0;
+  line-height: 1.2;
+  text-shadow: 0 2px 8px rgba(0,0,0,.4);
+}
+.ruta-hero__badges { display: flex; gap: 8px; flex-wrap: wrap; }
+.ruta-badge {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: .72rem;
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: .3px;
+}
+.ruta-badge--activity { background: #0d6efd; } /* overridden by inline style */
+
+/* ── Map ──────────────────────────────────────────────── */
+.ruta-map {
+  height: 460px;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 20px rgba(0,0,0,.12);
+}
+@media (max-width: 576px) { .ruta-map { height: 300px; } }
+
+/* ── Generic section card ─────────────────────────────── */
+.ruta-card {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 10px rgba(0,0,0,.07);
+  overflow: hidden;
+}
+.ruta-card__header {
+  padding: 10px 16px;
+  background: #f8f9fa;
+  border-bottom: 1px solid #e9ecef;
+  font-size: .82rem;
+  font-weight: 700;
+  color: #495057;
+  text-transform: uppercase;
+  letter-spacing: .4px;
+}
+.ruta-card__body { padding: 16px; }
+
+/* ── Stats bar ────────────────────────────────────────── */
+.ruta-stats-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  background: #fff;
+  border-radius: 12px;
+  padding: 16px;
+  box-shadow: 0 2px 10px rgba(0,0,0,.07);
+}
+.ruta-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 1;
+  min-width: 80px;
+  text-align: center;
+  padding: 6px 8px;
+}
+.ruta-stat__icon {
+  font-size: 1.3rem;
+  color: #0d6efd;
+  margin-bottom: 2px;
+}
+.ruta-stat__value {
+  font-size: .9rem;
+  font-weight: 700;
+  color: #1a1a2e;
+  line-height: 1.2;
+}
+.ruta-stat__label {
+  font-size: .65rem;
+  color: #6c757d;
+  text-transform: uppercase;
+  letter-spacing: .4px;
+  margin-top: 2px;
+}
+
+/* Difficulty badges (also used in estilos2.css for cards) */
+.difficulty-badge {
+  display: inline-block;
+  padding: 2px 10px;
+  border-radius: 20px;
+  font-size: .72rem;
+  font-weight: 700;
+  color: #fff;
+}
+.diff--easy     { background: #28a745; }
+.diff--moderate { background: #fd7e14; }
+.diff--hard     { background: #dc3545; }
+
+/* ── Action bar ───────────────────────────────────────── */
+.ruta-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  background: #fff;
+  border-radius: 12px;
+  padding: 14px 16px;
+  box-shadow: 0 2px 10px rgba(0,0,0,.07);
+}
+.ruta-author {
+  font-size: .82rem;
+  color: #6c757d;
+  margin: 0;
+  flex-shrink: 0;
+}
+.ruta-author i { font-size: 1rem; margin-right: 4px; }
+.ruta-actions__btns {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-left: auto;
+}
+
+/* Make sure button global rule doesn't bleed in */
+.ruta-actions .btn,
+.ruta-actions__btns .btn {
+  white-space: nowrap;
+}
+
+/* ── Route info table ─────────────────────────────────── */
+.ruta-info-table td {
+  padding: 8px 14px;
+  vertical-align: middle;
+  font-size: .84rem;
+  border-bottom: 1px solid #f0f0f0;
+}
+.ruta-info-table tr:last-child td { border-bottom: none; }
+.ruta-info-table td:first-child {
+  color: #6c757d;
+  width: 46%;
+  white-space: nowrap;
+}
+.ruta-info-table td i { margin-right: 5px; }
+
+/* ── Gallery ──────────────────────────────────────────── */
+.ruta-gallery {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0;
+}
+.ruta-gallery .gallery-item {
+  position: relative;
+  aspect-ratio: 1;
+  overflow: hidden;
+  cursor: pointer;
+}
+.ruta-gallery .gallery-item:first-child:nth-last-child(1) {
+  grid-column: 1 / -1;
+  aspect-ratio: 16/9;
+}
+.ruta-gallery .gallery-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform .35s ease;
+}
+.ruta-gallery .gallery-item:hover img { transform: scale(1.06); }
+.gallery-item__zoom {
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,.35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity .25s;
+  color: #fff;
+  font-size: 1.6rem;
+}
+.gallery-item:hover .gallery-item__zoom { opacity: 1; }
+
+/* ── Lightbox ─────────────────────────────────────────── */
+.lightbox-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: rgba(0,0,0,.92);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: zoom-out;
+}
+.lightbox-overlay img {
+  max-width: 92vw;
+  max-height: 90vh;
+  object-fit: contain;
+  border-radius: 4px;
+  box-shadow: 0 8px 40px rgba(0,0,0,.5);
+}
+.lightbox-close {
+  position: fixed;
+  top: 16px;
+  right: 20px;
+  background: rgba(255,255,255,.15);
+  border: none;
+  border-radius: 50%;
+  width: 42px;
+  height: 42px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 1.1rem;
+  cursor: pointer;
+  z-index: 10000;
+  transition: background .2s;
+}
+.lightbox-close:hover { background: rgba(255,255,255,.3); }
+
+/* ── Elevation profile tweaks ─────────────────────────── */
+#elevation-profile {
+  min-height: 140px;
+}
+.elevation-control.leaflet-control {
+  background: rgba(255,255,255,.9);
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.15);
+}
+
+/* ── Responsive ───────────────────────────────────────── */
+@media (max-width: 767px) {
+  .ruta-stats-bar { gap: 6px; }
+  .ruta-stat { min-width: 60px; }
+  .ruta-stat__value { font-size: .8rem; }
+  .ruta-actions { flex-direction: column; align-items: flex-start; }
+  .ruta-actions__btns { margin-left: 0; }
+  .ruta-gallery { grid-template-columns: 1fr; }
+  .ruta-gallery .gallery-item { aspect-ratio: 16/9; }
+}

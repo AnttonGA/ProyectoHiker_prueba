@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Search Routes — Hiker</title>
+  <link rel="icon" type="image/svg+xml" href="../../favicon.svg">
+
+  <!-- Leaflet CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+  <link href="https://api.mapbox.com/mapbox.js/plugins/leaflet-fullscreen/v1.0.1/leaflet.fullscreen.css" rel="stylesheet" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.css" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.Default.css" />
+
+  <!-- Bootstrap + icons -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.10.0/font/bootstrap-icons.min.css" rel="stylesheet">
+
+  <!-- Swiper CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/swiper/swiper-bundle.min.css" />
+
+  <!-- Custom CSS -->
+  <link href="../estilos2.css" rel="stylesheet">
+</head>
+
+<!-- Navbar -->
+<div id="menu"></div>
+
+<body>
+
+  <!-- Header -->
+  <div class="header">
+    <div class="overlay">
+      <h1>FIND YOUR NEXT ADVENTURE</h1>
+    </div>
+  </div>
+
+  <!-- Tabs -->
+  <nav>
+    <ul class="nav nav-tabs" id="myTab" role="tablist">
+      <li class="nav-item" role="presentation">
+        <button class="nav-link active" id="map-tab"
+          data-bs-toggle="tab" data-bs-target="#map-content"
+          type="button" role="tab" aria-controls="map-content" aria-selected="true">
+          <i class="bi bi-map me-1"></i>Map
+        </button>
+      </li>
+      <li class="nav-item" role="presentation">
+        <button class="nav-link" id="list-tab"
+          data-bs-toggle="tab" data-bs-target="#list-content"
+          type="button" role="tab" aria-controls="list-content" aria-selected="false">
+          <i class="bi bi-grid me-1"></i>List
+        </button>
+      </li>
+    </ul>
+  </nav>
+
+  <div class="tab-content" id="myTabContent">
+
+    <!-- ══════════════════ MAP TAB ══════════════════ -->
+    <div class="tab-pane fade show active" id="map-content" role="tabpanel" aria-labelledby="map-tab">
+      <div class="container-fluid mt-3">
+        <div class="row">
+
+          <!-- Sidebar filters -->
+          <div class="col-md-3 col-lg-2">
+
+            <!-- Shelter -->
+            <div class="map-sidebar-section">
+              <h6 class="map-sidebar-title"><i class="bi bi-house-door"></i> Shelters</h6>
+              <select id="filtroRefugio" class="form-select form-select-sm mb-2">
+                <option value="none" selected>None</option>
+                <option value="cabane ouverte">Open shelter</option>
+                <option value="cabane fermee">Closed shelter</option>
+                <option value="cabane ouverte mais ocupee par le berger l ete">Open (shepherd in summer)</option>
+                <option value="orri toue abri en pierre">Stone shelter</option>
+                <option value="refuge garde l ete partie hivernal">Summer refuge / partial winter</option>
+                <option value="refuge garde toute l annee">Year-round manned refuge</option>
+                <option value="ruine">Ruin</option>
+                <option value="all">All types</option>
+              </select>
+              <button id="aplicarFiltro" class="btn btn-outline-secondary btn-sm w-100">Show shelters</button>
+            </div>
+
+            <hr class="my-2">
+
+            <!-- Route filters -->
+            <div class="map-sidebar-section">
+              <h6 class="map-sidebar-title"><i class="bi bi-funnel"></i> Route filters</h6>
+
+              <label for="difficultyFilter" class="form-label form-label-xs">Difficulty</label>
+              <select id="difficultyFilter" class="form-select form-select-sm mb-2">
+                <option value="all">All</option>
+                <option value="beginner">Easy</option>
+                <option value="intermediate">Moderate</option>
+                <option value="advanced">Hard</option>
+              </select>
+
+              <label for="minElevation" class="form-label form-label-xs">Min. elevation gain (m)</label>
+              <input type="number" id="minElevation" class="form-control form-control-sm mb-2" min="0" placeholder="0">
+
+              <label for="maxDuration" class="form-label form-label-xs">Max. duration (h)</label>
+              <input type="number" id="maxDuration" class="form-control form-control-sm mb-2" min="0" placeholder="∞">
+
+              <label for="maxDistance" class="form-label form-label-xs">Max. distance (km)</label>
+              <input type="number" id="maxDistance" class="form-control form-control-sm mb-2" min="0" placeholder="∞">
+            </div>
+
+            <!-- Activities -->
+            <div class="map-sidebar-section">
+              <h6 class="map-sidebar-title"><i class="bi bi-lightning"></i> Activity</h6>
+              <div id="mapActivityFilter" class="d-flex flex-column gap-1">
+                <div class="form-check form-check-sm">
+                  <input class="form-check-input" type="checkbox" value="hiking" id="mapHiking">
+                  <label class="form-check-label small" for="mapHiking">
+                    <span class="act-dot" style="background:#28a745"></span><i class="bi bi-person-walking"></i> Hiking
+                  </label>
+                </div>
+                <div class="form-check form-check-sm">
+                  <input class="form-check-input" type="checkbox" value="ski_touring" id="mapSki">
+                  <label class="form-check-label small" for="mapSki">
+                    <span class="act-dot" style="background:#0d6efd"></span><i class="bi bi-snow3"></i> Ski Touring
+                  </label>
+                </div>
+                <div class="form-check form-check-sm">
+                  <input class="form-check-input" type="checkbox" value="btt" id="mapMtb">
+                  <label class="form-check-label small" for="mapMtb">
+                    <span class="act-dot" style="background:#fd7e14"></span><i class="bi bi-bicycle"></i> MTB
+                  </label>
+                </div>
+                <div class="form-check form-check-sm">
+                  <input class="form-check-input" type="checkbox" value="cycle_touring" id="mapCycle">
+                  <label class="form-check-label small" for="mapCycle">
+                    <span class="act-dot" style="background:#6f42c1"></span><i class="bi bi-bicycle"></i> Cycle Touring
+                  </label>
+                </div>
+                <div class="form-check form-check-sm">
+                  <input class="form-check-input" type="checkbox" value="snowshoeing" id="mapSnow">
+                  <label class="form-check-label small" for="mapSnow">
+                    <span class="act-dot" style="background:#17a2b8"></span><i class="bi bi-snow"></i> Snowshoeing
+                  </label>
+                </div>
+                <div class="form-check form-check-sm">
+                  <input class="form-check-input" type="checkbox" value="climbing" id="mapClimb">
+                  <label class="form-check-label small" for="mapClimb">
+                    <span class="act-dot" style="background:#dc3545"></span><i class="bi bi-activity"></i> Climbing
+                  </label>
+                </div>
+                <div class="form-check form-check-sm">
+                  <input class="form-check-input" type="checkbox" value="via_ferrata" id="mapVf">
+                  <label class="form-check-label small" for="mapVf">
+                    <span class="act-dot" style="background:#e83e8c"></span><i class="bi bi-lightning-charge"></i> Via Ferrata
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            <div class="d-flex gap-2 mt-2 mb-3">
+              <button id="filterButton" class="btn btn-primary btn-sm flex-fill">Apply</button>
+              <button id="clearMapFilters" class="btn btn-outline-secondary btn-sm" title="Clear filters">✕</button>
+            </div>
+
+          </div><!-- /col sidebar -->
+
+          <!-- Map -->
+          <div class="col-md-9 col-lg-10">
+            <div id="map" style="height:80vh;width:100%;border-radius:10px;overflow:hidden;"></div>
+          </div>
+
+        </div><!-- /row -->
+      </div><!-- /container -->
+
+      <!-- Suggested routes carousel -->
+      <div class="container-fluid mt-4 mb-5">
+        <div class="d-flex align-items-center justify-content-between mb-3">
+          <h5 class="fw-bold mb-0"><i class="bi bi-stars me-2 text-warning"></i>SUGGESTED ADVENTURES</h5>
+          <small class="text-muted">Most popular routes</small>
+        </div>
+        <div class="swiper-container carousel-swiper" id="carousel-swiper">
+          <div id="cards-container" class="swiper-wrapper">
+            <!-- Populated by carrusel.js -->
+          </div>
+          <div class="swiper-button-next carousel-next"></div>
+          <div class="swiper-button-prev carousel-prev"></div>
+          <div class="swiper-pagination carousel-pagination"></div>
+        </div>
+      </div>
+
+    </div><!-- /map-content -->
+
+    <!-- ══════════════════ LIST TAB ══════════════════ -->
+    <div id="list-content" class="tab-pane fade" role="tabpanel" aria-labelledby="list-tab">
+      <div class="container-fluid py-4">
+
+        <!-- Filters form -->
+        <form id="filter-form" class="row g-3 mb-3 align-items-end">
+
+          <div class="col-6 col-sm-4 col-md-2">
+            <label for="filter-difficulty" class="form-label fw-semibold small">Difficulty</label>
+            <select id="filter-difficulty" class="form-select form-select-sm">
+              <option value="all">All</option>
+              <option value="beginner">Easy</option>
+              <option value="intermediate">Moderate</option>
+              <option value="advanced">Hard</option>
+            </select>
+          </div>
+
+          <div class="col-6 col-sm-4 col-md-2">
+            <label for="filter-min-elevation" class="form-label fw-semibold small">Min. elevation (m)</label>
+            <input type="number" class="form-control form-control-sm" id="filter-min-elevation" min="0" placeholder="0">
+          </div>
+
+          <div class="col-6 col-sm-4 col-md-2">
+            <label for="filter-max-distance" class="form-label fw-semibold small">Max. distance (km)</label>
+            <input type="number" class="form-control form-control-sm" id="filter-max-distance" min="0" placeholder="∞">
+          </div>
+
+          <div class="col-6 col-sm-4 col-md-2">
+            <label for="filter-max-duration" class="form-label fw-semibold small">Max. duration (h)</label>
+            <input type="number" class="form-control form-control-sm" id="filter-max-duration" min="0" placeholder="∞">
+          </div>
+
+          <div class="col-12 col-md-2 d-flex align-items-end gap-2">
+            <button type="submit" class="btn btn-primary btn-sm flex-fill">Filter</button>
+            <button type="button" id="btn-clear-filters" class="btn btn-outline-secondary btn-sm" title="Clear">✕</button>
+          </div>
+
+          <!-- Activity checkboxes -->
+          <div class="col-12">
+            <label class="form-label fw-semibold small d-block mb-2">Activity</label>
+            <div id="activityFilter" class="d-flex flex-wrap gap-3">
+              <div class="form-check form-check-inline">
+                <input class="form-check-input" type="checkbox" value="hiking" id="actHiking">
+                <label class="form-check-label small" for="actHiking"><i class="bi bi-person-walking"></i> Hiking</label>
+              </div>
+              <div class="form-check form-check-inline">
+                <input class="form-check-input" type="checkbox" value="ski_touring" id="actSki">
+                <label class="form-check-label small" for="actSki"><i class="bi bi-snow3"></i> Ski Touring</label>
+              </div>
+              <div class="form-check form-check-inline">
+                <input class="form-check-input" type="checkbox" value="btt" id="actMtb">
+                <label class="form-check-label small" for="actMtb"><i class="bi bi-bicycle"></i> MTB</label>
+              </div>
+              <div class="form-check form-check-inline">
+                <input class="form-check-input" type="checkbox" value="cycle_touring" id="actCycle">
+                <label class="form-check-label small" for="actCycle"><i class="bi bi-bicycle"></i> Cycle Touring</label>
+              </div>
+              <div class="form-check form-check-inline">
+                <input class="form-check-input" type="checkbox" value="snowshoeing" id="actSnow">
+                <label class="form-check-label small" for="actSnow"><i class="bi bi-snow"></i> Snowshoeing</label>
+              </div>
+              <div class="form-check form-check-inline">
+                <input class="form-check-input" type="checkbox" value="climbing" id="actClimb">
+                <label class="form-check-label small" for="actClimb"><i class="bi bi-activity"></i> Climbing</label>
+              </div>
+              <div class="form-check form-check-inline">
+                <input class="form-check-input" type="checkbox" value="via_ferrata" id="actVf">
+                <label class="form-check-label small" for="actVf"><i class="bi bi-lightning-charge"></i> Via Ferrata</label>
+              </div>
+            </div>
+          </div>
+
+        </form>
+
+        <!-- Search bar + count -->
+        <div class="routes-toolbar">
+          <div class="search-wrap">
+            <i class="bi bi-search"></i>
+            <input type="search" id="search-input" class="form-control form-control-sm"
+                   placeholder="Search by name or area...">
+          </div>
+          <span class="routes-count" id="routes-count"></span>
+        </div>
+
+        <!-- Cards grid -->
+        <div id="routes-list" class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4">
+          <!-- Populated by lista.js -->
+        </div>
+
+        <!-- Load more -->
+        <div id="load-more-wrap" style="display:none;">
+          <button id="btn-load-more" class="btn btn-outline-primary">
+            Load more routes <i class="bi bi-chevron-down"></i>
+          </button>
+        </div>
+
+      </div>
+    </div><!-- /list-content -->
+
+  </div><!-- /tab-content -->
+
+  <!-- Mobile FAB: switch between map & list -->
+  <div class="map-list-fab d-md-none">
+    <button class="fab-btn active" id="fab-map" onclick="switchTab('map')">
+      <i class="bi bi-map"></i><span>Map</span>
+    </button>
+    <button class="fab-btn" id="fab-list" onclick="switchTab('list')">
+      <i class="bi bi-grid"></i><span>List</span>
+    </button>
+  </div>
+
+  <div id="footer"></div>
+
+  <!-- ── Scripts ──────────────────────────────────────────── -->
+  <!-- Leaflet must load BEFORE mapa.js -->
+  <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/leaflet-gpx/gpx.min.js"></script>
+  <script src="https://api.mapbox.com/mapbox.js/plugins/leaflet-fullscreen/v1.0.1/Leaflet.fullscreen.min.js"></script>
+  <script src="https://unpkg.com/leaflet.markercluster@1.4.1/dist/leaflet.markercluster.js"></script>
+
+  <!-- Bootstrap -->
+  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.min.js"></script>
+
+  <!-- Swiper -->
+  <script src="https://unpkg.com/swiper/swiper-bundle.min.js"></script>
+
+  <!-- App scripts -->
+  <script src="javascript/mapa.js"></script>
+  <script src="javascript/carrusel.js"></script>
+  <script src="javascript/lista.js"></script>
+  <script src="../../include.js"></script>
+
+  <script>
+    // Mobile FAB tab switcher
+    function switchTab(target) {
+      const tabEl = document.getElementById(target + '-tab');
+      if (tabEl) bootstrap.Tab.getOrCreateInstance(tabEl).show();
+      document.querySelectorAll('.fab-btn').forEach(b => b.classList.remove('active'));
+      document.getElementById('fab-' + target)?.classList.add('active');
+    }
+    // Keep FAB in sync when tabs change via click
+    document.querySelectorAll('[data-bs-toggle="tab"]').forEach(tab => {
+      tab.addEventListener('shown.bs.tab', e => {
+        const target = e.target.id === 'map-tab' ? 'map' : 'list';
+        document.querySelectorAll('.fab-btn').forEach(b => b.classList.remove('active'));
+        document.getElementById('fab-' + target)?.classList.add('active');
+      });
+    });
+  </script>
+
+</body>
+</html>

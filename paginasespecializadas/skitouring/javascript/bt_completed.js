@@ -1,0 +1,105 @@
+document.addEventListener('DOMContentLoaded', function() {
+    const btnCompleted = document.getElementById('btn-completed');
+
+    if (btnCompleted) {
+        btnCompleted.addEventListener('click', function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const routeId = urlParams.get('id');
+
+            if (!routeId) {
+                console.error('Route ID not found');
+                return;
+            }
+
+            toggleCompleted(routeId, this);
+        });
+
+        // Verificar el estado inicial de completado
+        checkCompletedStatus();
+    }
+
+    function toggleCompleted(routeId, button) {
+        button.disabled = true;
+        button.classList.add('btn-loading');
+
+        fetch('javascript/interaction_tracker.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify([{ type: 'complete', routeId: routeId }]),
+            credentials: 'include'
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.success) {
+                const isCompleted = !button.classList.contains('btn-success');
+                updateButtonState(button, isCompleted);
+                showFeedback(button, isCompleted ? 'Marked as completed' : 'Marked as not completed', true);
+            } else {
+                throw new Error(data.error || 'Unknown error occurred');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showFeedback(button, error.message, false);
+        })
+        .finally(() => {
+            button.disabled = false;
+            button.classList.remove('btn-loading');
+        });
+    }
+
+    function updateButtonState(button, isCompleted) {
+        if (isCompleted) {
+            button.textContent = 'Completed';
+            button.classList.remove('btn-outline-success');
+            button.classList.add('btn-success');
+        } else {
+            button.textContent = 'Mark as Completed';
+            button.classList.remove('btn-success');
+            button.classList.add('btn-outline-success');
+        }
+    }
+
+    function checkCompletedStatus() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const routeId = urlParams.get('id');
+
+        fetch('javascript/interaction_tracker.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: 'check', routeId }),
+            credentials: 'include'
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                updateButtonState(btnCompleted, data.isCompleted);
+            }
+        })
+        .catch(error => console.error('Error checking completed status:', error));
+    }
+
+    function showFeedback(element, message, isSuccess) {
+        const feedbackSpan = document.createElement('span');
+        feedbackSpan.textContent = message;
+        feedbackSpan.className = `feedback-text ms-2 ${isSuccess ? 'text-success' : 'text-danger'}`;
+        
+        element.parentNode.insertBefore(feedbackSpan, element.nextSibling);
+
+        element.classList.add('animate-feedback');
+        setTimeout(() => {
+            element.classList.remove('animate-feedback');
+        }, 500);
+
+        setTimeout(() => {
+            feedbackSpan.remove();
+        }, 3000);
+    }
+});

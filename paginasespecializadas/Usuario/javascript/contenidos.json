@@ -1,0 +1,170 @@
+[
+    {
+      "titulo": "Explora Nuevas Rutas",
+      "descripcion": "Descubre senderos emocionantes y destinos ocultos cerca de ti.",
+      "colorFondo": "#4CAF50",
+      "tipografia": "'Roboto', sans-serif",
+      "enlace": "explorar.html"
+    },
+    {
+      "titulo": "Planifica tu Aventura",
+      "descripcion": "Crea itinerarios personalizados para tus próximos viajes.",
+      "colorFondo": "#2196F3",
+      "tipografia": "'Montserrat', sans-serif",
+      "enlace": "planificar.html"
+    },
+    {
+      "titulo": "Comparte tus Experiencias",
+      "descripcion": "Cuenta tus historias y comparte fotos de tus rutas favoritas.",
+      "colorFondo": "#FF9800",
+      "tipografia": "'Lato', sans-serif",
+      "enlace": "compartir.html"
+    },
+    {
+      "titulo": "Conecta con la Comunidad",
+      "descripcion": "Únete a grupos locales y participa en eventos de senderismo.",
+      "colorFondo": "#E91E63",
+      "tipografia": "'Open Sans', sans-serif",
+      "enlace": "comunidad.html"
+    },
+    {
+      "titulo": "Seguimiento en Tiempo Real",
+      "descripcion": "Registra tu progreso y comparte tu ubicación con amigos.",
+      "colorFondo": "#9C27B0",
+      "tipografia": "'Nunito', sans-serif",
+      "enlace": "seguimiento.html"
+    },
+    {
+      "titulo": "Descarga Mapas Offline",
+      "descripcion": "Accede a mapas detallados incluso sin conexión a internet.",
+      "colorFondo": "#00BCD4",
+      "tipografia": "'Poppins', sans-serif",
+      "enlace": "mapas-offline.html"
+    },
+    {
+      "titulo": "Consejos de Seguridad",
+      "descripcion": "Aprende sobre seguridad en senderos y prepárate para emergencias.",
+      "colorFondo": "#FF5722",
+      "tipografia": "'Merriweather', serif",
+      "enlace": "seguridad.html"
+    },
+    {
+      "titulo": "Desafíos Mensuales",
+      "descripcion": "Participa en retos de senderismo y gana insignias exclusivas.",
+      "colorFondo": "#795548",
+      "tipografia": "'Oswald', sans-serif",
+      "enlace": "desafios.html"
+    },
+    {
+      "titulo": "Análisis de Rendimiento",
+      "descripcion": "Revisa estadísticas detalladas de tus caminatas y mejora tu forma física.",
+      "colorFondo": "#607D8B",
+      "tipografia": "'Raleway', sans-serif",
+      "enlace": "analisis.html"
+    },
+    {
+      "titulo": "Guías de Naturaleza",
+      "descripcion": "Aprende sobre la flora y fauna local en tus rutas favoritas.",
+      "colorFondo": "#8BC34A",
+      "tipografia": "'Ubuntu', sans-serif",
+      "enlace": "guias-naturaleza.html"
+    },
+    {
+      "titulo": "Recomendaciones Personalizadas",
+      "descripcion": "Recibe sugerencias de rutas basadas en tus preferencias y nivel de experiencia.",
+      "colorFondo": "#3F51B5",
+      "tipografia": "'Playfair Display', serif",
+      "enlace": "recomendaciones.html"
+    },
+    {
+      "titulo": "Reseñas de Equipamiento",
+      "descripcion": "Lee y comparte opiniones sobre el mejor equipo de senderismo.",
+      "colorFondo": "#FFC107",
+      "tipografia": "'Source Sans Pro', sans-serif",
+      "enlace": "equipamiento.html"
+    },
+    {
+      "titulo": "Predicción Meteorológica",
+      "descripcion": "Consulta pronósticos detallados para planificar tus salidas con seguridad.",
+      "colorFondo": "#03A9F4",
+      "tipografia": "'Quicksand', sans-serif",
+      "enlace": "clima.html"
+    },
+    {
+      "titulo": "Logros y Medallas",
+      "descripcion": "Desbloquea logros especiales y colecciona medallas virtuales.",
+      "colorFondo": "#FF4081",
+      "tipografia": "'Archivo Black', sans-serif",
+      "enlace": "logros.html"
+    },
+    {
+      "titulo": "Rutas Temáticas",
+      "descripcion": "Explora senderos con temas específicos como historia, geología o gastronomía.",
+      "colorFondo": "#009688",
+      "tipografia": "'Cabin', sans-serif",
+      "enlace": "rutas-tematicas.html"
+    },
+    {
+      "titulo": "Modo Nocturno",
+      "descripcion": "Activa el modo oscuro para una experiencia visual más cómoda.",
+      "colorFondo": "#212121",
+      "tipografia": "'Muli', sans-serif",
+      "enlace": "modo-nocturno.html"
+    },
+    {
+      "titulo": "Sincronización con Wearables",
+      "descripcion": "Conecta tu smartwatch para un seguimiento más preciso de tus actividades.",
+      "colorFondo": "#673AB7",
+      "tipografia": "'Exo 2', sans-serif",
+      "enlace": "sincronizacion.html"
+    },
+    {
+      "titulo": "Grupos de Interés",
+      "descripcion": "Únete a comunidades especializadas según tus intereses de senderismo.",
+      "colorFondo": "#FF6F00",
+      "tipografia": "'Kanit', sans-serif",
+      "enlace": "grupos.html"
+    },
+    {
+      "titulo": "Planificador de Viajes",
+      "descripcion": "Organiza tus rutas, alojamientos y transporte en un solo lugar.",
+      "colorFondo": "#0097A7",
+      "tipografia": "'Titillium Web', sans-serif",
+      "enlace": "planificador-viajes.html"
+    },
+    {
+      "titulo": "Galería de Fotos 360°",
+      "descripcion": "Explora vistas panorámicas de puntos destacados en las rutas.",
+      "colorFondo": "#D32F2F",
+      "tipografia": "'Comfortaa', cursive",
+      "enlace": "galeria-360.html"
+    },
+    {
+      "titulo": "Calculadora de Calorías",
+      "descripcion": "Estima las calorías quemadas en tus caminatas y senderos.",
+      "colorFondo": "#7CB342",
+      "tipografia": "'Barlow', sans-serif",
+      "enlace": "calculadora-calorias.html"
+    },
+    {
+      "titulo": "Foro de Consejos",
+      "descripcion": "Intercambia consejos y trucos con otros entusiastas del senderismo.",
+      "colorFondo": "#C2185B",
+      "tipografia": "'Josefin Sans', sans-serif",
+      "enlace": "foro.html"
+    },
+    {
+      "titulo": "Modo Familia",
+      "descripcion": "Descubre rutas aptas para niños y actividades familiares.",
+      "colorFondo": "#00796B",
+      "tipografia": "'Varela Round', sans-serif",
+      "enlace": "modo-familia.html"
+    },
+    {
+      "titulo": "Asistente Virtual",
+      "descripcion": "Obtén ayuda instantánea y respuestas a tus preguntas sobre rutas.",
+      "colorFondo": "#303F9F",
+      "tipografia": "'Rubik', sans-serif",
+      "enlace": "asistente.html"
+    }
+  ]

@@ -1,0 +1,240 @@
+/* Estilos generales */
+body, html {
+  height: 100%;
+  background-color: #ffffff; /* Cambiado a blanco */
+}
+
+/* El resto del CSS permanece igual */
+.full-height {
+  min-height: 100vh;
+  position: relative;
+}
+
+.overlay-text {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: white;
+  font-size: 2em;
+  font-weight: bold;
+  text-align: center;
+}
+
+.image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: opacity 0.3s ease;
+}
+
+.image-container {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  position: relative;
+}
+
+.p-1 {
+  padding: 0.5rem !important;
+}
+
+a:hover .image {
+  opacity: 0.7;
+}
+
+/* Estilos para la cabecera */
+.header {
+  background-image: url('skitouring/bannerski.jpg');
+  background-size: cover;
+  background-position: center;
+  height: 400px;
+  color: white;
+  text-align: center;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 20px;
+  position: relative;
+}
+
+.header .overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.header h1 {
+  font-size: 4rem;
+  margin: 0;
+}
+
+/* Estilos para el chat (Kahir.AI) */
+.chat-container {
+  max-width: 1600px;
+  margin: 0 auto;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+}
+
+.prompt-container {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 20px;
+  padding: 20px;
+}
+
+.prompt-box {
+  cursor: pointer;
+  transition: all 0.3s ease;
+  width: calc(25% - 20px);
+  max-width: 300px;
+  aspect-ratio: 1 / 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  background-color: #ffffff;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+}
+
+.prompt-box:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+
+.prompt-box .card-body {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  height: 100%;
+}
+
+#chat-area {
+  display: none;
+  flex-grow: 1;
+}
+
+#chat-container {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+}
+
+.message {
+  max-width: 80%;
+  margin-bottom: 15px;
+  padding: 10px 15px;
+  border-radius: 20px;
+  clear: both;
+}
+
+.user-message {
+  background-color: #007bff;
+  color: white;
+  float: right;
+  margin-left: auto;
+}
+
+.ai-message {
+  background-color: #e9ecef;
+  color: black;
+  float: left;
+}
+
+.thinking {
+  font-style: italic;
+  color: #6c757d;
+  background-color: #e9ecef;
+}
+
+.message-actions {
+  text-align: right;
+  margin-top: 5px;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.message-actions button {
+  margin-left: 5px;
+}
+
+#chat-form {
+  padding: 10px;
+  margin-top: 20px;
+  position: sticky;
+  bottom: 0;
+}
+
+#chat-form .input-group {
+  display: flex;
+  align-items: center;
+}
+
+#user-input {
+  flex-grow: 1;
+  border-radius: 20px;
+  padding: 10px 15px;
+  margin-right: 10px;
+}
+
+#chat-form .btn-primary {
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+#chat-form .btn-primary i {
+  font-size: 1rem;
+}
+
+/* Media queries para responsive design */
+@media (max-width: 1200px) {
+  .prompt-box {
+    width: calc(33.33% - 20px);
+  }
+}
+
+@media (max-width: 768px) {
+  .header {
+    height: 300px;
+  }
+
+  .header h1 {
+    font-size: 2.5rem;
+  }
+
+  .prompt-box {
+    width: calc(50% - 20px);
+  }
+}
+
+@media (max-width: 576px) {
+  .header {
+    height: 200px;
+  }
+
+  .header h1 {
+    font-size: 2rem;
+  }
+
+  .prompt-box {
+    width: calc(100% - 20px);
+  }
+}

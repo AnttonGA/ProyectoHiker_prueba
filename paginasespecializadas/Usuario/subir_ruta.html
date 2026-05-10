@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Subir Ruta</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css">
+    <link href="../estilos2.css" rel="stylesheet">
+    <style>
+        body { font-family: 'Arial', sans-serif; background-color: #f8f9fa; }
+
+        .header {
+            position: relative; text-align: center; color: white;
+            background: url('https://source.unsplash.com/1600x900/?nature,trail') no-repeat center center;
+            background-size: cover; height: 260px;
+        }
+        .header .overlay {
+            background-color: rgba(0,0,0,0.5); height: 100%;
+            display: flex; justify-content: center; align-items: center;
+        }
+        .header h1 { font-size: 2.5rem; margin: 0; }
+
+        /* Zona de drop GPX */
+        .gpx-drop-zone {
+            border: 2px dashed #6c757d;
+            border-radius: 12px;
+            padding: 40px 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: border-color 0.2s, background 0.2s;
+            background: #fff;
+        }
+        .gpx-drop-zone:hover,
+        .gpx-drop-zone.drag-over { border-color: #0d6efd; background: #f0f6ff; }
+        .gpx-drop-zone .gpx-icon { font-size: 3rem; color: #6c757d; margin-bottom: 10px; }
+        .gpx-drop-zone.has-file { border-color: #198754; background: #f0fdf4; }
+        .gpx-drop-zone.has-file .gpx-icon { color: #198754; }
+
+        /* Preview card */
+        #gpxPreview { display: none; }
+        .stat-pill {
+            display: inline-flex; align-items: center; gap: 6px;
+            background: #e9ecef; border-radius: 20px;
+            padding: 6px 14px; font-size: 0.9rem;
+        }
+
+        /* Step indicator */
+        .step-indicator { display: flex; gap: 0; margin-bottom: 2rem; }
+        .step-indicator .step {
+            flex: 1; text-align: center; padding: 10px 5px;
+            font-size: 0.85rem; font-weight: 600; color: #6c757d;
+            border-bottom: 3px solid #dee2e6; transition: all 0.2s;
+        }
+        .step-indicator .step.active { color: #0d6efd; border-bottom-color: #0d6efd; }
+        .step-indicator .step.done  { color: #198754; border-bottom-color: #198754; }
+
+        @media (max-width: 576px) { .header { height: 200px; } .header h1 { font-size: 1.5rem; } }
+    </style>
+</head>
+<body>
+    <div id="menu"></div>
+
+    <div class="header">
+        <div class="overlay">
+            <h1><i class="fas fa-mountain me-2"></i>SUBE TU RUTA</h1>
+        </div>
+    </div>
+
+    <div class="container mt-4" style="max-width: 680px;">
+
+        <!-- Alertas de error/éxito tras el envío -->
+        <div id="uploadAlert" class="d-none mb-4"></div>
+
+        <!-- Indicador de pasos -->
+        <div class="step-indicator">
+            <div class="step active" id="ind-step1"><i class="fas fa-file-upload me-1"></i>GPX</div>
+            <div class="step"        id="ind-step2"><i class="fas fa-info-circle me-1"></i>Detalles</div>
+        </div>
+
+        <form id="formularioRuta" action="procesar_subida.php" method="POST" enctype="multipart/form-data">
+
+            <!-- ══════════════════════════════════════════════
+                 PASO 1 — Sube tu GPX
+            ══════════════════════════════════════════════ -->
+            <div id="step1">
+                <h4 class="mb-3">Paso 1: Sube tu archivo GPX</h4>
+
+                <!-- Zona de drop -->
+                <div class="gpx-drop-zone mb-3" id="gpxDropZone">
+                    <div class="gpx-icon"><i class="fas fa-route"></i></div>
+                    <p class="mb-1 fw-semibold" id="gpxDropLabel">Arrastra aquí tu archivo GPX o haz clic para seleccionarlo</p>
+                    <small class="text-muted">Máximo 10 MB · Solo archivos .gpx</small>
+                    <input type="file" id="archivo_gpx" name="archivo_gpx" accept=".gpx"
+                           class="d-none" required>
+                </div>
+                <div class="invalid-feedback d-block" id="gpx-error" style="display:none!important"></div>
+
+                <!-- Preview de estadísticas (aparece tras parsear el GPX) -->
+                <div id="gpxPreview" class="card border-success mb-4">
+                    <div class="card-body py-3">
+                        <div class="d-flex align-items-center gap-2 mb-2">
+                            <i class="fas fa-check-circle text-success"></i>
+                            <strong id="gpxFileName" class="text-success"></strong>
+                        </div>
+                        <div class="d-flex flex-wrap gap-2">
+                            <span class="stat-pill"><i class="fas fa-ruler-horizontal text-primary"></i><span id="statDist">—</span> km</span>
+                            <span class="stat-pill"><i class="fas fa-mountain text-warning"></i>+<span id="statElev">—</span> m</span>
+                            <span class="stat-pill"><i class="fas fa-clock text-secondary"></i>~<span id="statDur">—</span> h</span>
+                            <span class="stat-pill"><i class="fas fa-map-marker-alt text-danger"></i><span id="statZone">—</span></span>
+                        </div>
+                        <small class="text-muted mt-1 d-block">
+                            <i class="fas fa-info-circle me-1"></i>
+                            La zona se ha auto-detectado por la ubicación del punto de inicio. Puedes cambiarla en el paso 2.
+                        </small>
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-end">
+                    <button type="button" id="nextStep1" class="btn btn-primary" disabled>
+                        Siguiente <i class="fas fa-arrow-right ms-1"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- ══════════════════════════════════════════════
+                 PASO 2 — Detalles de la ruta
+            ══════════════════════════════════════════════ -->
+            <div id="step2" style="display:none">
+                <h4 class="mb-3">Paso 2: Detalles de la ruta</h4>
+
+                <!-- Nombre -->
+                <div class="mb-3">
+                    <label for="nombre" class="form-label fw-semibold">
+                        <i class="fas fa-tag me-1 text-primary"></i>Nombre de la ruta <span class="text-danger">*</span>
+                    </label>
+                    <input type="text" class="form-control" id="nombre" name="nombre"
+                           placeholder="Ej: Pico Aneto por la Ruta Normal" maxlength="120">
+                    <div class="invalid-feedback"></div>
+                </div>
+
+                <div class="row g-3 mb-3">
+                    <!-- Tipo de actividad -->
+                    <div class="col-sm-6">
+                        <label for="tipo_ruta" class="form-label fw-semibold">
+                            <i class="fas fa-hiking me-1 text-primary"></i>Tipo de actividad <span class="text-danger">*</span>
+                        </label>
+                        <select class="form-select" id="tipo_ruta" name="tipo_ruta">
+                            <option value="">Selecciona…</option>
+                            <option value="hiking">Senderismo / Hiking</option>
+                            <option value="ski_touring">Ski Touring</option>
+                            <option value="cycle_touring">Cicloturismo</option>
+                            <option value="climbing">Escalada</option>
+                            <option value="snowshoeing">Raquetas de nieve</option>
+                            <option value="via_ferrata">Vía Ferrata</option>
+                            <option value="btt">BTT / MTB</option>
+                            <option value="kayaking">Kayak</option>
+                        </select>
+                        <div class="invalid-feedback"></div>
+                    </div>
+
+                    <!-- Dificultad -->
+                    <div class="col-sm-6">
+                        <label for="dificultad" class="form-label fw-semibold">
+                            <i class="fas fa-signal me-1 text-primary"></i>Dificultad <span class="text-danger">*</span>
+                        </label>
+                        <select class="form-select" id="dificultad" name="dificultad">
+                            <option value="">Selecciona…</option>
+                            <option value="beginner">Principiante</option>
+                            <option value="intermediate">Intermedio</option>
+                            <option value="advanced">Avanzado</option>
+                        </select>
+                        <div class="invalid-feedback"></div>
+                    </div>
+                </div>
+
+                <!-- Zona (auto-detectada, editable) -->
+                <div class="mb-3">
+                    <label for="location_ruta" class="form-label fw-semibold">
+                        <i class="fas fa-map-marker-alt me-1 text-danger"></i>Zona <span class="text-danger">*</span>
+                    </label>
+                    <select class="form-select" id="location_ruta" name="location_ruta">
+                        <option value="">Selecciona…</option>
+                        <option value="Western_Pyrenees">Pirineo Occidental</option>
+                        <option value="Central_Pyrenees">Pirineo Central</option>
+                        <option value="Eastern_Pyrenees">Pirineo Oriental</option>
+                    </select>
+                    <div class="invalid-feedback"></div>
+                    <div class="form-text" id="locationHint"></div>
+                </div>
+
+                <!-- Descripción -->
+                <div class="mb-3">
+                    <label for="descripcion" class="form-label fw-semibold">
+                        <i class="fas fa-align-left me-1 text-primary"></i>Descripción <span class="text-danger">*</span>
+                    </label>
+                    <textarea class="form-control" id="descripcion" name="descripcion" rows="4"
+                              placeholder="Describe el recorrido, el paisaje, puntos de interés…"></textarea>
+                    <div class="invalid-feedback"></div>
+                </div>
+
+                <!-- Información adicional (opcional) -->
+                <div class="card bg-light border-0 mb-3">
+                    <div class="card-body pb-1">
+                        <h6 class="mb-3 text-muted">
+                            <i class="fas fa-clipboard-list me-1"></i>Información adicional
+                            <span class="badge bg-secondary ms-1" style="font-size:0.7rem">Opcional</span>
+                        </h6>
+                        <div class="row g-3">
+                            <div class="col-sm-6">
+                                <label for="pregunta1" class="form-label small">
+                                    <i class="fas fa-car me-1 text-muted"></i>Acceso al inicio
+                                </label>
+                                <input type="text" class="form-control form-control-sm" id="pregunta1" name="pregunta1"
+                                       placeholder="Ej: pista asfaltada hasta el refugio">
+                                <div class="invalid-feedback"></div>
+                            </div>
+                            <div class="col-sm-6">
+                                <label for="pregunta2" class="form-label small">
+                                    <i class="fas fa-tools me-1 text-muted"></i>Material necesario
+                                </label>
+                                <input type="text" class="form-control form-control-sm" id="pregunta2" name="pregunta2"
+                                       placeholder="Ej: crampones, piolet en invierno">
+                                <div class="invalid-feedback"></div>
+                            </div>
+                            <div class="col-sm-6">
+                                <label for="pregunta3" class="form-label small">
+                                    <i class="fas fa-exclamation-triangle me-1 text-muted"></i>Peligros / Notas técnicas
+                                </label>
+                                <input type="text" class="form-control form-control-sm" id="pregunta3" name="pregunta3"
+                                       placeholder="Ej: riesgo de aludes en primavera">
+                                <div class="invalid-feedback"></div>
+                            </div>
+                            <div class="col-sm-6">
+                                <label for="pregunta4" class="form-label small">
+                                    <i class="fas fa-sun me-1 text-muted"></i>Mejor época
+                                </label>
+                                <input type="text" class="form-control form-control-sm" id="pregunta4" name="pregunta4"
+                                       placeholder="Ej: junio–septiembre">
+                                <div class="invalid-feedback"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Fotos (opcional) -->
+                <div class="mb-4">
+                    <label for="imagenes" class="form-label fw-semibold">
+                        <i class="fas fa-camera me-1 text-primary"></i>Fotos de la ruta
+                        <span class="badge bg-secondary ms-1" style="font-size:0.7rem">Opcional</span>
+                    </label>
+                    <input type="file" class="form-control" id="imagenes" name="imagenes[]" multiple
+                           accept="image/jpeg,image/png,image/webp">
+                    <div class="form-text text-muted">JPG, PNG o WebP · Máx. 5 MB por foto · Hasta 8 fotos. Si no subes fotos se usará una imagen por defecto.</div>
+                    <div class="invalid-feedback"></div>
+                </div>
+
+                <div class="d-flex justify-content-between">
+                    <button type="button" id="prevStep1" class="btn btn-outline-secondary">
+                        <i class="fas fa-arrow-left me-1"></i>Atrás
+                    </button>
+                    <button type="submit" class="btn btn-success btn-lg">
+                        <i class="fas fa-upload me-2"></i>Publicar ruta
+                    </button>
+                </div>
+            </div>
+
+        </form>
+    </div>
+
+    <div id="footer"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="javascript/validation.js"></script>
+    <script src="../../include.js"></script>
+    <script>
+        // Mostrar mensajes de error/éxito pasados por URL desde procesar_subida.php
+        (function () {
+            const params   = new URLSearchParams(window.location.search);
+            const alertBox = document.getElementById('uploadAlert');
+            if (!alertBox) return;
+
+            if (params.get('success') === '1') {
+                const id = params.get('id') ? ' (ID: ' + params.get('id') + ')' : '';
+                alertBox.className = 'alert alert-success mb-4';
+                alertBox.innerHTML = '<i class="fas fa-check-circle me-2"></i>'
+                    + '<strong>¡Ruta publicada correctamente!</strong> Ya está disponible en el catálogo' + id + '.';
+                alertBox.classList.remove('d-none');
+            } else if (params.get('error') === '1') {
+                const msg = params.get('msg')
+                    ? decodeURIComponent(params.get('msg'))
+                    : 'Ha ocurrido un error al subir la ruta.';
+                alertBox.className = 'alert alert-danger mb-4';
+                alertBox.innerHTML = '<i class="fas fa-exclamation-triangle me-2"></i>'
+                    + '<strong>Error:</strong> ' + msg;
+                alertBox.classList.remove('d-none');
+            }
+
+            if (params.has('error') || params.has('success')) {
+                history.replaceState(null, '', window.location.pathname);
+            }
+        })();
+    </script>
+</body>
+</html>

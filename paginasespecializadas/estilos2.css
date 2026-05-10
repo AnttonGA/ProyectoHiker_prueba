@@ -1,0 +1,568 @@
+
+.custom-height2 {
+  min-height: 225px; /* Altura por defecto para pantallas más grandes */
+
+  /* Media query para pantallas medianas */
+  @media (max-width: 992px) {
+    min-height: 150px;
+  }
+
+  /* Media query para pantallas pequeñas */
+  @media (max-width: 576px) {
+    min-height: 100px;
+  }
+}
+
+/* Media query para pantallas extra pequeñas (móviles) */
+@media (max-width: 576px) {
+  .single-column .col-6 {
+    width: 100%;
+  }
+}
+/* Estilo personalizado para quitar subrayado a los enlaces */
+.cell-link {
+  text-decoration: none !important; /* Elimina el subrayado */
+}
+
+/* Cabezera */
+.header {
+  background-image: url('skitouring/bannerski.jpg'); /* Ruta de tu imagen de fondo */
+  background-size: cover;
+  background-position: center;
+  height: 400px; /* Altura de la cabecera, ajusta según sea necesario */
+  color: white;
+  text-align: center;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 20px; /* Espacio inferior */
+  position: relative;
+}
+
+.header .overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5); /* Fondo semi-transparente */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.header h1 {
+  font-size: 4rem; /* Tamaño del título */
+  margin: 0; /* Elimina el margen para un aspecto más limpio */
+}
+
+/* Media queries para hacerlo responsive */
+@media (max-width: 768px) {
+  .header {
+    height: 300px; /* Reducir la altura para pantallas más pequeñas */
+  }
+
+  .header h1 {
+    font-size: 2.5rem; /* Reducir el tamaño del título para pantallas más pequeñas */
+  }
+}
+
+@media (max-width: 576px) {
+  .header {
+    height: 200px; /* Reducir aún más la altura para pantallas muy pequeñas */
+  }
+
+  .header h1 {
+    font-size: 2rem; /* Reducir aún más el tamaño del título para pantallas muy pequeñas */
+  }
+}
+
+/* icono */
+/* Estilos para el contenedor del ícono en Leaflet */
+.leaflet-bootstrap-icon-container {
+  position: relative; /* Posición relativa para posicionar el ícono dentro del contenedor */
+  width: 24px; /* Ancho del contenedor */
+  height: 24px; /* Alto del contenedor */
+}
+
+/* Estilos para el fondo del ícono */
+.leaflet-bootstrap-icon-background {
+  position: absolute; /* Posición absoluta para cubrir completamente el contenedor */
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(255, 255, 255, 0.8); /* Color de fondo con transparencia */
+  border-radius: 50%; /* Borde redondeado para un aspecto más suave */
+  display: flex; /* Para centrar el ícono verticalmente */
+  justify-content: center; /* Para centrar el ícono horizontalmente */
+  align-items: center; /* Para centrar el ícono verticalmente */
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Sombra suave para el efecto de elevación */
+}
+
+/* Estilos para HUTS */
+.leaflet-bootstrap-icon-background i {
+  font-size: 16px; /* Tamaño del ícono */
+  color: #333; /* Color del ícono */
+}
+
+.color-example {
+  display: inline-block;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  margin-right: 10px;
+}
+.color-example.blue {
+  background-color: #337DFF;
+}
+.color-example.red {
+  background-color: #FF5733;
+}
+.color-example.orange {
+  background-color: #FFA500;
+}
+.color-example.yellow {
+  background-color: #FFFF00;
+}
+.color-example.green-light {
+  background-color: #00FF00;
+}
+.color-example.pink {
+  background-color: #FF1493;
+}
+.color-example.gray {
+  background-color: #8C8C8C;
+}
+
+/* ── Swiper base ── */
+.swiper-container {
+  width: 100%;
+}
+.swiper-slide {
+  height: auto; /* let carousel-card control its own height */
+}
+
+/* ══════════════════════════════════════════════════════════════
+   ROUTE CARD — tarjetas de la vista lista
+══════════════════════════════════════════════════════════════ */
+.route-card {
+  display: block;
+  text-decoration: none;
+  color: inherit;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #fff;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  transition: box-shadow .25s ease, transform .25s ease;
+  height: 100%;
+}
+.route-card:hover {
+  box-shadow: 0 8px 24px rgba(0,0,0,.14);
+  transform: translateY(-4px);
+  color: inherit;
+  text-decoration: none;
+}
+
+/* Imagen — aspect ratio 3:2 */
+.route-card__img-wrap {
+  position: relative;
+  width: 100%;
+  padding-top: 66.66%;   /* 3:2 */
+  overflow: hidden;
+  background: #e9ecef;
+}
+.route-card__img-wrap img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform .35s ease;
+}
+.route-card:hover .route-card__img-wrap img { transform: scale(1.04); }
+
+/* Badges sobre la imagen */
+.route-card__diff,
+.route-card__activity {
+  position: absolute;
+  padding: 3px 9px;
+  border-radius: 20px;
+  font-size: .7rem;
+  font-weight: 600;
+  letter-spacing: .3px;
+  line-height: 1.4;
+  white-space: nowrap;
+}
+.route-card__diff {
+  top: 10px;
+  left: 10px;
+  color: #fff;
+}
+.diff--easy     { background: #28a745; }
+.diff--moderate { background: #fd7e14; }
+.diff--hard     { background: #dc3545; }
+
+.route-card__activity {
+  bottom: 10px;
+  right: 10px;
+  background: rgba(0,0,0,.55);
+  backdrop-filter: blur(4px);
+  color: #fff;
+}
+.route-card__activity i { font-size: .75rem; }
+
+/* Cuerpo */
+.route-card__body {
+  padding: 14px 16px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* Título — máx 2 líneas */
+.route-card__title {
+  font-size: .95rem;
+  font-weight: 700;
+  margin: 0;
+  line-height: 1.35;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  color: #1a1a2e;
+  min-height: 2.6em;
+}
+
+/* Stats en fila */
+.route-card__stats {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.route-card__stat {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: #f0f4f8;
+  border-radius: 20px;
+  padding: 3px 10px;
+  font-size: .75rem;
+  font-weight: 600;
+  color: #495057;
+  white-space: nowrap;
+}
+.route-card__stat i { font-size: .8rem; color: #6c757d; }
+
+/* Ubicación */
+.route-card__location {
+  margin: 0;
+  font-size: .75rem;
+  color: #6c757d;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* CTA */
+.route-card__cta {
+  margin-top: 4px;
+  padding: 7px 0;
+  text-align: center;
+  background: #0d6efd;
+  color: #fff;
+  border-radius: 8px;
+  font-size: .82rem;
+  font-weight: 600;
+  transition: background .2s;
+}
+.route-card:hover .route-card__cta { background: #0b5ed7; }
+
+/* ── Barra de estado y búsqueda ── */
+.routes-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+.routes-toolbar .search-wrap {
+  flex: 1;
+  min-width: 200px;
+  position: relative;
+}
+.routes-toolbar .search-wrap i {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #6c757d;
+  pointer-events: none;
+}
+.routes-toolbar .search-wrap input {
+  padding-left: 36px;
+  border-radius: 8px;
+}
+.routes-count {
+  font-size: .82rem;
+  color: #6c757d;
+  white-space: nowrap;
+}
+
+/* ── Skeleton loader ── */
+.route-card-skeleton {
+  border-radius: 12px;
+  overflow: hidden;
+  background: #fff;
+  box-shadow: 0 2px 8px rgba(0,0,0,.06);
+  height: 100%;
+}
+.skeleton-img {
+  width: 100%;
+  padding-top: 66.66%;
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.4s infinite;
+}
+.skeleton-body { padding: 14px 16px; display: flex; flex-direction: column; gap: 8px; }
+.skeleton-line {
+  height: 12px;
+  border-radius: 6px;
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.4s infinite;
+}
+.skeleton-line.w-80 { width: 80%; }
+.skeleton-line.w-60 { width: 60%; }
+.skeleton-line.w-40 { width: 40%; }
+@keyframes shimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* ── Load more ── */
+#load-more-wrap { text-align: center; padding: 24px 0; }
+#btn-load-more {
+  padding: 10px 32px;
+  border-radius: 24px;
+  font-weight: 600;
+  font-size: .9rem;
+}
+
+body {
+  overflow-x: hidden;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   MAP SIDEBAR
+══════════════════════════════════════════════════════════════ */
+.map-sidebar-section {
+  margin-bottom: 8px;
+}
+.map-sidebar-title {
+  font-size: .78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .5px;
+  color: #495057;
+  margin-bottom: 6px;
+}
+.form-label-xs {
+  font-size: .75rem;
+  font-weight: 600;
+  color: #495057;
+  margin-bottom: 2px;
+  display: block;
+}
+
+/* Activity colour dot in map sidebar legend */
+.act-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  margin-right: 4px;
+  vertical-align: middle;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   MOBILE FAB (Map / List switcher)
+══════════════════════════════════════════════════════════════ */
+.map-list-fab {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1050;
+  display: flex;
+  background: #fff;
+  border-radius: 40px;
+  box-shadow: 0 4px 20px rgba(0,0,0,.22);
+  overflow: hidden;
+  border: 1px solid #dee2e6;
+}
+.fab-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  padding: 10px 28px;
+  border: none;
+  background: transparent;
+  color: #6c757d;
+  font-size: .7rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background .2s, color .2s;
+}
+.fab-btn i {
+  font-size: 1.1rem;
+}
+.fab-btn.active {
+  background: #0d6efd;
+  color: #fff;
+}
+@media (min-width: 768px) {
+  .map-list-fab { display: none !important; }
+}
+
+@keyframes feedbackPulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.2); }
+  100% { transform: scale(1); }
+}
+
+.feedback-animation {
+  animation: feedbackPulse 0.5s ease-in-out;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   CAROUSEL CARDS  (.carousel-card — used inside Swiper slides)
+══════════════════════════════════════════════════════════════ */
+.carousel-swiper {
+  width: 100%;
+  padding-bottom: 44px !important; /* space for pagination dots */
+  overflow: hidden;
+}
+
+.carousel-card {
+  display: block;
+  text-decoration: none;
+  color: inherit;
+  border-radius: 10px;
+  overflow: hidden;
+  background: #fff;
+  box-shadow: 0 2px 10px rgba(0,0,0,.09);
+  transition: transform .25s ease, box-shadow .25s ease;
+  height: 100%;
+}
+.carousel-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 22px rgba(0,0,0,.15);
+  color: inherit;
+  text-decoration: none;
+}
+
+/* Image — fixed 3:2 aspect ratio */
+.carousel-card__img {
+  position: relative;
+  width: 100%;
+  padding-top: 66.66%;
+  overflow: hidden;
+  background: #e9ecef;
+}
+.carousel-card__img img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform .35s ease;
+}
+.carousel-card:hover .carousel-card__img img {
+  transform: scale(1.05);
+}
+
+/* Difficulty badge */
+.carousel-card__diff {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  padding: 2px 8px;
+  border-radius: 20px;
+  font-size: .65rem;
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: .3px;
+}
+
+/* Activity badge */
+.carousel-card__act {
+  position: absolute;
+  bottom: 8px;
+  right: 8px;
+  padding: 2px 8px;
+  border-radius: 20px;
+  font-size: .65rem;
+  font-weight: 600;
+  color: #fff;
+  backdrop-filter: blur(3px);
+}
+.carousel-card__act i { font-size: .7rem; }
+
+/* Body */
+.carousel-card__body {
+  padding: 10px 12px 12px;
+}
+.carousel-card__title {
+  font-size: .82rem;
+  font-weight: 700;
+  margin: 0 0 6px;
+  line-height: 1.3;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  color: #1a1a2e;
+  min-height: 2.2em;
+}
+.carousel-card__stats {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.carousel-card__stats span {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  background: #f0f4f8;
+  border-radius: 20px;
+  padding: 2px 8px;
+  font-size: .68rem;
+  font-weight: 600;
+  color: #495057;
+  white-space: nowrap;
+}
+.carousel-card__stats i { font-size: .72rem; color: #6c757d; }
+
+/* Navigation arrows */
+.carousel-next, .carousel-prev {
+  color: #0d6efd !important;
+}
+.carousel-next::after, .carousel-prev::after {
+  font-size: 1.1rem !important;
+  font-weight: 700;
+}
+
+/* Pagination dots */
+.carousel-pagination .swiper-pagination-bullet {
+  background: #0d6efd;
+  opacity: .35;
+}
+.carousel-pagination .swiper-pagination-bullet-active {
+  opacity: 1;
+}

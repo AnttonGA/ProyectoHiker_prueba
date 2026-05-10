@@ -1,0 +1,531 @@
+/* Estilos principales para el chat de Kahir.AI */
+
+/* Variables globales */
+:root {
+    /* Colores principales */
+    --primary-color: #3B82F6;
+    --primary-dark: #1D4ED8;
+    --primary-light: #60A5FA;
+    --secondary-color: #10B981;
+    --accent-color: #8B5CF6;
+    
+    /* Colores de estado */
+    --success-color: #34D399;
+    --warning-color: #FBBF24;
+    --danger-color: #EF4444;
+    --info-color: #60A5FA;
+    
+    /* Colores de fondo */
+    --bg-primary: #FFFFFF;
+    --bg-secondary: #F3F4F6;
+    --bg-tertiary: #E5E7EB;
+    
+    /* Colores de texto */
+    --text-primary: #111827;
+    --text-secondary: #4B5563;
+    --text-light: #9CA3AF;
+    
+    /* Espaciado */
+    --spacing-xs: 0.25rem;
+    --spacing-sm: 0.5rem;
+    --spacing-md: 1rem;
+    --spacing-lg: 1.5rem;
+    --spacing-xl: 2rem;
+    
+    /* Radios de borde */
+    --border-radius-sm: 0.25rem;
+    --border-radius-md: 0.5rem;
+    --border-radius-lg: 1rem;
+    
+    /* Sombras */
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+}
+
+/* Contenedor principal del chat */
+.chat-container {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    background-color: var(--bg-primary);
+    border-radius: var(--border-radius-lg);
+    box-shadow: var(--shadow-lg);
+}
+
+/* Área de mensajes */
+.chat-area {
+    flex-grow: 1;
+    overflow-y: auto;
+    padding: var(--spacing-md);
+    scroll-behavior: smooth;
+}
+
+/* Mensajes */
+.message {
+    max-width: 80%;
+    margin-bottom: var(--spacing-md);
+    padding: var(--spacing-md);
+    border-radius: var(--border-radius-md);
+    box-shadow: var(--shadow-sm);
+}
+
+.user-message {
+    background-color: var(--primary-color);
+    color: white;
+    margin-left: auto;
+    border-radius: var(--border-radius-md) var(--border-radius-md) 0 var(--border-radius-md);
+}
+
+.system-message {
+    background-color: var(--bg-secondary);
+    color: var(--text-primary);
+    margin-right: auto;
+    border-radius: var(--border-radius-md) var(--border-radius-md) var(--border-radius-md) 0;
+}
+
+/* ── Markdown renderizado dentro de mensajes del asistente ─────────────── */
+.system-message h1, .system-message h2 {
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin: 0.6rem 0 0.3rem;
+}
+.system-message h3, .system-message h4 {
+    font-size: 1rem;
+    font-weight: 600;
+    margin: 0.5rem 0 0.2rem;
+}
+.system-message p      { margin: 0.3rem 0; }
+.system-message ul,
+.system-message ol     { padding-left: 1.4rem; margin: 0.3rem 0; }
+.system-message li     { margin: 0.15rem 0; }
+.system-message hr     { border: none; border-top: 1px solid var(--bg-tertiary); margin: 0.6rem 0; }
+.system-message strong { font-weight: 600; }
+.system-message em     { font-style: italic; }
+.system-message code   {
+    background: rgba(0,0,0,0.07);
+    border-radius: 3px;
+    padding: 0 4px;
+    font-size: 0.88em;
+}
+.system-message pre    {
+    background: rgba(0,0,0,0.07);
+    border-radius: 6px;
+    padding: 0.5rem 0.75rem;
+    overflow-x: auto;
+    font-size: 0.85em;
+}
+/* ───────────────────────────────────────────────────────────────────────── */
+
+/* ── Aviso meteorológico (Caso B) ────────────────────────────────────────── */
+
+.weather-warning-box {
+    background: #FEF3C7;
+    border: 1px solid #F59E0B;
+    border-left: 4px solid #F59E0B;
+    border-radius: var(--border-radius-md);
+    padding: 0.6rem 0.875rem;
+    margin: var(--spacing-xs) 0;
+    max-width: 420px;
+}
+
+.weather-warning-item {
+    font-size: 0.83rem;
+    color: #92400E;
+    line-height: 1.45;
+    padding: 0.1rem 0;
+}
+
+.weather-warning-item + .weather-warning-item {
+    border-top: 1px solid #FDE68A;
+    margin-top: 0.25rem;
+    padding-top: 0.25rem;
+}
+
+/* ── Carousel de rutas ───────────────────────────────────────────────────── */
+
+.route-carousel {
+    width: 100%;
+    max-width: 420px;
+    margin: var(--spacing-xs) 0;
+}
+
+.carousel-track {
+    position: relative;
+}
+
+.carousel-slide {
+    display: none;
+}
+
+.carousel-slide.active {
+    display: block;
+    animation: slideIn 0.25s ease-out;
+}
+
+/* ── Tarjeta de ruta (nueva) ─────────────────────────────────────────────── */
+
+.route-card-inner {
+    background: var(--bg-primary);
+    border-radius: var(--border-radius-md);
+    box-shadow: var(--shadow-md);
+    overflow: hidden;
+    border: 1px solid var(--bg-tertiary);
+}
+
+.route-card-img-wrap {
+    position: relative;
+    height: 195px;
+    overflow: hidden;
+    background: var(--bg-tertiary);
+}
+
+.route-card-img-wrap img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+}
+
+.route-card-inner:hover .route-card-img-wrap img {
+    transform: scale(1.03);
+}
+
+.route-diff-badge {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    padding: 3px 10px;
+    border-radius: 999px;
+    color: white;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.3);
+}
+
+.route-act-badge {
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    background: rgba(0,0,0,0.55);
+    color: white;
+    padding: 4px 8px;
+    border-radius: var(--border-radius-sm);
+    font-size: 0.78rem;
+}
+
+/* Badge de tiempo en coche — esquina inferior izquierda de la foto */
+.route-drive-badge {
+    position: absolute;
+    bottom: 8px;
+    left: 8px;
+    background: rgba(0,0,0,0.72);
+    color: #fff;
+    padding: 3px 10px;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.route-card-body {
+    padding: 0.75rem 1rem 0.875rem;
+}
+
+/* Etiqueta de zona (Pirineo Aragonés, Euskadi…) */
+.route-card-location {
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--primary-color);
+    margin: 0 0 0.2rem;
+}
+
+.route-card-title {
+    font-size: 0.95rem;
+    font-weight: 700;
+    margin: 0 0 0.5rem;
+    color: var(--text-primary);
+    line-height: 1.3;
+}
+
+.route-card-stats {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem 0.65rem;
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    margin-bottom: 0.65rem;
+}
+
+.route-card-stats span {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.route-card-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 0.82rem;
+    padding: 0.3rem 0.75rem;
+}
+
+/* ── Navegación del carousel ─────────────────────────────────────────────── */
+
+.carousel-counter {
+    text-align: center;
+    font-size: 0.75rem;
+    color: var(--text-light);
+    margin-top: 0.35rem;
+}
+
+.carousel-nav {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+}
+
+.carousel-btn {
+    background: var(--bg-secondary);
+    border: 1px solid var(--bg-tertiary);
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    font-size: 1.1rem;
+    cursor: pointer;
+    line-height: 1;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-secondary);
+}
+
+.carousel-btn:hover {
+    background: var(--primary-color);
+    color: white;
+    border-color: var(--primary-color);
+}
+
+.carousel-dots {
+    display: flex;
+    gap: 6px;
+}
+
+.carousel-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--bg-tertiary);
+    cursor: pointer;
+    transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.carousel-dot.active {
+    background: var(--primary-color);
+    transform: scale(1.3);
+}
+
+/* ── Tarjetas legacy (chat-card) — mantenidas por si se usan en otro sitio ─ */
+
+.chat-card {
+    background-color: var(--bg-primary);
+    border-radius: var(--border-radius-md);
+    box-shadow: var(--shadow-md);
+    margin: var(--spacing-md) 0;
+    overflow: hidden;
+    transition: transform 0.3s ease;
+}
+
+.chat-card:hover {
+    transform: translateY(-2px);
+}
+
+/* Tarjeta de ruta (legacy) */
+.route-card {
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    gap: var(--spacing-md);
+}
+
+.route-image {
+    position: relative;
+    height: 200px;
+    overflow: hidden;
+}
+
+.route-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.difficulty-badge {
+    position: absolute;
+    top: var(--spacing-sm);
+    right: var(--spacing-sm);
+    padding: var(--spacing-xs) var(--spacing-sm);
+    border-radius: var(--border-radius-sm);
+    color: white;
+    font-weight: bold;
+}
+
+/* Tarjeta meteorológica */
+.weather-card {
+    padding: var(--spacing-md);
+}
+
+.current-conditions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: var(--spacing-md);
+}
+
+.weather-details {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--spacing-md);
+    margin-bottom: var(--spacing-md);
+}
+
+/* Formulario de chat */
+.chat-form {
+    padding: var(--spacing-md);
+    background-color: var(--bg-secondary);
+    border-top: 1px solid var(--bg-tertiary);
+}
+
+.input-group {
+    display: flex;
+    gap: var(--spacing-sm);
+}
+
+.user-input {
+    flex-grow: 1;
+    padding: var(--spacing-md);
+    border: 1px solid var(--bg-tertiary);
+    border-radius: var(--border-radius-lg);
+    background-color: var(--bg-primary);
+    transition: border-color 0.3s ease;
+}
+
+.user-input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+}
+
+/* Botones */
+.btn {
+    padding: var(--spacing-sm) var(--spacing-md);
+    border: none;
+    border-radius: var(--border-radius-md);
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-primary {
+    background-color: var(--primary-color);
+    color: white;
+}
+
+.btn-primary:hover {
+    background-color: var(--primary-dark);
+}
+
+/* Indicador de escritura */
+.typing-indicator {
+    display: flex;
+    padding: var(--spacing-sm);
+    gap: var(--spacing-xs);
+}
+
+.typing-dot {
+    width: 8px;
+    height: 8px;
+    background-color: var(--text-light);
+    border-radius: 50%;
+    animation: typing 1s infinite ease-in-out;
+}
+
+.typing-dot:nth-child(2) { animation-delay: 0.2s; }
+.typing-dot:nth-child(3) { animation-delay: 0.4s; }
+
+@keyframes typing {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-5px); }
+}
+
+/* Sugerencias */
+.suggestions-panel {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--spacing-sm);
+    padding: var(--spacing-sm);
+    background-color: var(--bg-secondary);
+}
+
+.suggestion-btn {
+    padding: var(--spacing-xs) var(--spacing-sm);
+    background-color: var(--bg-primary);
+    border: 1px solid var(--primary-color);
+    border-radius: var(--border-radius-sm);
+    color: var(--primary-color);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.suggestion-btn:hover {
+    background-color: var(--primary-color);
+    color: white;
+}
+
+/* Animaciones */
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.message, .chat-card {
+    animation: slideIn 0.3s ease-out;
+}
+
+/* Responsividad */
+@media (max-width: 768px) {
+    .route-card {
+        grid-template-columns: 1fr;
+    }
+
+    .message {
+        max-width: 90%;
+    }
+
+    .weather-details {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 480px) {
+    .weather-details {
+        grid-template-columns: 1fr;
+    }
+
+    .suggestions-panel {
+        display: none;
+    }
+}
