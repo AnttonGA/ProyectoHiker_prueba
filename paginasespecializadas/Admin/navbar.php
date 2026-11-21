@@ -1,6 +1,6 @@
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
   <div class="container-fluid">
-    <a class="navbar-brand" href="../../index.php">TheDonkey</a>
+    <a class="navbar-brand" href="../../index.php">Kahir.ai</a>
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>
     </button>
@@ -16,8 +16,10 @@
           <a class="nav-link" href="routes_management.php">Gestión de Rutas</a>
         </li>
         <li class="nav-item">
-          <a class="nav-link" href="configurations.php">Configuraciones</a>
+          <a class="nav-link" href="statistics.php">Estadísticas</a>
         </li>
+        <li class="nav-item"><a class="nav-link" href="../skitouring/skitouring.html">Ver la web</a></li>
+        <li class="nav-item"><a class="nav-link" href="../../cerrar_sesion.php">Cerrar sesión</a></li>
       </ul>
     </div>
   </div>

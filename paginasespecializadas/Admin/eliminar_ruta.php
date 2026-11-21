@@ -4,7 +4,8 @@ secure_session_start();
 include('../inicio_sesion/conexion.php');
 
 // Hay que haber iniciado sesión
-if (!isset($_SESSION['usuario'], $_SESSION['rol'])) {
+$miId = (int) ($_SESSION['id'] ?? 0);
+if ($miId < 1 || !isset($_SESSION['rol'])) {
     header('Location: ../inicio_sesion/gestion.php');
     exit();
 }
@@ -16,88 +17,52 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 }
 csrf_verify();
 
-// TODO esquema: se comprueba el rol 'A' (esquema antiguo); database/schema.sql usa 'admin'.
-$esAdmin = ($_SESSION['rol'] === 'A');
+$esAdmin = is_admin();
 $destino = $esAdmin ? 'routes_management.php' : '../Usuario/my_account.php';
 
 $id = filter_input(INPUT_POST, 'id', FILTER_VALIDATE_INT);
-if (!$id) {
+if (!$id || $id < 1) {
     http_response_code(400);
     exit('Identificador de ruta no válido.');
 }
 
-// TODO esquema: migrar a BD (tabla rutas). Se mantiene de momento la lógica sobre rutas.json.
-$jsonFilePath = __DIR__ . '/../skitouring/javascript/rutas.json';
-if (!is_readable($jsonFilePath)) {
-    http_response_code(404);
-    exit('Ruta no encontrada.');
+try {
+    $stmt = $conn->prepare("SELECT usuario_id, estado FROM rutas WHERE id = ?");
+    $stmt->bind_param("i", $id);
+    $stmt->execute();
+    $ruta = $stmt->get_result()->fetch_assoc();
+    $stmt->close();
+} catch (Throwable $ex) {
+    error_log('eliminar_ruta.php (select): ' . $ex->getMessage());
+    $_SESSION['message'] = 'No se pudo eliminar la ruta.';
+    header('Location: ' . $destino);
+    exit();
 }
 
-// Cargar el archivo JSON
-$rutas = json_decode(file_get_contents($jsonFilePath), true);
-if (!is_array($rutas)) {
-    $rutas = [];
-}
-
-// Buscar la ruta correspondiente
-$ruta = null;
-$rutaIndex = null;
-foreach ($rutas as $index => $r) {
-    if (is_array($r) && isset($r['id']) && (string) $r['id'] === (string) $id) {
-        $ruta = $r;
-        $rutaIndex = $index;
-        break;
-    }
-}
-
-if ($ruta === null) {
+if (!$ruta) {
     http_response_code(404);
     exit('Ruta no encontrada.');
 }
 
 // Solo un administrador o el propietario de la ruta pueden borrarla
-// TODO esquema: se asume que cada ruta del JSON guarda su autor en 'usuario'.
-$propietario = $ruta['usuario'] ?? null;
-if (!$esAdmin && (!is_string($propietario) || $propietario !== $_SESSION['usuario'])) {
+if (!$esAdmin && (int) $ruta['usuario_id'] !== $miId) {
     http_response_code(403);
     exit('No tienes permiso para eliminar esta ruta.');
 }
 
-// Función para eliminar la carpeta y su contenido
-function deleteDirectory($dir) {
-    if (!file_exists($dir) && !is_link($dir)) {
-        return true;
-    }
-    if (!is_dir($dir) || is_link($dir)) {
-        return unlink($dir);
-    }
-    foreach (scandir($dir) as $item) {
-        if ($item == '.' || $item == '..') {
-            continue;
-        }
-        if (!deleteDirectory($dir . DIRECTORY_SEPARATOR . $item)) {
-            return false;
-        }
-    }
-    return rmdir($dir);
+try {
+    // Borrado lógico: no se tocan filas relacionadas ni ficheros (GPX, imágenes)
+    $stmt = $conn->prepare("UPDATE rutas SET estado = 'eliminada' WHERE id = ?");
+    $stmt->bind_param("i", $id);
+    $stmt->execute();
+    $stmt->close();
+    $_SESSION['message'] = 'Ruta eliminada.';
+} catch (Throwable $ex) {
+    error_log('eliminar_ruta.php (update): ' . $ex->getMessage());
+    $_SESSION['message'] = 'No se pudo eliminar la ruta.';
 }
 
-// Eliminar la carpeta asociada a la ruta: solo una subcarpeta de rutas_st, nunca rutas_st entera
-$baseRutas = realpath(__DIR__ . '/../skitouring/rutas_st');
-$carpeta = basename(str_replace('\\', '/', (string) ($ruta['ruta_carpeta'] ?? '')));
-if ($baseRutas !== false && $carpeta !== '' && $carpeta !== '.' && $carpeta !== '..') {
-    $rutaCarpeta = realpath($baseRutas . DIRECTORY_SEPARATOR . $carpeta);
-    if ($rutaCarpeta !== false && $rutaCarpeta !== $baseRutas
-        && strpos($rutaCarpeta, $baseRutas . DIRECTORY_SEPARATOR) === 0) {
-        deleteDirectory($rutaCarpeta);
-    }
-}
+$conn->close();
 
-// Eliminar la ruta del array y guardar el JSON
-unset($rutas[$rutaIndex]);
-$rutas = array_values($rutas);
-file_put_contents($jsonFilePath, json_encode($rutas, JSON_PRETTY_PRINT), LOCK_EX);
-
-$_SESSION['message'] = 'Ruta eliminada.';
 header('Location: ' . $destino);
 exit();

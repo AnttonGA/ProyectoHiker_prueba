@@ -53,10 +53,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 // Token de recuperación criptográficamente seguro (64 caracteres hex)
                 $token = bin2hex(random_bytes(32));
 
-                // TODO esquema: el SELECT usa `email`/`username` pero aquí se actualiza `token` filtrando por `mail`;
-                // database/schema.sql no tiene columnas `token` ni `mail`. Confirmar con la BD real.
-                $updateStmt = $conn->prepare("UPDATE usuarios SET token = ? WHERE mail = ?");
-                $updateStmt->bind_param("ss", $token, $email);
+                // En la BD solo se guarda el hash del token y caduca en 1 hora
+                // (columnas de database/migration_seguridad.sql)
+                $tokenHash = hash('sha256', $token);
+                $updateStmt = $conn->prepare(
+                    "UPDATE usuarios SET reset_token_hash = ?, reset_expira = DATE_ADD(NOW(), INTERVAL 1 HOUR)
+                     WHERE email = ? AND username = ?"
+                );
+                $updateStmt->bind_param("sss", $tokenHash, $email, $usuario);
                 $updateStmt->execute();
                 $updateStmt->close();
 

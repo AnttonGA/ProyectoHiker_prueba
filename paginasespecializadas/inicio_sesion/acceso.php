@@ -37,7 +37,9 @@ if ($usuario === '' || $password === '') {
 
 try {
     $stmt = $conn->prepare(
-        "SELECT id, username, email, password_hash, rol FROM usuarios WHERE (username = ? OR email = ?) AND activo = 1"
+        "SELECT id, username, email, password_hash, rol, email_verificado,
+                (bloqueado_hasta IS NOT NULL AND bloqueado_hasta > NOW()) AS bloqueado
+         FROM usuarios WHERE (username = ? OR email = ?) AND activo = 1"
     );
     if (!$stmt) {
         throw new RuntimeException('prepare: ' . $conn->error);
@@ -48,7 +50,40 @@ try {
     $fila   = $result->fetch_assoc();
     $stmt->close();
 
-    if ($fila && password_verify($password, $fila['password_hash'])) {
+    // Cuenta bloqueada temporalmente por demasiados intentos fallidos
+    if ($fila && (int) $fila['bloqueado']) {
+        $response['message'] = 'Demasiados intentos fallidos. Inténtalo de nuevo dentro de 15 minutos.';
+        echo json_encode($response);
+        exit();
+    }
+
+    $passwordOk = $fila && password_verify($password, $fila['password_hash']);
+
+    if ($fila && !$passwordOk) {
+        // 5 fallos seguidos → bloqueo de 15 minutos
+        $upd = $conn->prepare(
+            "UPDATE usuarios
+                SET intentos_login = intentos_login + 1,
+                    bloqueado_hasta = IF(intentos_login + 1 >= 5, DATE_ADD(NOW(), INTERVAL 15 MINUTE), bloqueado_hasta)
+              WHERE id = ?"
+        );
+        $upd->bind_param('i', $fila['id']);
+        $upd->execute();
+        $upd->close();
+    }
+
+    if ($passwordOk && !(int) $fila['email_verificado']) {
+        $response['message'] = 'Tu cuenta aún no está verificada. Revisa tu correo y pulsa el enlace de verificación.';
+        echo json_encode($response);
+        exit();
+    }
+
+    if ($passwordOk) {
+        $upd = $conn->prepare("UPDATE usuarios SET intentos_login = 0, bloqueado_hasta = NULL, ultimo_acceso = NOW() WHERE id = ?");
+        $upd->bind_param('i', $fila['id']);
+        $upd->execute();
+        $upd->close();
+
         // Nuevo identificador de sesión (evita fijación de sesión) y nuevo token CSRF
         session_regenerate_id(true);
         unset($_SESSION['csrf_token']);

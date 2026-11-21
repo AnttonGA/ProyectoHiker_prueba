@@ -3,57 +3,81 @@ require_once __DIR__ . '/../../includes/security.php';
 secure_session_start();
 include('../inicio_sesion/conexion.php');
 
-// TODO esquema: se comprueba el rol 'A' (esquema antiguo); database/schema.sql usa 'admin' y acceso.php guarda el rol tal cual viene de la BD.
-if (!isset($_SESSION['rol']) || $_SESSION['rol'] != 'A') {
+if (!is_admin()) {
     header('Location: ../inicio_sesion/gestion.php');
     exit();
 }
 
-// Obtener usuarios desde la base de datos
-$sqlUsuarios = "SELECT id FROM usuarios";
-$resultUsuarios = $conn->query($sqlUsuarios);
-$totalUsuarios = $resultUsuarios->num_rows;
-
-// Obtener rutas desde el archivo JSON
-// TODO esquema: migrar a BD (tabla rutas). rutas.json ya no existe en esta copia.
-$jsonFile = '../skitouring/javascript/rutas.json';
-$rutas = is_readable($jsonFile) ? json_decode(file_get_contents($jsonFile), true) : [];
-if (!is_array($rutas)) {
-    $rutas = [];
+/** Ejecuta una consulta preparada sin parámetros y devuelve todas las filas. */
+function consulta(mysqli $conn, string $sql): array {
+    $stmt = $conn->prepare($sql);
+    $stmt->execute();
+    $filas = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+    $stmt->close();
+    return $filas;
 }
 
-// Calcular estadísticas de rutas
+$errorMsg = '';
+$usuariosStats = ['total' => 0, 'activos' => 0, 'verificados' => 0];
+$rutasPorEstado = ['publicada' => 0, 'borrador' => 0, 'eliminada' => 0];
 $rutasPorTipo = [];
 $rutasPopulares = [];
+$totales = ['favoritos' => 0, 'completadas' => 0, 'chats' => 0];
 
-foreach ($rutas as $ruta) {
-    if (!is_array($ruta) || !isset($ruta['tipo_ruta'])) {
-        continue;
+try {
+    $fila = consulta($conn,
+        "SELECT COUNT(*) AS total,
+                COALESCE(SUM(activo = 1), 0) AS activos,
+                COALESCE(SUM(email_verificado = 1), 0) AS verificados
+           FROM usuarios"
+    )[0] ?? [];
+    foreach ($usuariosStats as $k => $_) {
+        $usuariosStats[$k] = (int) ($fila[$k] ?? 0);
     }
-    // Agrupar rutas por tipo
-    if (!isset($rutasPorTipo[$ruta['tipo_ruta']])) {
-        $rutasPorTipo[$ruta['tipo_ruta']] = 0;
-    }
-    $rutasPorTipo[$ruta['tipo_ruta']]++;
 
-    // Rutas populares basadas en el número de vistas
-    if (!isset($ruta['views'])) {
-        $ruta['views'] = 0; // Si no hay vistas registradas, asigna 0
+    foreach (consulta($conn, "SELECT estado, COUNT(*) AS n FROM rutas GROUP BY estado") as $f) {
+        $rutasPorEstado[$f['estado']] = (int) $f['n'];
     }
-    $rutasPopulares[] = $ruta;
+
+    foreach (consulta($conn, "SELECT tipo_ruta, COUNT(*) AS n FROM rutas WHERE estado <> 'eliminada' GROUP BY tipo_ruta ORDER BY n DESC") as $f) {
+        $rutasPorTipo[ucfirst(str_replace('_', ' ', (string) $f['tipo_ruta']))] = (int) $f['n'];
+    }
+
+    $rutasPopulares = consulta($conn,
+        "SELECT r.id, r.titulo, rp.view_count AS views
+           FROM route_popularity rp
+           JOIN rutas r ON r.id = rp.ruta_id
+          WHERE r.estado <> 'eliminada'
+          ORDER BY rp.view_count DESC, r.id
+          LIMIT 10"
+    );
+
+    $fila = consulta($conn,
+        "SELECT (SELECT COUNT(*) FROM user_favorites) AS favoritos,
+                (SELECT COUNT(*) FROM user_completed) AS completadas,
+                (SELECT COUNT(*) FROM chat_sessions)  AS chats"
+    )[0] ?? [];
+    foreach ($totales as $k => $_) {
+        $totales[$k] = (int) ($fila[$k] ?? 0);
+    }
+} catch (Throwable $ex) {
+    error_log('statistics.php: ' . $ex->getMessage());
+    $errorMsg = 'No se pudieron cargar todas las estadísticas.';
 }
 
-usort($rutasPopulares, function ($a, $b) {
-    return $b['views'] - $a['views'];
-});
-
-$rutasPopulares = array_slice($rutasPopulares, 0, 5);
+$totalRutas = array_sum($rutasPorEstado);
 
 // Convertir datos a JSON para usar en Chart.js
 // Flags para que el JSON pueda incrustarse con seguridad dentro de <script>
 $jsonFlags = JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT;
-$rutasPorTipoJson = json_encode($rutasPorTipo, $jsonFlags);
-$rutasPopularesJson = json_encode($rutasPopulares, $jsonFlags);
+$rutasPorTipoJson = json_encode([
+    'labels' => array_keys($rutasPorTipo),
+    'data'   => array_values($rutasPorTipo),
+], $jsonFlags);
+
+function n(int $v): string {
+    return number_format($v, 0, ',', '.');
+}
 ?>
 
 <!DOCTYPE html>
@@ -63,38 +87,80 @@ $rutasPopularesJson = json_encode($rutasPopulares, $jsonFlags);
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Estadísticas de la Web</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 </head>
 <body>
     <?php include('navbar.php'); ?>
 
-    <div class="container mt-5">
+    <div class="container mt-5 mb-5">
         <h1>Estadísticas de la Web</h1>
-        <div class="row">
+        <?php if ($errorMsg !== ''): ?>
+            <div class="alert alert-warning"><?php echo e($errorMsg); ?></div>
+        <?php endif; ?>
+
+        <div class="row g-3 mb-3">
             <div class="col-md-4">
-                <div class="card mb-3 h-100">
+                <div class="card h-100">
                     <div class="card-body">
-                        <h5 class="card-title">Número de Usuarios</h5>
-                        <p class="card-text">Total de usuarios registrados: <?php echo (int) $totalUsuarios; ?></p>
+                        <h5 class="card-title">Usuarios</h5>
+                        <p class="card-text mb-1">Registrados: <strong><?php echo e(n($usuariosStats['total'])); ?></strong></p>
+                        <p class="card-text mb-1">Activos: <strong><?php echo e(n($usuariosStats['activos'])); ?></strong></p>
+                        <p class="card-text">Email verificado: <strong><?php echo e(n($usuariosStats['verificados'])); ?></strong></p>
                     </div>
                 </div>
             </div>
-            <div class="col-md-8">
-                <div class="card mb-3 h-100">
+            <div class="col-md-4">
+                <div class="card h-100">
                     <div class="card-body">
-                        <h5 class="card-title">Rutas por Tipo</h5>
-                        <canvas id="rutasPorTipoChart"></canvas>
+                        <h5 class="card-title">Rutas</h5>
+                        <p class="card-text mb-1">Total: <strong><?php echo e(n($totalRutas)); ?></strong></p>
+                        <?php foreach ($rutasPorEstado as $estado => $num): ?>
+                            <p class="card-text mb-1"><?php echo e(ucfirst($estado)); ?>: <strong><?php echo e(n($num)); ?></strong></p>
+                        <?php endforeach; ?>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">Actividad</h5>
+                        <p class="card-text mb-1">Favoritos: <strong><?php echo e(n($totales['favoritos'])); ?></strong></p>
+                        <p class="card-text mb-1">Rutas completadas: <strong><?php echo e(n($totales['completadas'])); ?></strong></p>
+                        <p class="card-text">Sesiones de chat: <strong><?php echo e(n($totales['chats'])); ?></strong></p>
                     </div>
                 </div>
             </div>
         </div>
 
-        <div class="row">
-            <div class="col-md-6">
-                <div class="card mb-3 h-100">
+        <div class="row g-3">
+            <div class="col-lg-7">
+                <div class="card h-100">
                     <div class="card-body">
-                        <h5 class="card-title">Rutas Más Populares</h5>
-                        <canvas id="rutasPopularesChart"></canvas>
+                        <h5 class="card-title">Rutas por Tipo <small class="text-muted">(sin eliminadas)</small></h5>
+                        <canvas id="rutasPorTipoChart"></canvas>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-5">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">Top 10 Rutas Más Vistas</h5>
+                        <?php if (!$rutasPopulares): ?>
+                            <p class="text-muted">Todavía no hay datos de visitas.</p>
+                        <?php else: ?>
+                            <table class="table table-sm table-striped mb-0">
+                                <thead><tr><th>#</th><th>Título</th><th class="text-end">Vistas</th></tr></thead>
+                                <tbody>
+                                    <?php foreach ($rutasPopulares as $i => $r): ?>
+                                        <tr>
+                                            <td><?php echo (int) $i + 1; ?></td>
+                                            <td><a href="../skitouring/ruta.html?id=<?php echo (int) $r['id']; ?>" target="_blank" rel="noopener"><?php echo e($r['titulo']); ?></a></td>
+                                            <td class="text-end"><?php echo e(n((int) $r['views'])); ?></td>
+                                        </tr>
+                                    <?php endforeach; ?>
+                                </tbody>
+                            </table>
+                        <?php endif; ?>
                     </div>
                 </div>
             </div>
@@ -104,54 +170,27 @@ $rutasPopularesJson = json_encode($rutasPopulares, $jsonFlags);
     <script>
         // Datos para el gráfico de rutas por tipo
         var rutasPorTipo = <?php echo $rutasPorTipoJson; ?>;
-        var ctx1 = document.getElementById('rutasPorTipoChart').getContext('2d');
-        var rutasPorTipoChart = new Chart(ctx1, {
-            type: 'bar',
-            data: {
-                labels: Object.keys(rutasPorTipo),
-                datasets: [{
-                    label: 'Número de Rutas',
-                    data: Object.values(rutasPorTipo),
-                    backgroundColor: 'rgba(54, 162, 235, 0.2)',
-                    borderColor: 'rgba(54, 162, 235, 1)',
-                    borderWidth: 1
-                }]
-            },
-            options: {
-                scales: {
-                    y: {
-                        beginAtZero: true
-                    }
+        if (window.Chart) {
+            new Chart(document.getElementById('rutasPorTipoChart'), {
+                type: 'bar',
+                data: {
+                    labels: rutasPorTipo.labels,
+                    datasets: [{
+                        label: 'Número de Rutas',
+                        data: rutasPorTipo.data,
+                        backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    plugins: { legend: { display: false } },
+                    scales: { y: { beginAtZero: true } }
                 }
-            }
-        });
-
-        // Datos para el gráfico de rutas más populares
-        var rutasPopulares = <?php echo $rutasPopularesJson; ?>;
-        var ctx2 = document.getElementById('rutasPopularesChart').getContext('2d');
-        var rutasPopularesChart = new Chart(ctx2, {
-            type: 'bar',
-            data: {
-                labels: rutasPopulares.map(ruta => ruta.title),
-                datasets: [{
-                    label: 'Vistas',
-                    data: rutasPopulares.map(ruta => ruta.views),
-                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
-                    borderColor: 'rgba(75, 192, 192, 1)',
-                    borderWidth: 1
-                }]
-            },
-            options: {
-                scales: {
-                    y: {
-                        beginAtZero: true
-                    }
-                }
-            }
-        });
+            });
+        }
     </script>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
-

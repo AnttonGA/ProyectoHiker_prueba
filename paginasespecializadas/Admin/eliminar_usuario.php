@@ -3,8 +3,7 @@ require_once __DIR__ . '/../../includes/security.php';
 secure_session_start();
 include('../inicio_sesion/conexion.php');
 
-// TODO esquema: se comprueba el rol 'A' (esquema antiguo); database/schema.sql usa 'admin' y acceso.php guarda el rol tal cual viene de la BD.
-if (!isset($_SESSION['rol']) || $_SESSION['rol'] != 'A') {
+if (!is_admin()) {
     header('Location: ../inicio_sesion/gestion.php');
     exit();
 }
@@ -17,7 +16,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 csrf_verify();
 
 $id = filter_input(INPUT_POST, 'id', FILTER_VALIDATE_INT);
-if (!$id) {
+if (!$id || $id < 1) {
     http_response_code(400);
     exit('Identificador de usuario no válido.');
 }
@@ -31,15 +30,29 @@ if ($miId === $id) {
 }
 
 try {
-    // Eliminar el usuario de la base de datos
-    $stmt = $conn->prepare("DELETE FROM usuarios WHERE id = ?");
+    // rutas.usuario_id tiene ON DELETE CASCADE: borrar a un autor borraría todas sus rutas.
+    // Por eso no se elimina a usuarios con rutas; se recomienda desactivarlos.
+    $stmt = $conn->prepare("SELECT COUNT(*) FROM rutas WHERE usuario_id = ?");
     $stmt->bind_param("i", $id);
-    $ok = $stmt->execute();
+    $stmt->execute();
+    $stmt->bind_result($numRutas);
+    $stmt->fetch();
     $stmt->close();
-    $_SESSION['message'] = $ok ? "Usuario eliminado exitosamente" : "Error al eliminar el usuario";
-} catch (Throwable $e) {
-    error_log('eliminar_usuario.php: ' . $e->getMessage());
-    $_SESSION['message'] = "Error al eliminar el usuario";
+
+    if ((int) $numRutas > 0) {
+        $_SESSION['message'] = "No se puede eliminar un usuario que tiene rutas (se borrarían en cascada). Desactívalo desde Editar en su lugar.";
+    } else {
+        $stmt = $conn->prepare("DELETE FROM usuarios WHERE id = ?");
+        $stmt->bind_param("i", $id);
+        $stmt->execute();
+        $borrados = $stmt->affected_rows;
+        $stmt->close();
+        $_SESSION['message'] = $borrados > 0 ? "Usuario eliminado exitosamente" : "El usuario no existe";
+    }
+} catch (Throwable $ex) {
+    // p. ej. una restricción de clave foránea (error 1451)
+    error_log('eliminar_usuario.php: ' . $ex->getMessage());
+    $_SESSION['message'] = "No se pudo eliminar el usuario. Si tiene datos asociados, desactívalo desde Editar en su lugar.";
 }
 
 $conn->close();

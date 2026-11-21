@@ -40,3 +40,6 @@ Thumbs.db
 
 # ── PHP ──────────────────────────────────────────────────────────────────────
 *.cache
+
+# Credenciales de prueba locales
+.credenciales_prueba

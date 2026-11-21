@@ -140,14 +140,13 @@ if (empty($_POST['usuario'])) {
         // Token de verificación del correo (antes se usaba $token sin definir)
         $token = bin2hex(random_bytes(32));
 
-        // TODO esquema: el INSERT usa las columnas de database/schema.sql (username, email, password_hash, rol)
-        // y no guarda el token, pero verificar.php busca usuarios por `token` y marca `estado`. Hasta confirmar
-        // el esquema real, el enlace de verificación no podrá validarse.
-        // Insertar el usuario en la base de datos usando prepared statement
+        // Usuario nuevo sin verificar; verificar.php lo activa con el token del correo
+        // (columna token_verificacion: database/migration_seguridad.sql)
         $stmt = $conn->prepare(
-            "INSERT INTO usuarios (username, email, password_hash, rol) VALUES (?, ?, ?, 'usuario')"
+            "INSERT INTO usuarios (username, email, password_hash, rol, email_verificado, token_verificacion)
+             VALUES (?, ?, ?, 'usuario', 0, ?)"
         );
-        $stmt->bind_param("sss", $usuario, $email, $password);
+        $stmt->bind_param("ssss", $usuario, $email, $password, $token);
 
         $insertOk = false;
         try {

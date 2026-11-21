@@ -32,22 +32,15 @@ require_once 'conexion.php';
         // Se rechazan tokens vacíos o demasiado cortos (los válidos son bin2hex(random_bytes(32)))
         if ($token !== '' && strlen($token) >= 32) {
             try {
-                // TODO esquema: usa las columnas `token` y `estado` ('A' = activo); database/schema.sql no
-                // tiene `token` y usa `activo`/`email_verificado`. Confirmar con la BD real.
-                $stmt = $conn->prepare("SELECT id FROM usuarios WHERE token = ?");
+                // Marca el email como verificado y anula el token (un solo uso)
+                $stmt = $conn->prepare(
+                    "UPDATE usuarios SET email_verificado = 1, token_verificacion = NULL
+                     WHERE token_verificacion = ? AND email_verificado = 0"
+                );
                 $stmt->bind_param("s", $token);
                 $stmt->execute();
-                $stmt->store_result();
-                $existe = $stmt->num_rows > 0;
+                $tokenValido = $stmt->affected_rows === 1;
                 $stmt->close();
-
-                if ($existe) {
-                    // Actualizar el estado del usuario a 'A' (Activo)
-                    $stmt = $conn->prepare("UPDATE usuarios SET estado = 'A', token = '' WHERE token = ?");
-                    $stmt->bind_param("s", $token);
-                    $tokenValido = $stmt->execute();
-                    $stmt->close();
-                }
             } catch (Throwable $ex) {
                 error_log('verificar.php: ' . $ex->getMessage());
                 $tokenValido = false;

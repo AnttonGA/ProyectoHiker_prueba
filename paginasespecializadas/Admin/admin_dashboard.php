@@ -3,9 +3,8 @@ require_once __DIR__ . '/../../includes/security.php';
 secure_session_start();
 include('../inicio_sesion/conexion.php');
 
-// TODO esquema: se comprueba el rol 'A' (esquema antiguo); database/schema.sql usa 'admin' y acceso.php guarda el rol tal cual viene de la BD.
-if (!isset($_SESSION['rol']) || $_SESSION['rol'] != 'A') {
-    header('Location: ../inicio_sesion/login.php');
+if (!is_admin()) {
+    header('Location: ../inicio_sesion/gestion.php');
     exit();
 }
 ?>
@@ -44,9 +43,9 @@ if (!isset($_SESSION['rol']) || $_SESSION['rol'] != 'A') {
         <div class="col-md-3">
             <div class="card mb-3 h-100">
                 <div class="card-body">
-                    <h5 class="card-title">Configuraciones</h5>
-                    <p class="card-text">Configura la plataforma según tus necesidades.</p>
-                    <a href="configuraciones.php" class="btn btn-primary">Configuraciones</a>
+                    <h5 class="card-title">Ver la web</h5>
+                    <p class="card-text">Abre el buscador de rutas tal como lo ven los usuarios.</p>
+                    <a href="../skitouring/skitouring.html" class="btn btn-primary">Ir al buscador</a>
                 </div>
             </div>
         </div>

@@ -337,7 +337,13 @@ PROMPT;
             throw new AIException('cURL error: ' . $curlErr, 'API_CONNECTION_ERROR');
         }
         if ($httpCode !== 200) {
-            $this->logger->error('Claude API error', ['code' => $httpCode]);
+            // Guardar también el tipo y el mensaje de error de la API (nunca incluyen la clave)
+            $errBody = json_decode((string) $resp, true);
+            $this->logger->error('Claude API error', [
+                'code'    => $httpCode,
+                'type'    => $errBody['error']['type'] ?? null,
+                'message' => isset($errBody['error']['message']) ? mb_substr((string) $errBody['error']['message'], 0, 300) : null,
+            ]);
             throw new AIException("Claude API HTTP $httpCode", 'API_RESPONSE_ERROR');
         }
 

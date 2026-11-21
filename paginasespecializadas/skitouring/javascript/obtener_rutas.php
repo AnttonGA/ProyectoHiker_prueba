@@ -70,7 +70,7 @@ try {
                   FROM rutas r
                   LEFT JOIN ruta_imagenes ri ON r.id = ri.ruta_id
                   LEFT JOIN route_popularity rp ON r.id = rp.ruta_id
-                  WHERE r.id = ?
+                  WHERE r.id = ? AND r.estado = 'publicada'
                   GROUP BY r.id";
         
         $stmt = $conn->prepare($query);
@@ -105,6 +105,7 @@ try {
                   FROM rutas r
                   LEFT JOIN ruta_imagenes ri ON r.id = ri.ruta_id
                   LEFT JOIN route_popularity rp ON r.id = rp.ruta_id
+                  WHERE r.estado = 'publicada'
                   GROUP BY r.id
                   ORDER BY rp.popularity_score DESC";
 

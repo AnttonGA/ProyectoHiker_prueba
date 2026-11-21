@@ -87,7 +87,7 @@ const AI_STEP = {
 const _user        = document.getElementById('onboarding-section')?.dataset.user ?? 'default';
 const LS_DISMISSED = `kahir_onb_dismissed_${_user}`;
 const LS_AI_DONE   = `kahir_onb_ai_${_user}`;
-const CHAT_URL     = '../../chat.php';
+const CHAT_URL     = '../../index.php';
 const LS_PREFILL   = 'kahir_chat_prefill';
 
 let _completed = new Set();

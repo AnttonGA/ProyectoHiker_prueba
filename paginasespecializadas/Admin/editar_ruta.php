@@ -4,166 +4,334 @@ secure_session_start();
 include('../inicio_sesion/conexion.php');
 
 // Verificar si el usuario está logueado y es administrador
-// TODO esquema: se comprueba el rol 'A' (esquema antiguo); database/schema.sql usa 'admin'.
-if (!isset($_SESSION['rol']) || $_SESSION['rol'] != 'A') {
+if (!is_admin()) {
     header('Location: ../inicio_sesion/gestion.php');
     exit();
 }
 
 $id = filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT);
-if (!$id) {
+if (!$id || $id < 1) {
     http_response_code(400);
     exit('Identificador de ruta no válido.');
 }
 
-// TODO esquema: migrar a BD (tabla rutas). Se mantiene de momento la lógica sobre rutas.json.
-$jsonFilePath = __DIR__ . '/../skitouring/javascript/rutas.json';
-$rutas = is_readable($jsonFilePath) ? json_decode(file_get_contents($jsonFilePath), true) : [];
-if (!is_array($rutas)) {
-    $rutas = [];
+// Listas blancas = valores de los ENUM de la tabla rutas (valor => etiqueta)
+$tiposValidos = [
+    'ski_touring'   => 'Ski Touring',
+    'hiking'        => 'Hiking',
+    'cycle_touring' => 'Cycle Touring',
+    'climbing'      => 'Climbing',
+    'snowshoeing'   => 'Snowshoeing',
+    'via_ferrata'   => 'Vía ferrata',
+    'btt'           => 'BTT',
+    'kayaking'      => 'Kayaking',
+];
+$ubicacionesValidas = [
+    'Western_Pyrenees' => 'Pirineo Occidental',
+    'Central_Pyrenees' => 'Pirineo Central',
+    'Eastern_Pyrenees' => 'Pirineo Oriental',
+    'Other'            => 'Otra',
+];
+$dificultadesValidas = [
+    'beginner'     => 'Principiante',
+    'intermediate' => 'Intermedio',
+    'advanced'     => 'Avanzado',
+    'expert'       => 'Experto',
+];
+$estadosValidos = [
+    'publicada' => 'Publicada',
+    'borrador'  => 'Borrador',
+    'eliminada' => 'Eliminada',
+];
+
+function cargar_ruta(mysqli $conn, int $id): ?array {
+    $stmt = $conn->prepare(
+        "SELECT id, titulo, descripcion, tipo_ruta, ubicacion, dificultad,
+                distancia_km, elevacion_ganada, duracion_horas, estado
+           FROM rutas WHERE id = ?"
+    );
+    $stmt->bind_param("i", $id);
+    $stmt->execute();
+    $fila = $stmt->get_result()->fetch_assoc();
+    $stmt->close();
+    return $fila ?: null;
 }
 
-// Buscar la ruta correspondiente
-$rutaIndex = null;
-foreach ($rutas as $index => $r) {
-    if (is_array($r) && isset($r['id']) && (string) $r['id'] === (string) $id) {
-        $rutaIndex = $index;
-        break;
+/**
+ * Valida un número >= 0 (vacío = NULL). Devuelve [ok, valor].
+ */
+function numero_opcional(string $valor, float $max, bool $entero): array {
+    $valor = trim(str_replace(',', '.', $valor));
+    if ($valor === '') {
+        return [true, null];
     }
+    $num = $entero ? filter_var($valor, FILTER_VALIDATE_INT) : filter_var($valor, FILTER_VALIDATE_FLOAT);
+    if ($num === false || $num < 0 || $num > $max) {
+        return [false, null];
+    }
+    return [true, $entero ? (int) $num : round((float) $num, 2)];
 }
 
-if ($rutaIndex === null) {
+try {
+    $ruta = cargar_ruta($conn, $id);
+} catch (Throwable $ex) {
+    error_log('editar_ruta.php (select): ' . $ex->getMessage());
+    http_response_code(500);
+    exit('Error al cargar la ruta.');
+}
+
+if ($ruta === null) {
     http_response_code(404);
     exit('Ruta no encontrada.');
 }
-$ruta = &$rutas[$rutaIndex];
-if (!isset($ruta['imagenes']) || !is_array($ruta['imagenes'])) {
-    $ruta['imagenes'] = [];
-}
 
-$errorMsg = '';
+$errores = [];
+$okMsg = '';
 
-if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     csrf_verify();
 
     if (isset($_POST['update_route'])) {
-        // Actualizar la ruta
-        $ruta['title'] = (string) ($_POST['title'] ?? '');
-        $ruta['description'] = (string) ($_POST['description'] ?? '');
-        $ruta['elevation'] = (string) ($_POST['elevation'] ?? '');
-        $ruta['duration'] = (string) ($_POST['duration'] ?? '');
-        $ruta['difficulty'] = (string) ($_POST['difficulty'] ?? '');
-        $ruta['length'] = (string) ($_POST['length'] ?? '');
-        $ruta['tipo_ruta'] = (string) ($_POST['tipo_ruta'] ?? '');
+        $titulo      = trim((string) ($_POST['titulo'] ?? ''));
+        $descripcion = (string) ($_POST['descripcion'] ?? '');
+        $tipoRuta    = (string) ($_POST['tipo_ruta'] ?? '');
+        $ubicacion   = (string) ($_POST['ubicacion'] ?? '');
+        $dificultad  = (string) ($_POST['dificultad'] ?? '');
+        $estado      = (string) ($_POST['estado'] ?? '');
 
-        // Guardar cambios en el archivo JSON
-        file_put_contents($jsonFilePath, json_encode($rutas, JSON_PRETTY_PRINT), LOCK_EX);
-        header("Location: routes_management.php");
-        exit();
+        [$okDist, $distancia] = numero_opcional((string) ($_POST['distancia_km'] ?? ''), 9999.99, false);
+        [$okElev, $elevacion] = numero_opcional((string) ($_POST['elevacion_ganada'] ?? ''), 100000, true);
+        [$okDur, $duracion]   = numero_opcional((string) ($_POST['duracion_horas'] ?? ''), 999.99, false);
+
+        $lenTitulo = mb_strlen($titulo, 'UTF-8');
+        if ($lenTitulo < 1 || $lenTitulo > 255) {
+            $errores[] = 'El título es obligatorio (máximo 255 caracteres).';
+        }
+        if (mb_strlen($descripcion, 'UTF-8') > 65000) {
+            $errores[] = 'La descripción es demasiado larga.';
+        }
+        if (!array_key_exists($tipoRuta, $tiposValidos)
+            || !array_key_exists($ubicacion, $ubicacionesValidas)
+            || !array_key_exists($dificultad, $dificultadesValidas)
+            || !array_key_exists($estado, $estadosValidos)) {
+            $errores[] = 'Datos no válidos.';
+        }
+        if (!$okDist) {
+            $errores[] = 'La distancia debe ser un número entre 0 y 9999,99.';
+        }
+        if (!$okElev) {
+            $errores[] = 'El desnivel debe ser un número entero mayor o igual que 0.';
+        }
+        if (!$okDur) {
+            $errores[] = 'La duración debe ser un número entre 0 y 999,99.';
+        }
+
+        if (!$errores) {
+            try {
+                $stmt = $conn->prepare(
+                    "UPDATE rutas
+                        SET titulo = ?, descripcion = ?, tipo_ruta = ?, ubicacion = ?, dificultad = ?,
+                            distancia_km = ?, elevacion_ganada = ?, duracion_horas = ?, estado = ?
+                      WHERE id = ?"
+                );
+                $stmt->bind_param(
+                    "sssssdidsi",
+                    $titulo, $descripcion, $tipoRuta, $ubicacion, $dificultad,
+                    $distancia, $elevacion, $duracion, $estado, $id
+                );
+                $stmt->execute();
+                $stmt->close();
+                $_SESSION['message'] = 'Ruta actualizada correctamente.';
+                header("Location: routes_management.php");
+                exit();
+            } catch (Throwable $ex) {
+                error_log('editar_ruta.php (update): ' . $ex->getMessage());
+                $errores[] = 'Error al actualizar la ruta.';
+            }
+        }
+
+        // Volver a mostrar lo enviado
+        $ruta = array_merge($ruta, [
+            'titulo' => $titulo,
+            'descripcion' => $descripcion,
+            'distancia_km' => $_POST['distancia_km'] ?? '',
+            'elevacion_ganada' => $_POST['elevacion_ganada'] ?? '',
+            'duracion_horas' => $_POST['duracion_horas'] ?? '',
+        ]);
+        foreach (['tipo_ruta' => $tiposValidos, 'ubicacion' => $ubicacionesValidas,
+                  'dificultad' => $dificultadesValidas, 'estado' => $estadosValidos] as $campo => $lista) {
+            $v = (string) ($_POST[$campo] ?? '');
+            if (array_key_exists($v, $lista)) {
+                $ruta[$campo] = $v;
+            }
+        }
     }
 
     if (isset($_POST['delete_image'])) {
-        $imageToDelete = (string) ($_POST['image_to_delete'] ?? '');
-
-        // Solo se permite borrar una imagen que figure en esta ruta...
-        if ($imageToDelete === '' || !in_array($imageToDelete, $ruta['imagenes'], true)) {
+        $imagenId = filter_input(INPUT_POST, 'image_id', FILTER_VALIDATE_INT);
+        if (!$imagenId || $imagenId < 1) {
             http_response_code(400);
             exit('Imagen no válida.');
         }
 
-        // ...y cuyo fichero esté realmente dentro de skitouring/rutas_st (sin path traversal)
-        $baseRutas = realpath(__DIR__ . '/../skitouring/rutas_st');
-        $imagePath = realpath(__DIR__ . '/../skitouring/' . $imageToDelete);
-        $dentroDeRutas = $baseRutas !== false && $imagePath !== false
-            && strpos($imagePath, $baseRutas . DIRECTORY_SEPARATOR) === 0 && is_file($imagePath);
+        try {
+            // Solo una imagen que pertenezca a ESTA ruta
+            $stmt = $conn->prepare("SELECT imagen_path FROM ruta_imagenes WHERE id = ? AND ruta_id = ?");
+            $stmt->bind_param("ii", $imagenId, $id);
+            $stmt->execute();
+            $img = $stmt->get_result()->fetch_assoc();
+            $stmt->close();
 
-        if ($dentroDeRutas && unlink($imagePath)) {
-            // Actualizar las imágenes de la ruta correspondiente
-            $ruta['imagenes'] = array_values(array_filter($ruta['imagenes'], function ($img) use ($imageToDelete) {
-                return $img !== $imageToDelete;
-            }));
+            if (!$img) {
+                http_response_code(400);
+                exit('Imagen no válida.');
+            }
 
-            // Guardar los cambios en el archivo JSON
-            file_put_contents($jsonFilePath, json_encode($rutas, JSON_PRETTY_PRINT), LOCK_EX);
+            // El fichero debe estar realmente dentro de skitouring/rutas_st (sin path traversal)
+            $relativa  = (string) $img['imagen_path'];
+            $baseRutas = realpath(__DIR__ . '/../skitouring/rutas_st');
+            $imagePath = realpath(__DIR__ . '/../skitouring/' . $relativa);
+            $dentroDeRutas = $baseRutas !== false && $imagePath !== false
+                && strpos($imagePath, $baseRutas . DIRECTORY_SEPARATOR) === 0 && is_file($imagePath);
+            // Si el fichero ya no existe, se permite limpiar el registro siempre que la ruta no intente salir del directorio
+            $ficheroAusente = $imagePath === false
+                && strpos(str_replace('\\', '/', $relativa), 'rutas_st/') === 0
+                && strpos($relativa, '..') === false;
 
-            // Redirigir después de eliminar
-            header("Location: editar_ruta.php?id=" . $id);
-            exit();
+            if ($dentroDeRutas || $ficheroAusente) {
+                $stmt = $conn->prepare("DELETE FROM ruta_imagenes WHERE id = ? AND ruta_id = ?");
+                $stmt->bind_param("ii", $imagenId, $id);
+                $stmt->execute();
+                $stmt->close();
+
+                if ($dentroDeRutas && !unlink($imagePath)) {
+                    error_log('editar_ruta.php: no se pudo borrar el fichero de la imagen ' . $imagenId);
+                }
+
+                header("Location: editar_ruta.php?id=" . $id);
+                exit();
+            }
+            error_log('editar_ruta.php: imagen ' . $imagenId . ' fuera de rutas_st');
+            $errores[] = 'No se pudo eliminar la imagen.';
+        } catch (Throwable $ex) {
+            error_log('editar_ruta.php (delete_image): ' . $ex->getMessage());
+            $errores[] = 'No se pudo eliminar la imagen.';
         }
-        $errorMsg = 'No se pudo eliminar la imagen.';
     }
+}
+
+// Imágenes de la ruta
+$imagenes = [];
+try {
+    $stmt = $conn->prepare("SELECT id, imagen_path FROM ruta_imagenes WHERE ruta_id = ? ORDER BY orden, id");
+    $stmt->bind_param("i", $id);
+    $stmt->execute();
+    $imagenes = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+    $stmt->close();
+} catch (Throwable $ex) {
+    error_log('editar_ruta.php (imagenes): ' . $ex->getMessage());
+    $errores[] = 'No se pudieron cargar las imágenes.';
 }
 ?>
 
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Editar Ruta</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    
 </head>
 <body>
-    
+
 <?php include('navbar.php'); ?>
     <div class="container mt-5">
-        <h1>Editar Ruta</h1>
-        <?php if ($errorMsg !== ''): ?>
-            <div class="alert alert-danger"><?php echo e($errorMsg); ?></div>
+        <h1>Editar Ruta #<?php echo (int) $id; ?></h1>
+        <?php if ($errores): ?>
+            <div class="alert alert-danger">
+                <ul class="mb-0">
+                    <?php foreach ($errores as $err): ?>
+                        <li><?php echo e($err); ?></li>
+                    <?php endforeach; ?>
+                </ul>
+            </div>
         <?php endif; ?>
-        <form method="POST" enctype="multipart/form-data">
+        <form method="POST" action="editar_ruta.php?id=<?php echo (int) $id; ?>">
             <?= csrf_field() ?>
             <div class="mb-3">
-                <label for="title" class="form-label">Título</label>
-                <input type="text" class="form-control" id="title" name="title" value="<?php echo e($ruta['title'] ?? ''); ?>" required>
+                <label for="titulo" class="form-label">Título</label>
+                <input type="text" class="form-control" id="titulo" name="titulo" maxlength="255" value="<?php echo e($ruta['titulo']); ?>" required>
             </div>
             <div class="mb-3">
-                <label for="description" class="form-label">Descripción</label>
-                <textarea class="form-control" id="description" name="description" required><?php echo e($ruta['description'] ?? ''); ?></textarea>
+                <label for="descripcion" class="form-label">Descripción</label>
+                <textarea class="form-control" id="descripcion" name="descripcion" rows="6"><?php echo e($ruta['descripcion'] ?? ''); ?></textarea>
             </div>
-            <div class="mb-3">
-                <label for="elevation" class="form-label">Elevación (m)</label>
-                <input type="number" class="form-control" id="elevation" name="elevation" value="<?php echo e($ruta['elevation'] ?? ''); ?>" step="0.01" required>
+            <div class="row">
+                <div class="col-md-4 mb-3">
+                    <label for="distancia_km" class="form-label">Distancia (km)</label>
+                    <input type="number" class="form-control" id="distancia_km" name="distancia_km" value="<?php echo e($ruta['distancia_km'] ?? ''); ?>" step="0.01" min="0" max="9999.99">
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label for="elevacion_ganada" class="form-label">Desnivel positivo (m)</label>
+                    <input type="number" class="form-control" id="elevacion_ganada" name="elevacion_ganada" value="<?php echo e($ruta['elevacion_ganada'] ?? ''); ?>" step="1" min="0">
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label for="duracion_horas" class="form-label">Duración (horas)</label>
+                    <input type="number" class="form-control" id="duracion_horas" name="duracion_horas" value="<?php echo e($ruta['duracion_horas'] ?? ''); ?>" step="0.01" min="0" max="999.99">
+                </div>
             </div>
-            <div class="mb-3">
-                <label for="duration" class="form-label">Duración (horas)</label>
-                <input type="number" class="form-control" id="duration" name="duration" value="<?php echo e($ruta['duration'] ?? ''); ?>" step="0.01" required>
+            <div class="row">
+                <div class="col-md-3 mb-3">
+                    <label for="tipo_ruta" class="form-label">Tipo de Ruta</label>
+                    <select class="form-select" id="tipo_ruta" name="tipo_ruta" required>
+                        <?php foreach ($tiposValidos as $valor => $etiqueta): ?>
+                            <option value="<?php echo e($valor); ?>" <?php if ($ruta['tipo_ruta'] === $valor) echo 'selected'; ?>><?php echo e($etiqueta); ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <label for="ubicacion" class="form-label">Ubicación</label>
+                    <select class="form-select" id="ubicacion" name="ubicacion" required>
+                        <?php foreach ($ubicacionesValidas as $valor => $etiqueta): ?>
+                            <option value="<?php echo e($valor); ?>" <?php if ($ruta['ubicacion'] === $valor) echo 'selected'; ?>><?php echo e($etiqueta); ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <label for="dificultad" class="form-label">Dificultad</label>
+                    <select class="form-select" id="dificultad" name="dificultad" required>
+                        <?php foreach ($dificultadesValidas as $valor => $etiqueta): ?>
+                            <option value="<?php echo e($valor); ?>" <?php if ($ruta['dificultad'] === $valor) echo 'selected'; ?>><?php echo e($etiqueta); ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <label for="estado" class="form-label">Estado</label>
+                    <select class="form-select" id="estado" name="estado" required>
+                        <?php foreach ($estadosValidos as $valor => $etiqueta): ?>
+                            <option value="<?php echo e($valor); ?>" <?php if ($ruta['estado'] === $valor) echo 'selected'; ?>><?php echo e($etiqueta); ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
             </div>
-            <div class="mb-3">
-                <label for="difficulty" class="form-label">Dificultad</label>
-                <select class="form-select" id="difficulty" name="difficulty" required>
-                    <option value="beginner" <?php if (($ruta['difficulty'] ?? '') == 'beginner') echo 'selected'; ?>>Principiante</option>
-                    <option value="intermediate" <?php if (($ruta['difficulty'] ?? '') == 'intermediate') echo 'selected'; ?>>Intermedio</option>
-                    <option value="advanced" <?php if (($ruta['difficulty'] ?? '') == 'advanced') echo 'selected'; ?>>Avanzado</option>
-                </select>
-            </div>
-            <div class="mb-3">
-                <label for="length" class="form-label">Longitud (km)</label>
-                <input type="number" class="form-control" id="length" name="length" value="<?php echo e($ruta['length'] ?? ''); ?>" step="0.01" required>
-            </div>
-            <div class="mb-3">
-                <label for="tipo_ruta" class="form-label">Tipo de Ruta</label>
-                <select class="form-select" id="tipo_ruta" name="tipo_ruta" required>
-                    <option value="ski_touring" <?php if (($ruta['tipo_ruta'] ?? '') == 'ski_touring') echo 'selected'; ?>>Ski Touring</option>
-                    <option value="cycle_touring" <?php if (($ruta['tipo_ruta'] ?? '') == 'cycle_touring') echo 'selected'; ?>>Cycle Touring</option>
-                    <option value="hiking" <?php if (($ruta['tipo_ruta'] ?? '') == 'hiking') echo 'selected'; ?>>Hiking</option>
-                </select>
-            </div>
-            <button type="submit" name="update_route" class="btn btn-success">Actualizar Ruta</button>
+            <button type="submit" name="update_route" value="1" class="btn btn-success">Actualizar Ruta</button>
             <a href="routes_management.php" class="btn btn-secondary">Cancelar</a>
+            <a href="../skitouring/ruta.html?id=<?php echo (int) $id; ?>" class="btn btn-outline-info" target="_blank" rel="noopener">Ver ruta</a>
         </form>
 
         <hr>
         <h2>Imágenes Subidas</h2>
+        <?php if (!$imagenes): ?>
+            <p class="text-muted">Esta ruta no tiene imágenes.</p>
+        <?php endif; ?>
         <div class="row">
-            <?php foreach ($ruta['imagenes'] as $imagen) : ?>
-                <div class="col-md-4">
-                    <img src="../skitouring/<?php echo e($imagen); ?>" class="img-thumbnail" alt="Imagen de Ruta">
-                    <form method="POST" class="mt-2">
-                        <input type="hidden" name="image_to_delete" value="<?php echo e($imagen); ?>">
+            <?php foreach ($imagenes as $imagen) : ?>
+                <div class="col-md-4 mb-3">
+                    <img src="../skitouring/<?php echo e($imagen['imagen_path']); ?>" class="img-thumbnail" alt="Imagen de Ruta">
+                    <form method="POST" action="editar_ruta.php?id=<?php echo (int) $id; ?>" class="mt-2" onsubmit="return confirm('¿Eliminar esta imagen? Se borrará el archivo.');">
                         <?= csrf_field() ?>
-                        <button type="submit" name="delete_image" class="btn btn-danger btn-sm">Eliminar Imagen</button>
+                        <input type="hidden" name="image_id" value="<?php echo (int) $imagen['id']; ?>">
+                        <button type="submit" name="delete_image" value="1" class="btn btn-danger btn-sm">Eliminar Imagen</button>
                     </form>
                 </div>
             <?php endforeach; ?>
@@ -171,9 +339,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
-   
+
 </body>
 </html>
-
-
-

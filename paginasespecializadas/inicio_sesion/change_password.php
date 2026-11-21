@@ -60,19 +60,22 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             // Los tokens se generan con bin2hex(random_bytes(32)) (64 caracteres); se rechazan los vacíos o cortos
             try {
                 if ($token !== '' && strlen($token) >= 32) {
-                    // TODO esquema: este archivo usa las columnas `token` y `password`; database/schema.sql
-                    // define `password_hash` y no tiene columna de token. Confirmar con la BD real.
-                    $stmt = $conn->prepare("SELECT id FROM usuarios WHERE token = ?");
-                    $stmt->bind_param("s", $token);
+                    // En la BD se guarda el hash SHA-256 del token y su caducidad (1 h)
+                    $tokenHash = hash('sha256', $token);
+                    $stmt = $conn->prepare("SELECT id FROM usuarios WHERE reset_token_hash = ? AND reset_expira > NOW()");
+                    $stmt->bind_param("s", $tokenHash);
                     $stmt->execute();
                     $stmt->store_result();
 
                     if ($stmt->num_rows > 0) {
-                        // Se guarda el hash de la contraseña, nunca el texto plano.
-                        // El token se vacía con '' (no NULL, por si la columna es NOT NULL); los tokens vacíos se rechazan arriba.
+                        // Se guarda el hash de la contraseña, nunca el texto plano, y el token deja de valer
                         $hash = password_hash($password, PASSWORD_DEFAULT);
-                        $stmt_update = $conn->prepare("UPDATE usuarios SET password = ?, token = '' WHERE token = ?");
-                        $stmt_update->bind_param("ss", $hash, $token);
+                        $stmt_update = $conn->prepare(
+                            "UPDATE usuarios SET password_hash = ?, reset_token_hash = NULL, reset_expira = NULL,
+                                    intentos_login = 0, bloqueado_hasta = NULL
+                             WHERE reset_token_hash = ?"
+                        );
+                        $stmt_update->bind_param("ss", $hash, $tokenHash);
 
                         if ($stmt_update->execute()) {
                             $message = 'Contraseña actualizada correctamente. <a href="gestion.php">Inicia sesion</a>';

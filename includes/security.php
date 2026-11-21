@@ -76,6 +76,18 @@ if (!function_exists('csrf_verify')) {
     }
 }
 
+if (!function_exists('is_admin')) {
+    /**
+     * ¿El usuario de la sesión es administrador?
+     * En la BD actual (kahir_db) el rol es ENUM('admin','editor','usuario','guest').
+     * Se acepta también 'A' por compatibilidad con el esquema antiguo.
+     */
+    function is_admin(): bool {
+        secure_session_start();
+        return in_array($_SESSION['rol'] ?? '', ['admin', 'A'], true);
+    }
+}
+
 if (!function_exists('e')) {
     function e($valor): string {
         return htmlspecialchars((string) ($valor ?? ''), ENT_QUOTES, 'UTF-8');

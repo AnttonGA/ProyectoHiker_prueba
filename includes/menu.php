@@ -64,8 +64,7 @@ require_once __DIR__ . '/functions.php';
           echo '<li class="nav-item"><a class="nav-link" href="' . e(root_path('paginasespecializadas/inicio_sesion/gestion.php')) . '">Log in</a></li>';
         }
         // Opciones adicionales para el rol de administrador
-        // TODO esquema: se comprueba el rol 'A' (esquema antiguo); database/schema.sql usa 'admin'.
-        if (isset($_SESSION['rol']) && $_SESSION['rol'] == 'A') {
+        if (is_admin()) {
           echo '<li class="nav-item"><a class="nav-link" href="' . e(root_path('paginasespecializadas/Admin/admin_dashboard.php')) . '">Admin Dashboard</a></li>';
         }
         if (isset($_SESSION['usuario'])) {

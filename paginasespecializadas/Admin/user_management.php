@@ -3,13 +3,28 @@ require_once __DIR__ . '/../../includes/security.php';
 secure_session_start();
 include('../inicio_sesion/conexion.php');
 
-// TODO esquema: se comprueba el rol 'A' (esquema antiguo); database/schema.sql usa 'admin' y acceso.php guarda el rol tal cual viene de la BD.
-// TODO esquema: las columnas mostradas (nombre, apellidos, mail, usuario, estado) son del esquema antiguo.
-if (isset($_SESSION['rol']) && $_SESSION['rol'] == 'A') {
+if (!is_admin()) {
+    header('Location: ../inicio_sesion/gestion.php'); // Redirige al usuario a la página de inicio de sesión si no está autorizado
+    exit();
+}
 
-    $sql = "SELECT * FROM usuarios";
-    $result = $conn->query($sql);
-    $usuarios = $result->fetch_all(MYSQLI_ASSOC);
+$miId = (int) ($_SESSION['id'] ?? 0);
+$usuarios = [];
+$errorMsg = '';
+
+try {
+    $stmt = $conn->prepare(
+        "SELECT id, username, email, rol, activo, email_verificado, fecha_registro, ultimo_acceso
+           FROM usuarios
+          ORDER BY id"
+    );
+    $stmt->execute();
+    $usuarios = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+    $stmt->close();
+} catch (Throwable $ex) {
+    error_log('user_management.php: ' . $ex->getMessage());
+    $errorMsg = 'No se pudo cargar el listado de usuarios.';
+}
 ?>
 
 <!DOCTYPE html>
@@ -42,44 +57,53 @@ if (isset($_SESSION['rol']) && $_SESSION['rol'] == 'A') {
             <div class="alert alert-info"><?php echo e($_SESSION['message']); ?></div>
             <?php unset($_SESSION['message']); ?>
         <?php endif; ?>
+        <?php if ($errorMsg !== ''): ?>
+            <div class="alert alert-danger"><?php echo e($errorMsg); ?></div>
+        <?php endif; ?>
 
         <input type="text" id="search" class="form-control search-box" placeholder="Buscar usuarios...">
 
+        <div class="table-responsive">
         <table class="table table-bordered table-striped mt-3" id="userTable" data-order="">
             <thead class="thead-dark">
                 <tr>
                     <th onclick="sortTable(0, this, event)" aria-sort="none">ID</th>
-                    <th onclick="sortTable(1, this, event)" aria-sort="none">Nombre</th>
-                    <th onclick="sortTable(2, this, event)" aria-sort="none">Apellidos</th>
-                    <th onclick="sortTable(3, this, event)" aria-sort="none">Mail</th>
-                    <th onclick="sortTable(4, this, event)" aria-sort="none">Usuario</th>
-                    <th onclick="sortTable(5, this, event)" aria-sort="none">Rol</th>
-                    <th onclick="sortTable(6, this, event)" aria-sort="none">Estado</th>
+                    <th onclick="sortTable(1, this, event)" aria-sort="none">Usuario</th>
+                    <th onclick="sortTable(2, this, event)" aria-sort="none">Email</th>
+                    <th onclick="sortTable(3, this, event)" aria-sort="none">Rol</th>
+                    <th onclick="sortTable(4, this, event)" aria-sort="none">Activo</th>
+                    <th onclick="sortTable(5, this, event)" aria-sort="none">Email verificado</th>
+                    <th onclick="sortTable(6, this, event)" aria-sort="none">Registro</th>
+                    <th onclick="sortTable(7, this, event)" aria-sort="none">Último acceso</th>
                     <th>Acciones</th>
                 </tr>
             </thead>
             <tbody>
-                <?php foreach ($usuarios as $row) { ?>
+                <?php foreach ($usuarios as $row) { $rowId = (int) $row['id']; ?>
                     <tr>
-                        <td><?php echo e($row['id'] ?? ''); ?></td>
-                        <td><?php echo e($row['nombre'] ?? ''); ?></td>
-                        <td><?php echo e($row['apellidos'] ?? ''); ?></td>
-                        <td><?php echo e($row['mail'] ?? ''); ?></td>
-                        <td><?php echo e($row['usuario'] ?? ''); ?></td>
-                        <td><?php echo e($row['rol'] ?? ''); ?></td>
-                        <td><?php echo e($row['estado'] ?? ''); ?></td>
+                        <td><?php echo $rowId; ?></td>
+                        <td><?php echo e($row['username']); ?></td>
+                        <td><?php echo e($row['email']); ?></td>
+                        <td><?php echo e($row['rol']); ?></td>
+                        <td><?php echo e((int) $row['activo'] === 1 ? 'Sí' : 'No'); ?></td>
+                        <td><?php echo e((int) $row['email_verificado'] === 1 ? 'Sí' : 'No'); ?></td>
+                        <td><?php echo e($row['fecha_registro'] ?? ''); ?></td>
+                        <td><?php echo e($row['ultimo_acceso'] ?? '—'); ?></td>
                         <td>
-                            <a href="editar_usuario.php?id=<?php echo (int) $row['id']; ?>" class="btn btn-primary btn-sm">Editar</a>
+                            <a href="editar_usuario.php?id=<?php echo $rowId; ?>" class="btn btn-primary btn-sm">Editar</a>
+                            <?php if ($rowId !== $miId): ?>
                             <form method="POST" action="eliminar_usuario.php" class="d-inline" onsubmit="return confirm('¿Eliminar este usuario? Esta acción no se puede deshacer.');">
                                 <?= csrf_field() ?>
-                                <input type="hidden" name="id" value="<?php echo (int) $row['id']; ?>">
+                                <input type="hidden" name="id" value="<?php echo $rowId; ?>">
                                 <button type="submit" class="btn btn-danger btn-sm">Eliminar</button>
                             </form>
+                            <?php endif; ?>
                         </td>
                     </tr>
                 <?php } ?>
             </tbody>
         </table>
+        </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
@@ -106,9 +130,7 @@ if (isset($_SESSION['rol']) && $_SESSION['rol'] == 'A') {
         function setupClickOutsideListener() {
             document.addEventListener('click', function(event) {
                 const table = document.getElementById("userTable");
-                const isClickInsideTable = table.contains(event.target);
-                
-                if (!isClickInsideTable) {
+                if (!table.contains(event.target)) {
                     resetTableHeader();
                 }
             });
@@ -117,13 +139,10 @@ if (isset($_SESSION['rol']) && $_SESSION['rol'] == 'A') {
         // Función para resetear el encabezado de la tabla
         function resetTableHeader() {
             const table = document.getElementById("userTable");
-            const headers = table.querySelectorAll('th');
-            
-            headers.forEach(header => {
+            table.querySelectorAll('th').forEach(header => {
                 header.classList.remove('active-header');
                 header.setAttribute('aria-sort', 'none');
             });
-            
             table.setAttribute('data-order', 'default');
         }
 
@@ -134,9 +153,8 @@ if (isset($_SESSION['rol']) && $_SESSION['rol'] == 'A') {
             const table = document.getElementById("userTable");
             const tbody = table.querySelector('tbody');
             const rows = Array.from(tbody.querySelectorAll('tr'));
-            
             const currentOrder = table.getAttribute('data-order') || 'default';
-            
+
             let newOrder;
             if (currentOrder === 'default') {
                 newOrder = 'asc';
@@ -157,28 +175,21 @@ if (isset($_SESSION['rol']) && $_SESSION['rol'] == 'A') {
                 rows.sort((a, b) => {
                     const cellA = a.cells[columnIndex].textContent.trim();
                     const cellB = b.cells[columnIndex].textContent.trim();
-                    return newOrder === 'asc' ? cellA.localeCompare(cellB) : cellB.localeCompare(cellA);
+                    const cmp = cellA.localeCompare(cellB, undefined, { numeric: true });
+                    return newOrder === 'asc' ? cmp : -cmp;
                 });
                 rows.forEach(row => tbody.appendChild(row));
             }
 
             table.setAttribute('data-order', newOrder);
-
-            const searchInput = document.getElementById('search');
-            const keyupEvent = new Event('keyup');
-            searchInput.dispatchEvent(keyupEvent);
+            document.getElementById('search').dispatchEvent(new Event('keyup'));
         }
 
-        // Función para buscar usuarios
+        // Función para buscar usuarios (filtro en cliente)
         function searchUsers() {
             const filter = this.value.toLowerCase();
-            const rows = Array.from(document.querySelectorAll('#userTable tbody tr'));
-
-            rows.forEach(row => {
-                const textContent = row.textContent.toLowerCase();
-                const shouldDisplay = textContent.includes(filter);
-                row.style.display = shouldDisplay ? '' : 'none';
-                
+            document.querySelectorAll('#userTable tbody tr').forEach(row => {
+                row.style.display = row.textContent.toLowerCase().includes(filter) ? '' : 'none';
             });
         }
 
@@ -187,19 +198,8 @@ if (isset($_SESSION['rol']) && $_SESSION['rol'] == 'A') {
             saveOriginalOrder();
             ensureButtonsVisibility();
             setupClickOutsideListener();
-
-            // Configurar el evento de búsqueda
-            const searchInput = document.getElementById('search');
-            searchInput.addEventListener('keyup', searchUsers);
+            document.getElementById('search').addEventListener('keyup', searchUsers);
         });
     </script>
 </body>
 </html>
-
-<?php
-} else {
-    header('Location: ../inicio_sesion/gestion.php'); // Redirige al usuario a la página de inicio de sesión si no está autorizado
-    exit();
-}
-?>
-
