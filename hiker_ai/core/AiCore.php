@@ -1468,7 +1468,10 @@ class AICore {
 
         $text = $this->askClaude(
             "El usuario pide recomendaciones personalizadas.\n" .
-            "Perfil: nivel {$prefs['experience_level']}, actividad habitual {$preferredActivity}.\n" .
+            "Perfil: nivel {$prefs['experience_level']}, actividad habitual {$preferredActivity}" .
+            (isset($prefs['comfortable_effort'])
+                ? ", va cómodo con rutas de esfuerzo MIDE ~{$prefs['comfortable_effort']}/5 (según sus valoraciones)"
+                : '') . ".\n" .
             ($zoneCtxStr ? "Condiciones por zona: {$zoneCtxStr}.\n" : '') .
             $allUnsafeNote .
             "Zona elegida: {$bestZone}." . $perCondNote . "\n\n" .

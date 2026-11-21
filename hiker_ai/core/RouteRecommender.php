@@ -174,7 +174,32 @@ class RouteRecommender implements IRecommender {
     // -----------------------------------------------------------------
 
     private function calculateDifficultyMatch(array $route, array $preferences): float {
-        $routeLevel = self::DIFFICULTY_MAP[$route['difficulty'] ?? 'intermediate'] ?? 2;
+        $levelMatch  = $this->calculateLevelMatch($route, $preferences);
+        $effortMatch = $this->calculateEffortMatch($route, $preferences);
+        // Con valoraciones del usuario, el esfuerzo (aprendido de lo que ha hecho) pesa más
+        return $effortMatch === null ? $levelMatch : round(0.4 * $levelMatch + 0.6 * $effortMatch, 4);
+    }
+
+    /**
+     * Encaje entre el esfuerzo MIDE de la ruta (1–5, columna generada `esfuerzo`) y el
+     * esfuerzo cómodo del usuario (UserPreferenceService: comfortable_effort).
+     * Null si falta cualquiera de los dos.
+     */
+    private function calculateEffortMatch(array $route, array $preferences): ?float {
+        $comfortable = $preferences['comfortable_effort'] ?? null;
+        $effort      = $route['esfuerzo'] ?? null;
+        if ($comfortable === null || $effort === null || $effort === '') {
+            return null;
+        }
+        $diff = (float) $effort - (float) $comfortable;
+        // Más exigente de lo cómodo penaliza el doble que más fácil
+        return $diff > 0
+            ? max(0.0, 1.0 - $diff * 0.45)
+            : max(0.0, 1.0 - abs($diff) * 0.2);
+    }
+
+    private function calculateLevelMatch(array $route, array $preferences): float {
+        $routeLevel = self::DIFFICULTY_MAP[$route['difficulty'] ?? $route['dificultad'] ?? 'intermediate'] ?? 2;
         $userLevel  = self::DIFFICULTY_MAP[$preferences['experience_level'] ?? 'intermediate'] ?? 2;
         $diff = $routeLevel - $userLevel;
 
@@ -191,7 +216,7 @@ class RouteRecommender implements IRecommender {
             $preferred = array_map('trim', explode(',', $preferred));
         }
         if (empty($preferred)) return 0.5;
-        return in_array($route['location'] ?? '', $preferred, true) ? 1.0 : 0.2;
+        return in_array($route['location'] ?? $route['ubicacion'] ?? '', $preferred, true) ? 1.0 : 0.2;
     }
 
     private function calculateWeatherScore(array $route, array $weather): float {
@@ -254,7 +279,8 @@ class RouteRecommender implements IRecommender {
      *   Comportamiento original: filtro por columna location de la BD.
      */
     private function getCandidateRoutes(array $criteria): array {
-        $conditions = [];
+        // Nunca recomendar rutas eliminadas o en borrador
+        $conditions = ["r.estado = 'publicada'"];
         $params     = [];
         $types      = '';
 

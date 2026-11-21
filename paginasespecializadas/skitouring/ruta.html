@@ -81,6 +81,11 @@
             <span class="ruta-stat__value" id="ruta-duration">—</span>
             <span class="ruta-stat__label">Duration</span>
           </div>
+          <div class="ruta-stat" title="MIDE-style effort: estimated walking time from distance and ascent (1 = under 1 h … 5 = over 10 h)">
+            <i class="bi bi-activity ruta-stat__icon"></i>
+            <span class="ruta-stat__value" id="ruta-effort">—</span>
+            <span class="ruta-stat__label">Effort (MIDE)</span>
+          </div>
           <div class="ruta-stat">
             <i class="bi bi-signal ruta-stat__icon"></i>
             <span class="ruta-stat__value" id="ruta-difficulty">—</span>
@@ -114,6 +119,31 @@
               <i class="bi bi-check-circle"></i> Mark as Completed
             </button>
             <div id="ruta-download" class="d-inline-block"></div>
+          </div>
+        </div>
+
+        <!-- Valoración tras completar (Fase 1) -->
+        <div id="route-feedback" class="ruta-card mb-3" hidden>
+          <div class="ruta-card__header">
+            <i class="bi bi-chat-heart"></i> How did it go?
+          </div>
+          <div class="ruta-card__body">
+            <p class="mb-2 small text-muted">Your answer helps Kahir recommend routes at your level.</p>
+            <div class="btn-group mb-2" role="group" aria-label="Perceived difficulty">
+              <button type="button" class="btn btn-outline-success btn-sm" data-percepcion="facil" aria-pressed="false">Easy for me</button>
+              <button type="button" class="btn btn-outline-primary btn-sm" data-percepcion="adecuada" aria-pressed="false">About right</button>
+              <button type="button" class="btn btn-outline-danger btn-sm" data-percepcion="dura" aria-pressed="false">Hard for me</button>
+            </div>
+            <div class="mb-2" role="group" aria-label="Rating (optional)">
+              <span class="small text-muted me-1">Rating (optional):</span>
+              <button type="button" class="btn btn-link btn-sm p-0 text-warning" data-star="1" aria-label="1 star"><i class="bi bi-star"></i></button>
+              <button type="button" class="btn btn-link btn-sm p-0 text-warning" data-star="2" aria-label="2 stars"><i class="bi bi-star"></i></button>
+              <button type="button" class="btn btn-link btn-sm p-0 text-warning" data-star="3" aria-label="3 stars"><i class="bi bi-star"></i></button>
+              <button type="button" class="btn btn-link btn-sm p-0 text-warning" data-star="4" aria-label="4 stars"><i class="bi bi-star"></i></button>
+              <button type="button" class="btn btn-link btn-sm p-0 text-warning" data-star="5" aria-label="5 stars"><i class="bi bi-star"></i></button>
+            </div>
+            <button type="button" id="feedback-save" class="btn btn-success btn-sm" disabled>Save</button>
+            <p id="feedback-msg" class="small mt-2" aria-live="polite"></p>
           </div>
         </div>
 
@@ -178,6 +208,10 @@
                 <tr>
                   <td class="text-muted"><i class="bi bi-clock"></i> Duration</td>
                   <td id="ruta-duration-2">—</td>
+                </tr>
+                <tr>
+                  <td class="text-muted"><i class="bi bi-activity"></i> Effort (MIDE)</td>
+                  <td id="ruta-effort-2">—</td>
                 </tr>
               </tbody>
             </table>
@@ -253,12 +287,13 @@
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.min.js"></script>
 
   <!-- App scripts -->
-  <script src="../../csrf.js"></script>
-  <script src="javascript/paginaunica.js"></script>
-  <script src="javascript/bt_fav.js"></script>
-  <script src="javascript/bt_lists.js"></script>
-  <script src="javascript/bt_completed.js"></script>
-  <script src="javascript/user_preferences.js"></script>
+  <script src="../../csrf.js?v=20261121"></script>
+  <script src="javascript/paginaunica.js?v=20261121"></script>
+  <script src="javascript/bt_fav.js?v=20261121"></script>
+  <script src="javascript/bt_lists.js?v=20261121"></script>
+  <script src="javascript/bt_completed.js?v=20261121"></script>
+  <script src="javascript/route_feedback.js?v=20261121"></script>
+  <script src="javascript/user_preferences.js?v=20261121"></script>
   <script src="../../include.js"></script>
 
 </body>

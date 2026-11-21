@@ -56,6 +56,8 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function updateButtonState(button, isCompleted) {
+        // Avisar al panel de valoración (route_feedback.js)
+        document.dispatchEvent(new CustomEvent('kahir:completed', { detail: { isCompleted: !!isCompleted } }));
         if (isCompleted) {
             button.textContent = 'Completed';
             button.classList.remove('btn-outline-success');

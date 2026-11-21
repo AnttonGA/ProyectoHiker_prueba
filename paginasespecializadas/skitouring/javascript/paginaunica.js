@@ -74,6 +74,14 @@ document.addEventListener('DOMContentLoaded', function() {
         ['ruta-distance',  'ruta-distance-2' ].forEach(id => setText(id, dist));
         ['ruta-duration',  'ruta-duration-2' ].forEach(id => setText(id, dur));
 
+        // Esfuerzo tipo MIDE (columna calculada en la BD: 1–5 + horas estimadas)
+        const esf = Number(ruta.esfuerzo);
+        const hm  = parseFloat(ruta.horas_mide);
+        const effort = (esf >= 1 && esf <= 5)
+            ? `${esf}/5` + (Number.isFinite(hm) ? ` · ~${hm < 10 ? hm.toFixed(1) : Math.round(hm)} h` : '')
+            : '—';
+        ['ruta-effort', 'ruta-effort-2'].forEach(id => setText(id, effort));
+
         // Difficulty
         const diffKey   = (ruta.dificultad || '').toLowerCase();
         const diffLabel = DIFFICULTY_LABEL[diffKey] || ruta.dificultad || '—';

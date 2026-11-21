@@ -32,7 +32,7 @@ class UserPreferenceService {
             $stmt = $this->conn->prepare(
                 "SELECT nivel_experiencia, actividades_preferidas, ubicaciones_habituales,
                         distancia_max_km, duracion_max_horas,
-                        preferencias_inferidas, ultima_actualizacion
+                        preferencias_inferidas, preferencias_declaradas, ultima_actualizacion
                  FROM user_preferences WHERE usuario_id = ? LIMIT 1"
             );
             $stmt->bind_param("i", $userId);
@@ -40,19 +40,36 @@ class UserPreferenceService {
             $row = $stmt->get_result()->fetch_assoc();
             $stmt->close();
 
-            if (!$row) return $this->defaultPrefs();
+            // Esfuerzo cómodo aprendido de las valoraciones "fácil/adecuada/dura" (Fase 1)
+            $comfortableEffort = $this->getComfortableEffort($userId);
 
-            $inferidas = json_decode($row['preferencias_inferidas'] ?? '{}', true) ?? [];
+            if (!$row) {
+                $prefs = $this->defaultPrefs();
+                $prefs['comfortable_effort'] = $comfortableEffort;
+                $prefs['_user_id'] = $userId;
+                return $prefs;
+            }
+
+            $inferidas   = json_decode($row['preferencias_inferidas'] ?? '{}', true) ?? [];
+            $declaradas  = json_decode($row['preferencias_declaradas'] ?? '{}', true) ?? [];
+            $actividades = json_decode($row['actividades_preferidas'] ?? '[]', true) ?? [];
+
+            // Lo que el usuario declara en el cuestionario manda sobre lo inferido del comportamiento
+            if (!empty($declaradas['actividades']) && is_array($declaradas['actividades'])) {
+                $actividades = array_values($declaradas['actividades']);
+            }
 
             return [
                 // Claves que AiCore usa internamente
                 'experience_level'      => $row['nivel_experiencia'] ?? 'beginner',
-                'preferred_activities'  => json_decode($row['actividades_preferidas'] ?? '[]', true) ?? [],
+                'preferred_activities'  => $actividades,
                 'preferred_locations'   => json_decode($row['ubicaciones_habituales'] ?? '[]', true) ?? [],
                 'avg_preferred_distance' => (float)($row['distancia_max_km']   ?? 0),
                 'avg_preferred_duration' => (float)($row['duracion_max_horas'] ?? 0),
                 'total_interactions'    => (int)($inferidas['total_interactions'] ?? 0),
                 'last_updated'          => $row['ultima_actualizacion'] ?? null,
+                // Esfuerzo MIDE (1–5) con el que el usuario va cómodo, o null si aún no ha valorado rutas
+                'comfortable_effort'    => $comfortableEffort,
                 // ID para operaciones internas
                 '_user_id'              => $userId,
             ];
@@ -132,6 +149,51 @@ class UserPreferenceService {
     }
 
     // ── Privados ──────────────────────────────────────────────────────────────
+
+    /**
+     * Esfuerzo MIDE (1–5) con el que el usuario va cómodo, deducido de sus últimas
+     * 10 valoraciones: "adecuada" → el esfuerzo de esa ruta; "fácil" → uno más;
+     * "dura" → uno menos. Las valoraciones recientes pesan más. Null si no hay datos.
+     */
+    private function getComfortableEffort(int $userId): ?float {
+        try {
+            $stmt = $this->conn->prepare(
+                "SELECT f.percepcion, r.esfuerzo
+                   FROM route_feedback f
+                   JOIN rutas r ON r.id = f.ruta_id
+                  WHERE f.usuario_id = ? AND r.esfuerzo IS NOT NULL
+                  ORDER BY f.updated_at DESC
+                  LIMIT 10"
+            );
+            $stmt->bind_param("i", $userId);
+            $stmt->execute();
+            $rows = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+            $stmt->close();
+        } catch (\Throwable $e) {
+            // Sin la tabla (migration_fase1.sql no aplicada) simplemente no hay dato
+            $this->logger->warning('getComfortableEffort', ['error' => $e->getMessage()]);
+            return null;
+        }
+        if (!$rows) {
+            return null;
+        }
+
+        $sum = 0.0;
+        $weights = 0.0;
+        foreach ($rows as $i => $r) {
+            $level = (int) $r['esfuerzo'];
+            $level += match ($r['percepcion']) {
+                'facil' => 1,
+                'dura'  => -1,
+                default => 0,
+            };
+            $level = max(1, min(5, $level));
+            $w = 1.0 / (1 + $i * 0.3);   // la más reciente pesa 1, la décima ≈ 0,27
+            $sum += $level * $w;
+            $weights += $w;
+        }
+        return round($sum / $weights, 1);
+    }
 
     private function getUserId(string $username): ?int {
         // Acepta tanto username textual como ID numérico (ej. cuando se pasa '1')

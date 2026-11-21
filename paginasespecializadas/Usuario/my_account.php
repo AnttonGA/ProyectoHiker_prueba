@@ -71,6 +71,9 @@ echo cssTag('css/my_account.css');
   <!-- ── Main ──────────────────────────────────────────────── -->
   <main class="container-xl py-4">
 
+    <!-- ── Actividades declaradas (Fase 1; opcional, lo rellena actividades_usuario.js) ── -->
+    <div id="activities-card" class="mb-4" hidden></div>
+
     <!-- ── Discovery / onboarding section (hidden until JS populates it) ── -->
     <div id="onboarding-section" class="onboarding-section mb-4"
          data-user="<?= $username ?>" style="display:none"></div>
@@ -253,6 +256,7 @@ echo jsTag('javascript/completadasusuario.js');
 echo jsTag('javascript/user_lists.js');
 echo jsTag('javascript/perfil_ia.js');
 echo jsTag('javascript/onboarding.js');
+echo jsTag('javascript/actividades_usuario.js');
 ?>
   <script src="../../include.js"></script>
 </body>
