@@ -8,42 +8,43 @@ use PHPMailer\PHPMailer\Exception;
 //Load Composer's autoloader
 require 'vendor/autoload.php';
 
+// Este archivo también se incluye desde gestion.php y verificar.php, que ya inician la sesión antes de la salida
+require_once __DIR__ . '/../../includes/security.php';
+secure_session_start();
+
 require_once 'config.php';
 
 // Incluir la conexión a la base de datos u otras configuraciones necesarias
 require_once 'conexion.php';
 
-// Función para generar un token aleatorio de 252 caracteres
-function generarToken($longitud = 252) {
-    return bin2hex(random_bytes($longitud / 2));
-}
 
 // Inicializar variables y mensajes de error
-$nombre = $apellidos = $mail = $usuario = $telefono = "";
+$nombre = $apellidos = $mail = $email = $usuario = $telefono = "";
 $nombreErr = $apellidosErr = $mailErr = $usuarioErr = $passwordErr = $telefonoErr = $terminosErr = "";
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    csrf_verify();
     $error = false;
 
     if (empty($_POST['nombre'])) {
         $nombreErr = "Nombre es requerido";
         $error = true;
     } else {
-        $nombre = mysqli_real_escape_string($conn, $_POST['nombre']);
+        $nombre = trim((string) $_POST['nombre']);
     }
 
     if (empty($_POST['apellidos'])) {
         $apellidosErr = "Apellidos son requeridos";
         $error = true;
     } else {
-        $apellidos = mysqli_real_escape_string($conn, $_POST['apellidos']);
+        $apellidos = trim((string) $_POST['apellidos']);
     }
 
     if (empty($_POST['mail'])) {
         $mailErr = "Email es requerido";
         $error = true;
     } else {
-        $email = mysqli_real_escape_string($conn, $_POST['mail']);
+        $email = trim((string) $_POST['mail']);
         if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
             $mailErr = "Formato de email inválido";
             $error = true;
@@ -66,7 +67,7 @@ if (empty($_POST['usuario'])) {
     $usuarioErr = "Usuario es requerido";
     $error = true; // Marcar error si el campo está vacío
 } else {
-    $usuario = mysqli_real_escape_string($conn, $_POST['usuario']);
+    $usuario = trim((string) $_POST['usuario']);
     
     // Verificar si el usuario ya existe en la base de datos
     $stmt = $conn->prepare("SELECT id FROM usuarios WHERE username = ?");
@@ -123,7 +124,7 @@ if (empty($_POST['usuario'])) {
         $telefonoErr = "Teléfono es requerido";
         $error = true;
     } else {
-        $telefono = mysqli_real_escape_string($conn, $_POST['telefono']);
+        $telefono = trim((string) $_POST['telefono']);
     }
 
     // Validar aceptación de términos y condiciones
@@ -136,49 +137,62 @@ if (empty($_POST['usuario'])) {
     $boletin = isset($_POST['boletin']) ? 'S' : 'N';
 
     if (!$error) {
+        // Token de verificación del correo (antes se usaba $token sin definir)
+        $token = bin2hex(random_bytes(32));
+
+        // TODO esquema: el INSERT usa las columnas de database/schema.sql (username, email, password_hash, rol)
+        // y no guarda el token, pero verificar.php busca usuarios por `token` y marca `estado`. Hasta confirmar
+        // el esquema real, el enlace de verificación no podrá validarse.
         // Insertar el usuario en la base de datos usando prepared statement
         $stmt = $conn->prepare(
             "INSERT INTO usuarios (username, email, password_hash, rol) VALUES (?, ?, ?, 'usuario')"
         );
         $stmt->bind_param("sss", $usuario, $email, $password);
 
-        if ($stmt->execute()) {
+        $insertOk = false;
+        try {
+            $insertOk = $stmt->execute();
+        } catch (Throwable $ex) {
+            error_log('registro_ia.php: ' . $ex->getMessage());
+        }
+
+        if ($insertOk) {
             // Enviar correo de verificación
             $mail = new PHPMailer(true);
             try {
                 // Configuración del servidor
                 $mail->isSMTP();
-                $mail->Host = 'smtp.gmail.com'; // Cambia esto por tu servidor SMTP
+                $mail->Host = env('SMTP_HOST', 'smtp.gmail.com');
                 $mail->SMTPAuth = true;
-                $mail->Username = 'thedonkeysocialclub@gmail.com'; // Cambia esto por tu correo
-                $mail->Password = 'soye uknz vwci ymzg'; // Cambia esto por tu contraseña
+                $mail->Username = env('SMTP_USER');
+                $mail->Password = env('SMTP_PASS');
                 $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
-                $mail->Port = 587;
+                $mail->Port = (int) env('SMTP_PORT', 587);
 
                 // Destinatario
-                $mail->setFrom('thedonkeysocialclub@gmail.com', 'The Donkey Team');
+                $mail->setFrom(env('SMTP_USER'), env('SMTP_FROM_NAME', 'Kahir.ai'));
                 $mail->addAddress($email, $nombre);
 
                 // Contenido del correo
                 $mail->isHTML(true);
+                $mail->CharSet = 'UTF-8';
                 $mail->Subject = 'Verificación de correo electrónico';
                 
                 // Usar BASE_URL para construir el enlace de verificación
-                $verificationLink = BASE_URL . "/paginasespecializadas/inicio_sesion/verificar.php?token=$token";
-                $mail->Body = "Hola $nombre,<br><br>Por favor, haz clic en el siguiente enlace para verificar tu correo electrónico:<br><a href='$verificationLink'>Verificar correo</a>";
+                $verificationLink = BASE_URL . "/paginasespecializadas/inicio_sesion/verificar.php?token=" . urlencode($token);
+                $mail->Body = "Hola " . e($nombre) . ",<br><br>Por favor, haz clic en el siguiente enlace para verificar tu correo electrónico:<br><a href=\"" . e($verificationLink) . "\">Verificar correo</a>";
 
                 $mail->send();
-                echo 'El mensaje ha sido enviado';
             } catch (Exception $e) {
-                echo "No se pudo enviar el mensaje. Error de Mailer: {$mail->ErrorInfo}";
+                error_log('registro_ia.php: error de Mailer: ' . $mail->ErrorInfo);
             }
 
-            echo "Registro exitoso.";
             $nombre = $apellidos = $mail = $usuario = $telefono = ""; // Limpiar campos
             header("Location: gestion.php");
             exit(); // Asegúrate de terminar la ejecución del script después de la redirección
         } else {
-            echo "Error: " . $stmt->error;
+            error_log('registro_ia.php: ' . $stmt->error);
+            echo '<div class="alert alert-danger">No se pudo completar el registro. Inténtalo de nuevo más tarde.</div>';
         }
         $stmt->close();
     }
@@ -199,7 +213,8 @@ mysqli_close($conn);
 <body>
     <div class="container">
         <h2 class="mb-4">Sign up</h2>
-        <form name="registroForm" id="registroForm" method="post" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]);?>">
+        <form name="registroForm" id="registroForm" method="post" action="<?php echo e($_SERVER["PHP_SELF"]);?>">
+            <?= csrf_field() ?>
             <div class="mb-3">
                 <label for="nombre" class="form-label">Name:</label>
                 <input type="text" class="form-control" id="nombre" name="nombre" value="<?php echo isset($nombre) ? htmlspecialchars($nombre) : ''; ?>">
@@ -212,7 +227,7 @@ mysqli_close($conn);
             </div>
             <div class="mb-3">
                 <label for="mail" class="form-label">Email:</label>
-                <input type="email" class="form-control" id="mail" name="mail" value="<?php echo isset($mail) ? htmlspecialchars($mail) : ''; ?>">
+                <input type="email" class="form-control" id="mail" name="mail" value="<?php echo e($email); ?>">
                 <div class="text-danger" id="mailError"><?php echo isset($mailErr) ? $mailErr : ''; ?></div>
             </div>
             <div class="mb-3">

@@ -1,4 +1,10 @@
 <?php
+// Script de mantenimiento: solo se puede ejecutar desde la línea de comandos (php archivo.php),
+// nunca desde el navegador. Antes cualquiera podía lanzarlo por web sin iniciar sesión.
+if (PHP_SAPI !== 'cli') {
+    http_response_code(403);
+    exit('Solo disponible desde la línea de comandos.');
+}
 /**
  * setup_tables.php — crea todas las tablas auxiliares si no existen.
  * Ejecutar UNA vez desde CLI o navegador (solo en local).

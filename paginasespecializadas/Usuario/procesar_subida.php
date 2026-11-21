@@ -9,7 +9,8 @@
 
 declare(strict_types=1);
 ini_set('display_errors', '0');
-session_start();
+require_once __DIR__ . '/../../includes/security.php';
+secure_session_start();
 
 require_once __DIR__ . '/../inicio_sesion/config.php';
 require_once __DIR__ . '/../inicio_sesion/conexion.php';
@@ -92,6 +93,11 @@ function safeFilename(string $name): string {
     $base = pathinfo($name, PATHINFO_FILENAME);
     $base = preg_replace('/[^a-zA-Z0-9_\-.]/', '_', $base);
     return substr($base, 0, 80) . '.' . $ext;
+}
+
+// ─── 0. Token CSRF (lo añade csrf.js al formulario) ─────────────────────────────
+if ($_SERVER['REQUEST_METHOD'] !== 'POST' || !csrf_is_valid()) {
+    redirectError('La sesión ha caducado. Recarga la página e inténtalo de nuevo.');
 }
 
 // ─── 1. Validar campos del formulario ────────────────────────────────────────
@@ -187,20 +193,26 @@ if ($hasImages) {
         redirectError('Máximo ' . IMG_MAX_COUNT . ' imágenes por ruta.');
     }
 
-    $validImgMimes = ['image/jpeg', 'image/png', 'image/webp'];
+    // La extensión se decide por el tipo REAL del archivo, nunca por el nombre que envía el usuario:
+    // antes una imagen manipulada llamada "x.php" se guardaba como .php y se podía ejecutar.
+    $validImgMimes = ['image/jpeg' => 'jpg', 'image/png' => 'png', 'image/webp' => 'webp'];
+    $validImgTypes = ['image/jpeg' => IMAGETYPE_JPEG, 'image/png' => IMAGETYPE_PNG, 'image/webp' => IMAGETYPE_WEBP];
 
     foreach ($_FILES['imagenes']['name'] as $k => $imgName) {
         if ($_FILES['imagenes']['error'][$k] !== UPLOAD_ERR_OK) continue;
+        $imgNameHtml = htmlspecialchars((string) $imgName, ENT_QUOTES, 'UTF-8');
         if ($_FILES['imagenes']['size'][$k] > IMG_MAX_BYTES) {
-            redirectError("La imagen «{$imgName}» supera 5 MB.");
+            redirectError("La imagen «{$imgNameHtml}» supera 5 MB.");
         }
 
-        $imgMime = finfo_file(finfo_open(FILEINFO_MIME_TYPE), $_FILES['imagenes']['tmp_name'][$k]);
-        if (!in_array($imgMime, $validImgMimes, true)) {
-            redirectError("El archivo «{$imgName}» no es una imagen válida (JPG, PNG o WebP).");
+        $imgTmp  = $_FILES['imagenes']['tmp_name'][$k];
+        $imgMime = finfo_file(finfo_open(FILEINFO_MIME_TYPE), $imgTmp);
+        $imgInfo = @getimagesize($imgTmp);
+        if (!isset($validImgMimes[$imgMime]) || $imgInfo === false || $imgInfo[2] !== $validImgTypes[$imgMime]) {
+            redirectError("El archivo «{$imgNameHtml}» no es una imagen válida (JPG, PNG o WebP).");
         }
 
-        $imgSafe = safeFilename($imgName);
+        $imgSafe = 'img-' . ($k + 1) . '-' . bin2hex(random_bytes(4)) . '.' . $validImgMimes[$imgMime];
         $imgDest = $folderPath . '/' . $imgSafe;
         if (move_uploaded_file($_FILES['imagenes']['tmp_name'][$k], $imgDest)) {
             $imagenesPaths[] = RUTAS_WEB_PATH . $folderName . '/' . $imgSafe;

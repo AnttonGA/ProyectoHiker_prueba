@@ -35,16 +35,16 @@ function loadUserLists() {
         return;
       }
       container.innerHTML = data.map(list => `
-        <div class="acct-list-item" data-list-id="${list.id}">
+        <div class="acct-list-item" data-list-id="${escHtml(list.id)}">
           <div class="acct-list-icon"><i class="bi bi-bookmark-fill"></i></div>
           <span class="acct-list-name">${escHtml(list.list_name)}</span>
           <div class="d-flex gap-1 flex-shrink-0">
             <button class="btn btn-sm btn-outline-primary btn-view-list"
-                    data-id="${list.id}" data-name="${escHtml(list.list_name)}">
+                    data-id="${escHtml(list.id)}" data-name="${escHtml(list.list_name)}">
               <i class="bi bi-eye me-1"></i>View
             </button>
             <button class="btn btn-sm btn-outline-danger btn-delete-list"
-                    data-id="${list.id}" data-name="${escHtml(list.list_name)}">
+                    data-id="${escHtml(list.id)}" data-name="${escHtml(list.list_name)}">
               <i class="bi bi-trash"></i>
             </button>
           </div>
@@ -112,15 +112,15 @@ function viewListRoutes(listId, listName) {
         return;
       }
       modalBody.innerHTML = routes.map(route => `
-        <div class="list-route-item" data-route-id="${route.id}">
-          <a href="../skitouring/ruta.html?id=${route.id}" class="text-decoration-none flex-grow-1 min-width-0">
+        <div class="list-route-item" data-route-id="${escHtml(route.id)}">
+          <a href="../skitouring/ruta.html?id=${encodeURIComponent(route.id)}" class="text-decoration-none flex-grow-1 min-width-0">
             <div class="list-route-item__title">${escHtml(route.titulo)}</div>
             ${route.descripcion
               ? `<div class="list-route-item__desc">${escHtml(route.descripcion)}</div>`
               : ''}
           </a>
           <button class="btn btn-sm btn-outline-danger btn-remove-route flex-shrink-0"
-                  data-list-id="${listId}" data-route-id="${route.id}" title="Remove from list">
+                  data-list-id="${escHtml(listId)}" data-route-id="${escHtml(route.id)}" title="Remove from list">
             <i class="bi bi-trash"></i>
           </button>
         </div>`).join('');

@@ -41,13 +41,13 @@ document.addEventListener('DOMContentLoaded', function () {
 
     return `
       <div class="swiper-slide">
-        <a href="ruta.html?id=${route.id}" class="carousel-card">
+        <a href="ruta.html?id=${encodeURIComponent(route.id)}" class="carousel-card">
           <div class="carousel-card__img">
             <img src="${esc(img)}" alt="${esc(route.titulo)}" loading="lazy"
                  onerror="this.src='${getDefaultImage(route.tipo_ruta)}'">
             ${diff ? `<span class="carousel-card__diff ${diff.cls}">${diff.label}</span>` : ''}
             <span class="carousel-card__act" style="background:${act.color};">
-              <i class="bi ${act.icon}"></i> ${act.label}
+              <i class="bi ${act.icon}"></i> ${esc(act.label)}
             </span>
           </div>
           <div class="carousel-card__body">

@@ -22,21 +22,31 @@ document.addEventListener('DOMContentLoaded', function() {
         .then(data => {
             const existingLists = document.getElementById('existingLists');
             existingLists.innerHTML = '';
-            data.lists.forEach(list => {
+            (data.lists || []).forEach(list => {
                 addListToDOM(list);
             });
         })
         .catch(error => console.error('Error loading user lists:', error));
     }
 
+    function escapeHtml(value) {
+        return String(value ?? '')
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
+    }
+
     function addListToDOM(list) {
         const existingLists = document.getElementById('existingLists');
         const listItem = document.createElement('div');
         listItem.className = 'form-check mb-2';
+        const listId = escapeHtml(parseInt(list.id, 10) || '');
         listItem.innerHTML = `
-            <input class="form-check-input" type="checkbox" id="list${list.id}" value="${list.id}" ${list.is_route_in_list ? 'checked' : ''}>
-            <label class="form-check-label" for="list${list.id}">
-                ${list.list_name}
+            <input class="form-check-input" type="checkbox" id="list${listId}" value="${listId}" ${list.is_route_in_list && list.is_route_in_list !== '0' ? 'checked' : ''}>
+            <label class="form-check-label" for="list${listId}">
+                ${escapeHtml(list.list_name)}
             </label>
             <span class="feedback-text ms-2"></span>
         `;

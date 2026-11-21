@@ -1,3 +1,8 @@
+<?php
+// La sesión debe iniciarse antes de cualquier salida: login.php y registro_ia.php se incluyen más abajo
+require_once __DIR__ . '/../../includes/security.php';
+secure_session_start();
+?>
 <!DOCTYPE html>
 <html lang="es">
 <head>

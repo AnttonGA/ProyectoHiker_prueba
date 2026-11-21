@@ -7,7 +7,7 @@ use PHPMailer\PHPMailer\Exception;
 // Load Composer's autoloader
 require 'vendor/autoload.php';
 
-include '../../includes/functions.php'; 
+require_once __DIR__ . '/../../includes/functions.php'; // inicia la sesión segura y carga e()/csrf_*
 
 require_once 'config.php';
 
@@ -23,77 +23,77 @@ $failureMessage = "";
 $email = "";
 $usuario = "";
 
+// Mensaje único: no se revela si el email/usuario existen
+$mensajeGenerico = 'Si los datos corresponden a una cuenta registrada, recibirás un correo con instrucciones para restablecer tu contraseña.';
+
 // Verificar si se envió un formulario POST
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    // Inicializar variables
-    $email = "";
-    $usuario = "";
-    $usuarioExiste = false; // Variable para indicar si el usuario existe en la base de datos
+    csrf_verify();
 
-    // Validación y limpieza del campo de correo electrónico
-    if (empty($_POST['mail'])) {
+    $usuarioExiste = false; // Variable para indicar si el usuario existe en la base de datos
+    $email = isset($_POST['mail']) && is_string($_POST['mail']) ? trim($_POST['mail']) : '';
+    $usuario = isset($_POST['usuario']) && is_string($_POST['usuario']) ? trim($_POST['usuario']) : '';
+
+    // Validación del campo de correo electrónico
+    if ($email === '') {
         $emailErr = "El email es requerido";
+    } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        $emailErr = "Formato de email inválido";
     } else {
-        $email = mysqli_real_escape_string($conn, $_POST['mail']);
-        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-            $emailErr = "Formato de email inválido";
-        } else {
-            // Validación y consulta para verificar si el correo y usuario existen
-            $usuario = mysqli_real_escape_string($conn, $_POST['usuario']);
+        try {
+            // Consulta para verificar si el correo y usuario existen y coinciden
             $stmt = $conn->prepare("SELECT id FROM usuarios WHERE email = ? AND username = ?");
             $stmt->bind_param("ss", $email, $usuario);
             $stmt->execute();
             $stmt->store_result();
-
-            // Si hay al menos una fila, el usuario existe
-            if ($stmt->num_rows > 0) {
-                $usuarioExiste = true;
-            } else {
-                $failureMessage = "El correo electrónico y/o usuario no están registrados o no coinciden";
-            }
-
+            $usuarioExiste = $stmt->num_rows > 0;
             $stmt->close();
+
+            if ($usuarioExiste) {
+                // Token de recuperación criptográficamente seguro (64 caracteres hex)
+                $token = bin2hex(random_bytes(32));
+
+                // TODO esquema: el SELECT usa `email`/`username` pero aquí se actualiza `token` filtrando por `mail`;
+                // database/schema.sql no tiene columnas `token` ni `mail`. Confirmar con la BD real.
+                $updateStmt = $conn->prepare("UPDATE usuarios SET token = ? WHERE mail = ?");
+                $updateStmt->bind_param("ss", $token, $email);
+                $updateStmt->execute();
+                $updateStmt->close();
+
+                // Enviar correo de recuperación
+                $mail = new PHPMailer(true);
+                try {
+                    // Configuración del servidor SMTP
+                    $mail->isSMTP();
+                    $mail->Host = env('SMTP_HOST', 'smtp.gmail.com');
+                    $mail->SMTPAuth = true;
+                    $mail->Username = env('SMTP_USER');
+                    $mail->Password = env('SMTP_PASS');
+                    $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+                    $mail->Port = (int) env('SMTP_PORT', 587);
+
+                    // Destinatario
+                    $mail->setFrom(env('SMTP_USER'), env('SMTP_FROM_NAME', 'Kahir.ai'));
+                    $mail->addAddress($email);
+
+                    // Contenido del correo (los datos del usuario se escapan)
+                    $mail->isHTML(true);
+                    $mail->CharSet = 'UTF-8';
+                    $mail->Subject = 'Recuperación de contraseña';
+                    $resetLink = BASE_URL . "/paginasespecializadas/inicio_sesion/change_password.php?token=" . urlencode($token);
+                    $mail->Body = "Hola " . e($usuario) . ",<br><br>Haz clic en el siguiente enlace para restablecer tu contraseña:<br><a href=\"" . e($resetLink) . "\">Restablecer contraseña</a>";
+
+                    $mail->send();
+                } catch (Exception $ex) {
+                    error_log('forget_password.php: error de Mailer: ' . $mail->ErrorInfo);
+                }
+            }
+        } catch (Throwable $ex) {
+            error_log('forget_password.php: ' . $ex->getMessage());
         }
-    }
 
-    // Si el usuario existe, proceder con el envío del correo de recuperación
-    if ($usuarioExiste) {
-        // Generar token de recuperación (ejemplo básico, mejorar para entorno de producción)
-        $token = uniqid();
-
-        // Actualizar token en la base de datos para el usuario correspondiente (por seguridad)
-        $updateStmt = $conn->prepare("UPDATE usuarios SET token = ? WHERE mail = ?");
-        $updateStmt->bind_param("ss", $token, $email);
-        $updateStmt->execute();
-        $updateStmt->close();
-
-        // Enviar correo de recuperación
-        $mail = new PHPMailer(true);
-        try {
-            // Configuración del servidor SMTP
-            $mail->isSMTP();
-            $mail->Host = 'smtp.gmail.com'; // Cambia esto por tu servidor SMTP
-            $mail->SMTPAuth = true;
-            $mail->Username = 'thedonkeysocialclub@gmail.com'; // Cambia esto por tu correo
-            $mail->Password = 'soye uknz vwci ymzg'; // Cambia esto por tu contraseña
-            $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
-            $mail->Port = 587;
-
-            // Destinatario
-            $mail->setFrom('thedonkeysocialclub@gmail.com', 'The Donkey Team');
-            $mail->addAddress($email); // Aquí deberías usar el correo del usuario encontrado
-
-            // Contenido del correo
-            $mail->isHTML(true);
-            $mail->Subject = 'Recuperación de contraseña';
-            $resetLink = BASE_URL . "/paginasespecializadas/inicio_sesion/change_password.php?token=$token";
-            $mail->Body = "Hola $usuario,<br><br>Haz clic en el siguiente enlace para restablecer tu contraseña:<br><a href='$resetLink'>Restablecer contraseña</a>";
-
-            $mail->send();
-            $successMessage = 'El mensaje ha sido enviado con instrucciones para restablecer tu contraseña.';
-        } catch (Exception $e) {
-            $failureMessage = "No se pudo enviar el mensaje. Error de Mailer: {$mail->ErrorInfo}";
-        }
+        // Siempre el mismo mensaje, exista o no la cuenta
+        $successMessage = $mensajeGenerico;
     }
 }
 
@@ -125,27 +125,28 @@ mysqli_close($conn);
         <!-- Mostrar alertas de éxito o error -->
         <?php if (!empty($successMessage)): ?>
             <div class="alert alert-success" role="alert">
-                <?php echo $successMessage; ?>
+                <?php echo e($successMessage); ?>
             </div>
         <?php elseif (!empty($failureMessage)): ?>
             <div class="alert alert-danger" role="alert">
-                <?php echo $failureMessage; ?>
+                <?php echo e($failureMessage); ?>
             </div>
         <?php endif; ?>
 
-        <form method="post" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>" class="needs-validation" novalidate>
+        <form method="post" action="<?php echo e($_SERVER["PHP_SELF"]); ?>" class="needs-validation" novalidate>
+            <?= csrf_field() ?>
             <div class="mb-3">
                 <label for="mail" class="form-label">Email asociado a tu cuenta:</label>
                 <input type="email" name="mail" id="mail" class="form-control" value="<?php echo htmlspecialchars($email); ?>" required>
                 <div class="invalid-feedback">
-                    <?php echo $emailErr; ?>
+                    <?php echo e($emailErr); ?>
                 </div>
             </div>
             <div class="mb-3">
                 <label for="usuario" class="form-label">Usuario:</label>
                 <input type="text" name="usuario" id="usuario" class="form-control" value="<?php echo htmlspecialchars($usuario); ?>" required>
                 <div class="invalid-feedback">
-                    <?php echo $usuarioErr; ?>
+                    <?php echo e($usuarioErr); ?>
                 </div>
             </div>
             <button type="submit" class="btn btn-primary">Recuperar Contraseña</button>

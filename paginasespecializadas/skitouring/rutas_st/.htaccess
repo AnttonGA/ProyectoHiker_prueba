@@ -1,0 +1,5 @@
+# Carpeta de subidas de usuarios: nunca ejecutar scripts aquí
+Options -Indexes -ExecCGI
+<FilesMatch "\.(php\d?|phtml|phar|pht|cgi|pl|py|sh|htaccess)$">
+    Require all denied
+</FilesMatch>

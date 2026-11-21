@@ -72,9 +72,9 @@ class WeatherCard {
                     </div>
                     <div class="condition">
                         <img src="${this.getWeatherIcon(current.weather[0].icon)}" 
-                             alt="${current.weather[0].description}"
+                             alt="${this.wcEsc(current.weather[0].description)}"
                              class="condition-icon">
-                        <span class="condition-text">${current.weather[0].description}</span>
+                        <span class="condition-text">${this.wcEsc(current.weather[0].description)}</span>
                     </div>
                 </div>
                 <div class="update-time">
@@ -93,12 +93,12 @@ class WeatherCard {
                     <div class="metric">
                         <i class="fas fa-tint"></i>
                         <span>Humedad</span>
-                        <strong>${current.humidity}%</strong>
+                        <strong>${this.wcEsc(current.humidity)}%</strong>
                     </div>
                     <div class="metric">
                         <i class="fas fa-eye"></i>
                         <span>Visibilidad</span>
-                        <strong>${this.formatVisibility(current.visibility)}</strong>
+                        <strong>${this.wcEsc(this.formatVisibility(current.visibility))}</strong>
                     </div>
                 </div>
 
@@ -134,21 +134,21 @@ class WeatherCard {
                 <div class="conditions-grid">
                     <div class="condition-item">
                         <span class="label">Cota de Nieve</span>
-                        <strong>${conditions.snow_level || 'N/A'} m</strong>
+                        <strong>${this.wcEsc(conditions.snow_level || 'N/A')} m</strong>
                     </div>
                     <div class="condition-item">
                         <span class="label">ISO 0</span>
-                        <strong>${conditions.iso_zero || 'N/A'} m</strong>
+                        <strong>${this.wcEsc(conditions.iso_zero || 'N/A')} m</strong>
                     </div>
                     <div class="condition-item">
                         <span class="label">Riesgo de Aludes</span>
-                        <strong class="risk-level-${conditions.avalanche_risk || 0}">
+                        <strong class="risk-level-${this.wcEsc(conditions.avalanche_risk || 0)}">
                             ${this.formatAvalancheRisk(conditions.avalanche_risk)}
                         </strong>
                     </div>
                     <div class="condition-item">
                         <span class="label">Viento en Altura</span>
-                        <strong>${conditions.altitude_wind || 'N/A'} km/h</strong>
+                        <strong>${this.wcEsc(conditions.altitude_wind || 'N/A')} km/h</strong>
                     </div>
                 </div>
             </div>
@@ -165,7 +165,7 @@ class WeatherCard {
             <div class="hourly-item">
                 <span class="time">${this.formatHour(hour.dt)}</span>
                 <img src="${this.getWeatherIcon(hour.weather[0].icon)}" 
-                     alt="${hour.weather[0].description}"
+                     alt="${this.wcEsc(hour.weather[0].description)}"
                      class="small-icon">
                 <span class="temp">${Math.round(hour.temp)}°</span>
                 <span class="wind">${Math.round(hour.wind_speed * 3.6)} km/h</span>
@@ -186,9 +186,9 @@ class WeatherCard {
                 <h4>Avisos Meteorológicos</h4>
                 <div class="warnings-list">
                     ${warnings.map(warning => `
-                        <div class="warning-item warning-level-${warning.level}">
+                        <div class="warning-item warning-level-${this.wcEsc(warning.level)}">
                             <i class="fas fa-exclamation-triangle"></i>
-                            <span>${warning.description}</span>
+                            <span>${this.wcEsc(warning.description)}</span>
                         </div>
                     `).join('')}
                 </div>
@@ -233,6 +233,17 @@ class WeatherCard {
     }
 
     // Métodos de formateo y utilidad
+
+    /** Escapa texto antes de insertarlo en HTML (nombre único: se carga junto a chat.js y chatcard.js) */
+    wcEsc(value) {
+        return String(value ?? '')
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
+    }
+
     formatTime(date) {
         return date.toLocaleTimeString(this.config.language, { 
             hour: '2-digit', 
@@ -259,7 +270,9 @@ class WeatherCard {
     }
 
     getWeatherIcon(iconCode) {
-        return `https://openweathermap.org/img/wn/${iconCode}@2x.png`;
+        // El código de icono solo puede ser alfanumérico (p. ej. '10d')
+        const code = /^[a-z0-9]+$/i.test(String(iconCode ?? '')) ? iconCode : '01d';
+        return `https://openweathermap.org/img/wn/${code}@2x.png`;
     }
 
     getWindDirection(degrees) {

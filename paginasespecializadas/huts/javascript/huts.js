@@ -6,6 +6,26 @@ document.addEventListener('DOMContentLoaded', function() {
         attribution: 'Map data &copy; <a href="https://www.opentopomap.org/copyright">OpenTopoMap</a> contributors'
     }).addTo(map);
 
+    // Escapa texto antes de meterlo en el HTML del popup
+    function escapeHtml(value) {
+        return String(value === undefined || value === null ? '' : value)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
+    }
+
+    // Solo enlaces http(s)
+    function safeHttpUrl(url) {
+        try {
+            var parsed = new URL(String(url || ''), window.location.href);
+            return (parsed.protocol === 'http:' || parsed.protocol === 'https:') ? parsed.href : '';
+        } catch (e) {
+            return '';
+        }
+    }
+
     var geojsonUrl = 'javascript/pyrenees.geojson';
     var geojsonLayer;
     var originalData; // Variable para guardar los datos originales
@@ -48,18 +68,19 @@ document.addEventListener('DOMContentLoaded', function() {
                     opacity: 1,
                     fillOpacity: 0.8
                 }).bindPopup(function(layer) {
-                    var props = layer.feature.properties;
+                    var props = layer.feature.properties || {};
+                    var url = safeHttpUrl(props.url);
                     var popupContent = `
                         <div class="card border-0">
                             <div class="card-header bg-primary text-dark">
-                                <h5 class="card-title">${props.name || 'N/A'}</h5>
+                                <h5 class="card-title">${escapeHtml(props.name || 'N/A')}</h5>
                             </div>
                             <div class="card-body">
-                                <p class="card-text"><b>Region:</b> ${props.region || 'N/A'}</p>
-                                <p class="card-text"><b>Altitude:</b> ${props.altitude || 'N/A'}</p>
-                                <p class="card-text"><b>Capacity (summer):</b> ${props.cap_ete || 'N/A'}</p>
-                                <p class="card-text"><b>Capacity (winter):</b> ${props.cap_hiver || 'N/A'}</p>
-                                <a href="${props.url}" class="btn btn-primary text-dark" target="_blank">More info</a>
+                                <p class="card-text"><b>Region:</b> ${escapeHtml(props.region || 'N/A')}</p>
+                                <p class="card-text"><b>Altitude:</b> ${escapeHtml(props.altitude || 'N/A')}</p>
+                                <p class="card-text"><b>Capacity (summer):</b> ${escapeHtml(props.cap_ete || 'N/A')}</p>
+                                <p class="card-text"><b>Capacity (winter):</b> ${escapeHtml(props.cap_hiver || 'N/A')}</p>
+                                ${url ? `<a href="${escapeHtml(url)}" class="btn btn-primary text-dark" target="_blank" rel="noopener noreferrer">More info</a>` : ''}
                             </div>
                         </div>`;
                     return popupContent;

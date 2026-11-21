@@ -1,17 +1,43 @@
 <?php
-session_start();
+require_once __DIR__ . '/../../../includes/security.php';
+secure_session_start();
 require_once '../../inicio_sesion/conexion.php';
 
 header('Content-Type: application/json');
+
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    http_response_code(405);
+    echo json_encode(['success' => false, 'error' => 'Método no permitido']);
+    exit;
+}
 
 if (!isset($_SESSION['usuario'])) {
     echo json_encode(['success' => false, 'error' => 'User not logged in']);
     exit;
 }
 
+csrf_verify(true);
+
 $data    = json_decode(file_get_contents('php://input'), true);
+if (!is_array($data)) {
+    $data = [];
+}
 $action  = $data['action']  ?? '';
-$routeId = $data['routeId'] ?? null;
+$routeId = isset($data['routeId']) ? (int)$data['routeId'] : 0;
+
+$enTransaccion = false;
+
+/**
+ * Comprueba que la lista pertenece al usuario de la sesión.
+ */
+function listaEsDelUsuario($conn, int $listId, int $userId): bool {
+    $stmt = $conn->prepare("SELECT 1 FROM user_lists WHERE id = ? AND usuario_id = ? LIMIT 1");
+    $stmt->bind_param("ii", $listId, $userId);
+    $stmt->execute();
+    $ok = $stmt->get_result()->num_rows > 0;
+    $stmt->close();
+    return $ok;
+}
 
 try {
     // Resolver usuario_id
@@ -22,15 +48,19 @@ try {
         $stmt->execute();
         $row = $stmt->get_result()->fetch_assoc();
         $stmt->close();
-        if (!$row) throw new Exception('User not found');
+        if (!$row) throw new InvalidArgumentException('User not found');
         $userId = (int)$row['id'];
     }
 
+    if (!$routeId) throw new InvalidArgumentException('Route ID is required');
+
     if ($action === 'create') {
-        $listName = $data['listName'] ?? '';
-        if (empty($listName)) throw new Exception('List name is required');
+        $listName = trim((string)($data['listName'] ?? ''));
+        if ($listName === '') throw new InvalidArgumentException('List name is required');
+        if (mb_strlen($listName) > 100) throw new InvalidArgumentException('List name is too long');
 
         $conn->begin_transaction();
+        $enTransaccion = true;
 
         $createListStmt = $conn->prepare(
             "INSERT INTO user_lists (usuario_id, nombre) VALUES (?, ?)"
@@ -48,6 +78,7 @@ try {
         $addToListStmt->close();
 
         $conn->commit();
+        $enTransaccion = false;
 
         echo json_encode([
             'success' => true,
@@ -56,8 +87,12 @@ try {
         ]);
 
     } elseif ($action === 'add') {
-        $listId = $data['listId'] ?? null;
-        if (!$listId) throw new Exception('List ID is required');
+        $listId = isset($data['listId']) ? (int)$data['listId'] : 0;
+        if (!$listId) throw new InvalidArgumentException('List ID is required');
+        if (!listaEsDelUsuario($conn, $listId, $userId)) {
+            http_response_code(403);
+            throw new InvalidArgumentException('List not found');
+        }
 
         $checkStmt = $conn->prepare(
             "SELECT COUNT(*) FROM user_list_routes WHERE lista_id = ? AND ruta_id = ?"
@@ -67,7 +102,7 @@ try {
         $exists = $checkStmt->get_result()->fetch_row()[0] > 0;
         $checkStmt->close();
 
-        if ($exists) throw new Exception('Route is already in this list');
+        if ($exists) throw new InvalidArgumentException('Route is already in this list');
 
         $addToListStmt = $conn->prepare(
             "INSERT INTO user_list_routes (lista_id, ruta_id) VALUES (?, ?)"
@@ -79,8 +114,12 @@ try {
         echo json_encode(['success' => true, 'message' => 'Route added to list']);
 
     } elseif ($action === 'remove') {
-        $listId = $data['listId'] ?? null;
-        if (!$listId) throw new Exception('List ID is required');
+        $listId = isset($data['listId']) ? (int)$data['listId'] : 0;
+        if (!$listId) throw new InvalidArgumentException('List ID is required');
+        if (!listaEsDelUsuario($conn, $listId, $userId)) {
+            http_response_code(403);
+            throw new InvalidArgumentException('List not found');
+        }
 
         $removeStmt = $conn->prepare(
             "DELETE FROM user_list_routes WHERE lista_id = ? AND ruta_id = ?"
@@ -92,12 +131,16 @@ try {
         echo json_encode(['success' => true, 'message' => 'Route removed from list']);
 
     } else {
-        throw new Exception('Invalid action');
+        throw new InvalidArgumentException('Invalid action');
     }
 
-} catch (Exception $e) {
-    if ($conn->inTransaction()) $conn->rollback();
+} catch (InvalidArgumentException $e) {
+    if ($enTransaccion) $conn->rollback();
     echo json_encode(['success' => false, 'error' => $e->getMessage()]);
+} catch (Throwable $e) {
+    if ($enTransaccion) $conn->rollback();
+    error_log('bt_lists.php: ' . $e->getMessage());
+    echo json_encode(['success' => false, 'error' => 'No se ha podido actualizar la lista. Inténtalo de nuevo más tarde.']);
 }
 
 $conn->close();

@@ -4,6 +4,10 @@ require_once __DIR__ . '/vendor/autoload.php';
 require_once __DIR__ . '/includes/functions.php';
 require_once __DIR__ . '/paginasespecializadas/inicio_sesion/conexion.php';
 require_once __DIR__ . '/paginasespecializadas/inicio_sesion/config.php';
+require_once __DIR__ . '/includes/security.php';
+
+// Sesión con cookie HttpOnly + SameSite antes de que AuthService la abra
+secure_session_start();
 
 // Importar clases necesarias
 use KahirAI\Core\{AICore, ChatManager};
@@ -19,7 +23,7 @@ $userPreferences = [];
 // Verificar conexión a la base de datos
 if (!isset($conn) || $conn === null) {
     $logger->error('Error de conexión a la base de datos');
-    die('Error: No se pudo establecer la conexión con la base de datos');
+    die('Ahora mismo no podemos atenderte. Inténtalo de nuevo más tarde.');
 }
 
 if ($isLoggedIn) {
@@ -39,6 +43,7 @@ if ($isLoggedIn) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="<?= e(csrf_token()) ?>">
     <title><?php echo $isLoggedIn ? 'Kahir.ai Chat - Asistente de Rutas' : 'Kahir.AI - Tu Asistente de Montaña'; ?></title>
     
     <!-- Meta tags -->
@@ -118,16 +123,19 @@ if ($isLoggedIn) {
     <!-- Scripts comunes -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- CSRF: añade X-CSRF-Token a fetch()/$.ajax POST (después de jQuery, antes de los scripts propios) -->
+    <script src="csrf.js"></script>
     <!-- Marked.js: renderiza Markdown en las respuestas del asistente -->
     <script src="https://cdn.jsdelivr.net/npm/marked@9/marked.min.js"></script>
 
     <?php if ($isLoggedIn): ?>
         <!-- Scripts para el chat -->
+        <?php $jsonFlags = JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_UNESCAPED_UNICODE; ?>
         <script>
             window.appConfig = {
-                userId: '<?php echo isset($_SESSION['id']) ? $_SESSION['id'] : ''; ?>',
-                username: '<?php echo isset($_SESSION['usuario']) ? $_SESSION['usuario'] : ''; ?>',
-                preferences: <?php echo !empty($userPreferences) ? json_encode($userPreferences) : '{}'; ?>,
+                userId: <?php echo json_encode(isset($_SESSION['id']) ? (string)$_SESSION['id'] : '', $jsonFlags); ?>,
+                username: <?php echo json_encode(isset($_SESSION['usuario']) ? (string)$_SESSION['usuario'] : '', $jsonFlags); ?>,
+                preferences: <?php echo !empty($userPreferences) ? (json_encode($userPreferences, $jsonFlags) ?: '{}') : '{}'; ?>,
                 apiEndpoints: {
                     chat: 'api/chat_handler.php',
                     weather: 'api/weather_handler.php',

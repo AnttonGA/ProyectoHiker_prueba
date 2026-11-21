@@ -1,5 +1,6 @@
 <?php
-session_start();
+require_once __DIR__ . '/../../../includes/security.php';
+secure_session_start();
 require_once __DIR__ . '/../../inicio_sesion/conexion.php';
 require_once __DIR__ . '/../../inicio_sesion/config.php';
 
@@ -11,9 +12,26 @@ function debug_log($message) {
 debug_log("Update preferences script started");
 header('Content-Type: application/json');
 
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    http_response_code(405);
+    echo json_encode(['success' => false, 'error' => 'Método no permitido']);
+    exit;
+}
+
 try {
     if (!isset($_SESSION['usuario'])) {
-        throw new Exception('Usuario no autenticado');
+        echo json_encode(['success' => false, 'error' => 'Usuario no autenticado']);
+        exit;
+    }
+
+    // CSRF: sendBeacon no admite cabeceras, así que el token viaja en el cuerpo JSON.
+    $body = json_decode(file_get_contents('php://input'), true);
+    $tokenCuerpo = (is_array($body) && isset($body['csrf_token']) && is_string($body['csrf_token']))
+        ? $body['csrf_token'] : null;
+    if (!csrf_is_valid($tokenCuerpo)) {
+        http_response_code(403);
+        echo json_encode(['success' => false, 'error' => 'La sesión ha caducado. Recarga la página.']);
+        exit;
     }
 
     // Resolver usuario_id
@@ -24,7 +42,10 @@ try {
         $stmt->execute();
         $row = $stmt->get_result()->fetch_assoc();
         $stmt->close();
-        if (!$row) throw new Exception('Usuario no encontrado en la base de datos');
+        if (!$row) {
+            echo json_encode(['success' => false, 'error' => 'Usuario no encontrado']);
+            exit;
+        }
         $userId = (int)$row['id'];
     }
     debug_log("User ID: $userId");
@@ -125,9 +146,10 @@ try {
         ]
     ]);
 
-} catch (Exception $e) {
+} catch (Throwable $e) {
     debug_log("Exception: " . $e->getMessage());
-    echo json_encode(['success' => false, 'error' => $e->getMessage()]);
+    error_log('user_preferences.php: ' . $e->getMessage());
+    echo json_encode(['success' => false, 'error' => 'No se han podido actualizar las preferencias.']);
 } finally {
     if (isset($stmt) && $stmt instanceof mysqli_stmt) $stmt->close();
     if (isset($conn) && $conn instanceof mysqli)       $conn->close();

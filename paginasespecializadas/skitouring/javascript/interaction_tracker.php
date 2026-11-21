@@ -1,5 +1,6 @@
 <?php
-session_start();
+require_once __DIR__ . '/../../../includes/security.php';
+secure_session_start();
 require_once '../../inicio_sesion/conexion.php';
 require_once '../../inicio_sesion/config.php';
 
@@ -8,7 +9,7 @@ define('ERROR_LOG', LOG_DIR . '/error.log');
 define('DEBUG_LOG', LOG_DIR . '/debug.log');
 
 if (!file_exists(LOG_DIR)) {
-    mkdir(LOG_DIR, 0777, true);
+    mkdir(LOG_DIR, 0755, true);
 }
 
 function writeLog($message, $type = 'DEBUG') {
@@ -46,19 +47,66 @@ $routeId = null;
 $interactions = null;
 
 if ($method === 'GET') {
+    // Por GET solo se permite consultar el estado (no modifica datos)
     $action  = $_GET['action']  ?? '';
     $routeId = $_GET['routeId'] ?? null;
+    if ($action !== 'check') {
+        http_response_code(405);
+        echo json_encode(['success' => false, 'error' => 'Método no permitido']);
+        exit;
+    }
 } elseif ($method === 'POST') {
     $data = json_decode(file_get_contents('php://input'), true);
+    if (!is_array($data)) {
+        $data = [];
+    }
+    // CSRF: cabecera X-CSRF-Token (csrf.js) o campo csrf_token en el cuerpo JSON
+    $tokenCuerpo = (isset($data['csrf_token']) && is_string($data['csrf_token'])) ? $data['csrf_token'] : null;
+    csrf_verify(true, $tokenCuerpo);
+
     if (isset($data['action'])) {
         $action  = $data['action'];
         $routeId = $data['routeId'] ?? null;
+    } elseif (isset($data['interactions']) && is_array($data['interactions'])) {
+        $interactions = $data['interactions'];
     } else {
+        unset($data['csrf_token']);
         $interactions = $data;
     }
+} else {
+    http_response_code(405);
+    echo json_encode(['success' => false, 'error' => 'Método no permitido']);
+    exit;
 }
 
 $response = ['success' => true, 'messages' => []];
+
+// 'view_end' solo actualiza la duración de la última vista (no cuenta otra vista).
+// Se procesa fuera de la transacción para que un fallo no deshaga el resto.
+if ($interactions !== null) {
+    $pendientes = [];
+    foreach ($interactions as $interaction) {
+        if (!is_array($interaction)) {
+            continue;
+        }
+        $tipo = $interaction['type'] ?? null;
+        if ($tipo === 'map_interaction') {
+            // El ENUM de user_interactions no lo admite: se ignora
+            continue;
+        }
+        if ($tipo === 'view_end') {
+            updateViewDuration($conn, $userId, $interaction['routeId'] ?? null, $interaction['viewDuration'] ?? null);
+            continue;
+        }
+        $pendientes[] = $interaction;
+    }
+    $interactions = $pendientes;
+    if (!$interactions) {
+        $conn->close();
+        echo json_encode($response);
+        exit;
+    }
+}
 
 try {
     $conn->begin_transaction();
@@ -70,7 +118,7 @@ try {
             if (!$routeId || !$type) {
                 throw new Exception("Missing required fields for an interaction");
             }
-            processInteraction($conn, $userId, $routeId, $type);
+            processInteraction($conn, $userId, (int)$routeId, $type);
         }
     } else {
         if (!$routeId) {
@@ -78,11 +126,11 @@ try {
         }
         switch ($action) {
             case 'check':
-                $response = checkInteractionStatus($conn, $userId, $routeId);
+                $response = checkInteractionStatus($conn, $userId, (int)$routeId);
                 break;
             case 'favorite':
             case 'complete':
-                processInteraction($conn, $userId, $routeId, $action);
+                processInteraction($conn, $userId, (int)$routeId, $action);
                 break;
             default:
                 throw new Exception('Invalid action');
@@ -95,16 +143,42 @@ try {
 
     maybeUpdateUserPreferences($conn, $userId);
 
-} catch (Exception $e) {
+} catch (Throwable $e) {
     $conn->rollback();
     writeLog("Error en la transacción: " . $e->getMessage(), 'ERROR');
-    $response = ['success' => false, 'error' => $e->getMessage()];
+    error_log('interaction_tracker.php: ' . $e->getMessage());
+    $response = ['success' => false, 'error' => 'No se ha podido registrar la acción. Inténtalo de nuevo más tarde.'];
 }
 
 $conn->close();
 echo json_encode($response);
 
 // ─── Funciones ────────────────────────────────────────────────────────────────
+
+/**
+ * Guarda la duración (segundos) en la última fila 'view' de este usuario y ruta.
+ * No inserta una vista nueva. Si falla (p. ej. la columna no existe), solo se registra en el log.
+ */
+function updateViewDuration($conn, $userId, $routeId, $seconds) {
+    $routeId = (int)$routeId;
+    if ($routeId <= 0 || !is_numeric($seconds)) {
+        return;
+    }
+    $seconds = max(0, min((int)$seconds, 86400));
+    try {
+        $stmt = $conn->prepare(
+            "UPDATE user_interactions SET duracion_seg = ?
+             WHERE usuario_id = ? AND ruta_id = ? AND tipo = 'view'
+             ORDER BY id DESC LIMIT 1"
+        );
+        $stmt->bind_param("iii", $seconds, $userId, $routeId);
+        $stmt->execute();
+        $stmt->close();
+    } catch (Throwable $e) {
+        writeLog("Error guardando la duración de la vista: " . $e->getMessage(), 'ERROR');
+        error_log('interaction_tracker.php (view_end): ' . $e->getMessage());
+    }
+}
 
 function processInteraction($conn, $userId, $routeId, $type) {
     $validTypes = ['view', 'download', 'favorite', 'complete'];

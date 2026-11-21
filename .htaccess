@@ -1,0 +1,25 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# Kahir.ai · bloqueo de archivos sensibles (Apache 2.4)
+# Antes no había ningún .htaccess: .env, àpi_key, logs y .sql se podían descargar.
+# ─────────────────────────────────────────────────────────────────────────────
+
+Options -Indexes
+
+# Archivos ocultos (.env, .gitignore, .gitattributes…)
+<FilesMatch "^\.">
+    Require all denied
+</FilesMatch>
+
+# Extensiones que nunca deben servirse
+<FilesMatch "\.(env|log|sql|md|lock|py|zip|bak|ini|sh)$">
+    Require all denied
+</FilesMatch>
+
+# Archivos concretos
+<FilesMatch "(pi_key|^composer\.json|^ia_prompts\.json|^settings\.local\.json)$">
+    Require all denied
+</FilesMatch>
+
+# Carpetas internas: git, configuración de herramientas, base de datos, logs, librerías y tests
+RedirectMatch 404 (?i)/(\.git|\.claude|database|logs|vendor|cache|temp)(/|$)
+RedirectMatch 404 (?i)/hiker_ai/(tests?|config|core|DataBase|models|Services|utils|interfaces|exceptions|api)(/|$)

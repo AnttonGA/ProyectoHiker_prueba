@@ -36,7 +36,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
             fetch('acceso.php', {
                 method: 'POST',
-                body: formData
+                body: formData,
+                credentials: 'same-origin'
             })
             .then(response => response.json())
             .then(data => {
@@ -102,7 +103,12 @@ document.addEventListener('DOMContentLoaded', function () {
             console.error('Elemento de mensaje no encontrado');
             return;
         }
-        messageDiv.innerHTML = `<p class="${type}">${message}</p>`;
+        // textContent para no interpretar como HTML el mensaje recibido del servidor
+        messageDiv.textContent = '';
+        const p = document.createElement('p');
+        p.className = type;
+        p.textContent = message;
+        messageDiv.appendChild(p);
         messageDiv.style.display = 'block';
 
         // Ocultar el mensaje después de 3 segundos

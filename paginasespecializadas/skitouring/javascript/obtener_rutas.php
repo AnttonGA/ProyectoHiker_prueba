@@ -12,7 +12,7 @@ function debug_log($message) {
 }
 
 debug_log("Script started");
-debug_log("SERVER: " . print_r($_SERVER, true));
+// No se registra $_SERVER: contiene las cookies de sesión.
 
 // Configuración de errores
 error_reporting(E_ALL);
@@ -21,14 +21,10 @@ header('Content-Type: application/json');
 
 // Manejo de errores personalizados
 function handleError($errno, $errstr, $errfile, $errline) {
-    $error = array(
-        'error' => 'PHP Error',
-        'message' => $errstr,
-        'file' => $errfile,
-        'line' => $errline
-    );
-    debug_log("Error occurred: " . json_encode($error));
-    echo json_encode($error);
+    debug_log("Error occurred: $errstr en $errfile:$errline");
+    error_log("obtener_rutas.php: $errstr en $errfile:$errline");
+    http_response_code(500);
+    echo json_encode(['error' => 'No se han podido cargar las rutas. Inténtalo de nuevo más tarde.']);
     exit;
 }
 
@@ -37,14 +33,10 @@ set_error_handler('handleError');
 
 // Asegurar el uso de excepciones en caso de errores fatales
 set_exception_handler(function($e) {
-    $error = [
-        'error' => 'Uncaught Exception',
-        'message' => $e->getMessage(),
-        'file' => $e->getFile(),
-        'line' => $e->getLine()
-    ];
-    debug_log("Uncaught exception: " . json_encode($error));
-    echo json_encode($error);
+    debug_log("Uncaught exception: " . $e->getMessage() . ' en ' . $e->getFile() . ':' . $e->getLine());
+    error_log('obtener_rutas.php: ' . $e->getMessage());
+    http_response_code(500);
+    echo json_encode(['error' => 'No se han podido cargar las rutas. Inténtalo de nuevo más tarde.']);
     exit;
 });
 
@@ -90,7 +82,9 @@ try {
         $result = $stmt->get_result();
 
         if ($result->num_rows === 0) {
-            throw new Exception('Route not found');
+            http_response_code(404);
+            echo json_encode(['error' => 'Route not found']);
+            exit;
         }
 
         $ruta = $result->fetch_assoc();
@@ -138,11 +132,11 @@ try {
 
     debug_log("Query results processed and sent");
 
-} catch (Exception $e) {
+} catch (Throwable $e) {
     http_response_code(500);
-    $error = ['error' => $e->getMessage()];
-    debug_log("Exception caught: " . json_encode($error));
-    echo json_encode($error);
+    debug_log("Exception caught: " . $e->getMessage());
+    error_log('obtener_rutas.php: ' . $e->getMessage());
+    echo json_encode(['error' => 'No se han podido cargar las rutas. Inténtalo de nuevo más tarde.']);
 } finally {
     // Cerrar el statement y la conexión
     if (isset($stmt) && $stmt instanceof mysqli_stmt) {

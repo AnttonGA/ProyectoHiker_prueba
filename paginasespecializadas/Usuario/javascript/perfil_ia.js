@@ -41,7 +41,7 @@ const PerfilIA = {
     const container = document.getElementById('perfil-ia-content');
 
     const hasPrefs  = p !== null;
-    const actLabel  = (key) => this.activityLabels[key] || key;
+    const actLabel  = (key) => this.esc(this.activityLabels[key] || key);
     const levelInfo = this.levelLabels[p?.experience_level] ?? { text: 'No data', badge: 'secondary' };
 
     container.innerHTML = `
@@ -140,15 +140,15 @@ const PerfilIA = {
             <div class="card-body">
               <div class="row text-center">
                 <div class="col-4">
-                  <div class="display-6 fw-bold text-primary">${p.avg_preferred_distance}</div>
+                  <div class="display-6 fw-bold text-primary">${this.esc(p.avg_preferred_distance)}</div>
                   <small class="text-muted">avg km</small>
                 </div>
                 <div class="col-4">
-                  <div class="display-6 fw-bold text-success">${p.avg_preferred_duration}</div>
+                  <div class="display-6 fw-bold text-success">${this.esc(p.avg_preferred_duration)}</div>
                   <small class="text-muted">avg hours</small>
                 </div>
                 <div class="col-4">
-                  <div class="display-6 fw-bold text-warning">${p.avg_preferred_elevation}</div>
+                  <div class="display-6 fw-bold text-warning">${this.esc(p.avg_preferred_elevation)}</div>
                   <small class="text-muted">avg elevation (m)</small>
                 </div>
               </div>
@@ -266,9 +266,12 @@ const PerfilIA = {
   },
 
   esc(str) {
-    const d = document.createElement('div');
-    d.textContent = str ?? '';
-    return d.innerHTML;
+    return String(str ?? '')
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
   },
 };
 

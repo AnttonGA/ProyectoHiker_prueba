@@ -30,6 +30,7 @@ require_once $hiker_ai_dir . '/config/database.php'; // define DB_HOST, DB_USER,
 ini_set('display_errors', '0');
 
 require_once $project_root . '/vendor/autoload.php'; // PSR-4: KahirAI\ → hiker_ai/
+require_once $project_root . '/includes/security.php'; // sesión segura + CSRF
 
 use KahirAI\Core\{AICore, ChatManager};
 use KahirAI\Database\DBConnection;
@@ -42,16 +43,8 @@ header('X-Content-Type-Options: nosniff');
 
 // ─── Sesión ───────────────────────────────────────────────────────────────────
 
-if (session_status() === PHP_SESSION_NONE) {
-    session_set_cookie_params([
-        'lifetime' => SESSION_LIFETIME,
-        'path'     => '/',
-        'secure'   => false,   // true en producción con HTTPS
-        'httponly' => true,
-        'samesite' => 'Lax',
-    ]);
-    session_start();
-}
+// Cookie HttpOnly + SameSite=Lax (y Secure si la petición llega por HTTPS)
+secure_session_start();
 
 // ─── Logger para este endpoint ────────────────────────────────────────────────
 
@@ -71,15 +64,16 @@ function jsonResponse(array $data, int $httpCode = 200): void
 register_shutdown_function(function () {
     $e = error_get_last();
     if ($e && in_array($e['type'], [E_ERROR, E_PARSE, E_CORE_ERROR, E_COMPILE_ERROR], true)) {
-        ob_end_clean();
+        // El detalle solo va al log, nunca al cliente
+        error_log('chat_handler.php fatal: ' . $e['message'] . ' in ' . $e['file'] . ':' . $e['line']);
+        if (ob_get_level() > 0) {
+            ob_end_clean();
+        }
         http_response_code(500);
         echo json_encode([
             'success' => false,
             'type'    => 'error',
             'message' => 'Error interno del servidor. Inténtalo de nuevo.',
-            'debug'   => (defined('DEBUG_MODE') && DEBUG_MODE)
-                         ? $e['message'] . ' in ' . $e['file'] . ':' . $e['line']
-                         : null,
         ], JSON_UNESCAPED_UNICODE);
     }
 });
@@ -98,6 +92,16 @@ if (empty($_SESSION['usuario'])) {
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     jsonResponse(['success' => false, 'type' => 'error', 'message' => 'Método no permitido.'], 405);
+}
+
+// ─── CSRF (cabecera X-CSRF-Token que añade csrf.js) ──────────────────────────
+
+if (!csrf_is_valid()) {
+    jsonResponse([
+        'success' => false,
+        'type'    => 'error',
+        'message' => 'La sesión ha caducado. Recarga la página e inténtalo de nuevo.',
+    ], 403);
 }
 
 // ─── Leer y validar entrada ───────────────────────────────────────────────────
@@ -120,9 +124,10 @@ if (mb_strlen($userMessage) > 500) {
 
 try {
     $conn = DBConnection::getInstance()->getConnection();
-} catch (\Exception $e) {
+} catch (\Throwable $e) {
     $logger->error('Error de conexión a BD', ['error' => $e->getMessage()]);
-    jsonResponse(['success' => false, 'type' => 'error', 'message' => 'Error de conexión a la base de datos.'], 500);
+    error_log('chat_handler.php BD: ' . $e->getMessage());
+    jsonResponse(['success' => false, 'type' => 'error', 'message' => 'El asistente no está disponible en este momento. Inténtalo más tarde.'], 500);
 }
 
 // ─── Resolver ID numérico del usuario ────────────────────────────────────────
@@ -136,8 +141,9 @@ try {
     $stmt->execute();
     $row = $stmt->get_result()->fetch_assoc();
     $stmt->close();
-} catch (\Exception $e) {
+} catch (\Throwable $e) {
     $logger->error('Error buscando usuario', ['error' => $e->getMessage()]);
+    error_log('chat_handler.php usuario: ' . $e->getMessage());
     jsonResponse(['success' => false, 'type' => 'error', 'message' => 'Error al verificar el usuario.'], 500);
 }
 
@@ -174,9 +180,26 @@ try {
             'message' => "Has alcanzado el límite de {$rateLimit} mensajes por hora. Inténtalo en un rato.",
         ], 429);
     }
-} catch (\Exception $e) {
-    // Si la consulta falla (tabla no existe, etc.) continuamos sin rate limiting
-    $logger->warning('Rate limiting omitido', ['error' => $e->getMessage()]);
+} catch (\Throwable $e) {
+    // Si la consulta falla NO se deja pasar sin límite: se registra el error y se aplica
+    // un límite de respaldo por sesión (mismo número de mensajes por hora).
+    $logger->error('Rate limiting por BD no disponible; se usa el límite por sesión', ['error' => $e->getMessage()]);
+    error_log('chat_handler.php rate limit: ' . $e->getMessage());
+
+    $ahora    = time();
+    $marcas   = array_values(array_filter(
+        (array)($_SESSION['chat_rate_fallback'] ?? []),
+        static fn($t) => is_int($t) && $t > $ahora - 3600
+    ));
+    if (count($marcas) >= $rateLimit) {
+        jsonResponse([
+            'success' => false,
+            'type'    => 'error',
+            'message' => "Has alcanzado el límite de {$rateLimit} mensajes por hora. Inténtalo en un rato.",
+        ], 429);
+    }
+    $marcas[] = $ahora;
+    $_SESSION['chat_rate_fallback'] = $marcas;
 }
 
 // ─── Instanciar ChatManager y AICore ─────────────────────────────────────────
@@ -184,20 +207,21 @@ try {
 try {
     $chatManager = new ChatManager();
     $aiCore      = new AICore($conn);
-} catch (\Exception $e) {
+} catch (\Throwable $e) {
     $logger->error('Error instanciando servicios AI', ['error' => $e->getMessage()]);
+    error_log('chat_handler.php init: ' . $e->getMessage());
 
-    // Detectar si es el error de API key no configurada
+    // Detectar si es el error de API key no configurada (el detalle queda en el log)
     $errMsg = $e->getMessage();
     if (stripos($errMsg, 'API key') !== false || stripos($errMsg, 'API_KEY') !== false) {
         jsonResponse([
             'success' => false,
             'type'    => 'error',
-            'message' => 'El asistente IA aún no está configurado. Añade la clave CLAUDE_API_KEY al archivo .env del proyecto.',
+            'message' => 'El asistente IA no está disponible en este momento. Inténtalo más tarde.',
         ], 503);
     }
 
-    jsonResponse(['success' => false, 'type' => 'error', 'message' => 'Error al inicializar el asistente: ' . $errMsg], 500);
+    jsonResponse(['success' => false, 'type' => 'error', 'message' => 'No se ha podido iniciar el asistente. Inténtalo más tarde.'], 500);
 }
 
 // ─── Sesión de chat persistente ───────────────────────────────────────────────
@@ -226,8 +250,9 @@ try {
 
 try {
     $chatResult = $chatManager->processMessage($userMessage);
-} catch (\Exception $e) {
+} catch (\Throwable $e) {
     $logger->error('Error en ChatManager', ['error' => $e->getMessage()]);
+    error_log('chat_handler.php ChatManager: ' . $e->getMessage());
     jsonResponse(['success' => false, 'type' => 'error', 'message' => 'Error al procesar tu mensaje.'], 500);
 }
 
@@ -271,7 +296,8 @@ switch ($chatResult['type']) {
 
 try {
     $aiResponse = $aiCore->processQuery($userMessage, $sessionUser, $history, $chatSessionId);
-} catch (\Exception $e) {
+} catch (\Throwable $e) {
+    error_log('chat_handler.php processQuery: ' . $e->getMessage());
     $logger->error('Error en AICore::processQuery', [
         'userId' => $userIdInt,
         'error'  => $e->getMessage(),

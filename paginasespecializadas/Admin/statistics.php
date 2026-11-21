@@ -1,26 +1,35 @@
 <?php
+require_once __DIR__ . '/../../includes/security.php';
+secure_session_start();
 include('../inicio_sesion/conexion.php');
-session_start();
 
+// TODO esquema: se comprueba el rol 'A' (esquema antiguo); database/schema.sql usa 'admin' y acceso.php guarda el rol tal cual viene de la BD.
 if (!isset($_SESSION['rol']) || $_SESSION['rol'] != 'A') {
     header('Location: ../inicio_sesion/gestion.php');
     exit();
 }
 
 // Obtener usuarios desde la base de datos
-$sqlUsuarios = "SELECT * FROM usuarios";
+$sqlUsuarios = "SELECT id FROM usuarios";
 $resultUsuarios = $conn->query($sqlUsuarios);
 $totalUsuarios = $resultUsuarios->num_rows;
 
 // Obtener rutas desde el archivo JSON
+// TODO esquema: migrar a BD (tabla rutas). rutas.json ya no existe en esta copia.
 $jsonFile = '../skitouring/javascript/rutas.json';
-$rutas = json_decode(file_get_contents($jsonFile), true);
+$rutas = is_readable($jsonFile) ? json_decode(file_get_contents($jsonFile), true) : [];
+if (!is_array($rutas)) {
+    $rutas = [];
+}
 
 // Calcular estadísticas de rutas
 $rutasPorTipo = [];
 $rutasPopulares = [];
 
 foreach ($rutas as $ruta) {
+    if (!is_array($ruta) || !isset($ruta['tipo_ruta'])) {
+        continue;
+    }
     // Agrupar rutas por tipo
     if (!isset($rutasPorTipo[$ruta['tipo_ruta']])) {
         $rutasPorTipo[$ruta['tipo_ruta']] = 0;
@@ -41,8 +50,10 @@ usort($rutasPopulares, function ($a, $b) {
 $rutasPopulares = array_slice($rutasPopulares, 0, 5);
 
 // Convertir datos a JSON para usar en Chart.js
-$rutasPorTipoJson = json_encode($rutasPorTipo);
-$rutasPopularesJson = json_encode($rutasPopulares);
+// Flags para que el JSON pueda incrustarse con seguridad dentro de <script>
+$jsonFlags = JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT;
+$rutasPorTipoJson = json_encode($rutasPorTipo, $jsonFlags);
+$rutasPopularesJson = json_encode($rutasPopulares, $jsonFlags);
 ?>
 
 <!DOCTYPE html>
@@ -64,7 +75,7 @@ $rutasPopularesJson = json_encode($rutasPopulares);
                 <div class="card mb-3 h-100">
                     <div class="card-body">
                         <h5 class="card-title">Número de Usuarios</h5>
-                        <p class="card-text">Total de usuarios registrados: <?php echo $totalUsuarios; ?></p>
+                        <p class="card-text">Total de usuarios registrados: <?php echo (int) $totalUsuarios; ?></p>
                     </div>
                 </div>
             </div>

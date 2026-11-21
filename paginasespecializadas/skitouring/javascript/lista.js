@@ -106,7 +106,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     return `
       <div class="col">
-        <a href="ruta.html?id=${route.id}" class="route-card">
+        <a href="ruta.html?id=${encodeURIComponent(route.id)}" class="route-card">
           <div class="route-card__img-wrap">
             <img src="${esc(imgSrc)}" alt="${esc(route.titulo)}"
                  loading="lazy" onerror="this.src='${defaultImg}'">

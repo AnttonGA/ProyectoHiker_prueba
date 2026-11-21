@@ -108,6 +108,26 @@ document.addEventListener('DOMContentLoaded', function () {
     initMap(42.5, 1.5, 7);
   }
 
+  // ── Escape helpers (datos de la BD / GeoJSON antes de meterlos en HTML) ──
+  function escapeHtml(value) {
+    return String(value ?? '')
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+
+  // Solo enlaces http(s); cualquier otro esquema (javascript:, data:...) se descarta
+  function safeHttpUrl(url) {
+    try {
+      const parsed = new URL(String(url || ''), window.location.href);
+      return (parsed.protocol === 'http:' || parsed.protocol === 'https:') ? parsed.href : '';
+    } catch (e) {
+      return '';
+    }
+  }
+
   // ── Popup builder ─────────────────────────────────────────────
   function buildPopup(ruta) {
     const actStyle = ACTIVITY_STYLE[ruta.tipo_ruta] || { color: '#6c757d' };
@@ -122,20 +142,20 @@ document.addEventListener('DOMContentLoaded', function () {
     return `
       <div style="min-width:220px;font-family:inherit;">
         <div style="background:${actStyle.color};color:#fff;padding:8px 12px;margin:-1px -1px 0;border-radius:4px 4px 0 0;">
-          <strong style="font-size:.9rem;">${ruta.titulo || 'Sin título'}</strong>
+          <strong style="font-size:.9rem;">${escapeHtml(ruta.titulo || 'Sin título')}</strong>
         </div>
         <div style="padding:10px 12px 12px;line-height:1.5;">
           <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px;">
-            <span style="background:${diffColor};color:#fff;border-radius:20px;padding:2px 8px;font-size:.7rem;font-weight:600;">${diffLabel}</span>
-            <span style="background:${actStyle.color};color:#fff;border-radius:20px;padding:2px 8px;font-size:.7rem;font-weight:600;">${actLabel}</span>
+            <span style="background:${diffColor};color:#fff;border-radius:20px;padding:2px 8px;font-size:.7rem;font-weight:600;">${escapeHtml(diffLabel)}</span>
+            <span style="background:${actStyle.color};color:#fff;border-radius:20px;padding:2px 8px;font-size:.7rem;font-weight:600;">${escapeHtml(actLabel)}</span>
           </div>
           <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px;">
             <span style="background:#f0f4f8;border-radius:20px;padding:2px 9px;font-size:.72rem;font-weight:600;">↑ ${elev}</span>
             <span style="background:#f0f4f8;border-radius:20px;padding:2px 9px;font-size:.72rem;font-weight:600;">⟷ ${dist}</span>
             <span style="background:#f0f4f8;border-radius:20px;padding:2px 9px;font-size:.72rem;font-weight:600;">⏱ ${dur}</span>
           </div>
-          ${ruta.ubicacion ? `<div style="font-size:.75rem;color:#6c757d;margin-bottom:10px;">📍 ${ruta.ubicacion}</div>` : ''}
-          <a href="ruta.html?id=${ruta.id}" style="display:block;text-align:center;background:#0d6efd;color:#fff;border-radius:8px;padding:6px 0;font-size:.8rem;font-weight:600;text-decoration:none;">Ver ruta →</a>
+          ${ruta.ubicacion ? `<div style="font-size:.75rem;color:#6c757d;margin-bottom:10px;">📍 ${escapeHtml(ruta.ubicacion)}</div>` : ''}
+          <a href="ruta.html?id=${encodeURIComponent(ruta.id)}" style="display:block;text-align:center;background:#0d6efd;color:#fff;border-radius:8px;padding:6px 0;font-size:.8rem;font-weight:600;text-decoration:none;">Ver ruta →</a>
         </div>
       </div>`;
   }
@@ -269,17 +289,19 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 
   function createShelterPopup(props) {
+    props = props || {};
+    const url = props.url ? safeHttpUrl(props.url) : '';
     return `
       <div style="min-width:200px;">
         <div style="background:#0d6efd;color:#fff;padding:8px 12px;margin:-1px -1px 0;border-radius:4px 4px 0 0;">
-          <strong>${props.name || 'Shelter'}</strong>
+          <strong>${escapeHtml(props.name || 'Shelter')}</strong>
         </div>
         <div style="padding:10px 12px;line-height:1.6;font-size:.82rem;">
-          ${props.region   ? `<div>📍 ${props.region}</div>` : ''}
-          ${props.altitude ? `<div>⛰️ Alt: ${props.altitude} m</div>` : ''}
-          ${props.cap_ete  ? `<div>☀️ Summer capacity: ${props.cap_ete}</div>` : ''}
-          ${props.cap_hiver? `<div>❄️ Winter capacity: ${props.cap_hiver}</div>` : ''}
-          ${props.url      ? `<div style="margin-top:8px;"><a href="${props.url}" target="_blank" style="color:#0d6efd;font-weight:600;">More info →</a></div>` : ''}
+          ${props.region   ? `<div>📍 ${escapeHtml(props.region)}</div>` : ''}
+          ${props.altitude ? `<div>⛰️ Alt: ${escapeHtml(props.altitude)} m</div>` : ''}
+          ${props.cap_ete  ? `<div>☀️ Summer capacity: ${escapeHtml(props.cap_ete)}</div>` : ''}
+          ${props.cap_hiver? `<div>❄️ Winter capacity: ${escapeHtml(props.cap_hiver)}</div>` : ''}
+          ${url            ? `<div style="margin-top:8px;"><a href="${escapeHtml(url)}" target="_blank" rel="noopener noreferrer" style="color:#0d6efd;font-weight:600;">More info →</a></div>` : ''}
         </div>
       </div>`;
   }

@@ -1,6 +1,7 @@
 <?php
 ini_set('display_errors', 0);
-session_start();
+require_once __DIR__ . '/../../../includes/security.php';
+secure_session_start();
 require_once '../../inicio_sesion/conexion.php';
 
 header('Content-Type: application/json');
@@ -51,6 +52,18 @@ function getListRoutes($conn, $list_id, $user_id) {
 
 $action = $_GET['action'] ?? '';
 
+// Las acciones que modifican datos solo por POST y con token CSRF
+$accionesEscritura = ['createList', 'removeRouteFromList', 'deleteList'];
+if (in_array($action, $accionesEscritura, true)) {
+    if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+        http_response_code(405);
+        echo json_encode(['error' => 'Método no permitido']);
+        exit;
+    }
+    csrf_verify(true);
+}
+
+try {
 switch ($action) {
     case 'getLists':
         echo json_encode(getUserLists($conn, $user_id));
@@ -69,7 +82,8 @@ switch ($action) {
             if ($stmt->execute()) {
                 echo json_encode(['success' => true, 'id' => $conn->insert_id]);
             } else {
-                echo json_encode(['error' => 'Error al crear la lista: ' . $conn->error]);
+                error_log('user_lists_handler.php (createList): ' . $conn->error);
+                echo json_encode(['error' => 'No se ha podido crear la lista.']);
             }
         } else {
             echo json_encode(['error' => 'Nombre de lista vacío']);
@@ -86,7 +100,12 @@ switch ($action) {
                  WHERE ulr.lista_id = ? AND ulr.ruta_id = ? AND ul.usuario_id = ?"
             );
             $stmt->bind_param("iii", $list_id, $route_id, $user_id);
-            echo json_encode($stmt->execute() ? ['success' => true] : ['error' => $conn->error]);
+            if ($stmt->execute()) {
+                echo json_encode(['success' => true]);
+            } else {
+                error_log('user_lists_handler.php (removeRouteFromList): ' . $conn->error);
+                echo json_encode(['error' => 'No se ha podido quitar la ruta de la lista.']);
+            }
         } else {
             echo json_encode(['error' => 'Parámetros inválidos']);
         }
@@ -115,6 +134,10 @@ switch ($action) {
 
     default:
         echo json_encode(['error' => 'Acción no reconocida']);
+}
+} catch (Throwable $e) {
+    error_log('user_lists_handler.php: ' . $e->getMessage());
+    echo json_encode(['error' => 'Ha ocurrido un error. Inténtalo de nuevo más tarde.']);
 }
 
 $conn->close();

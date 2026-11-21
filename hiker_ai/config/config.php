@@ -2,8 +2,8 @@
 require_once dirname(__DIR__, 2) . '/includes/env_loader.php';
 load_env();
 
-// Entorno
-define('APP_ENV',    env('APP_ENV', 'development'));
+// Entorno: si .env no define APP_ENV se asume producción (sin errores en pantalla)
+define('APP_ENV',    env('APP_ENV', 'production') ?: 'production');
 define('DEBUG_MODE', APP_ENV === 'development');
 
 // Claude API (Anthropic)

@@ -1,7 +1,9 @@
 <?php
+require_once __DIR__ . '/../../includes/security.php';
+secure_session_start();
 include('../inicio_sesion/conexion.php');
-session_start();
 
+// TODO esquema: se comprueba el rol 'A' (esquema antiguo); database/schema.sql usa 'admin' y acceso.php guarda el rol tal cual viene de la BD.
 if (!isset($_SESSION['rol']) || $_SESSION['rol'] != 'A') {
     header('Location: ../inicio_sesion/login.php');
     exit();

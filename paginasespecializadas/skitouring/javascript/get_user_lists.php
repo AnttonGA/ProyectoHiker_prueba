@@ -1,5 +1,6 @@
 <?php
-session_start();
+require_once __DIR__ . '/../../../includes/security.php';
+secure_session_start();
 require_once '../../inicio_sesion/conexion.php';
 
 header('Content-Type: application/json');
@@ -44,8 +45,9 @@ try {
 
     echo json_encode(['success' => true, 'lists' => $lists]);
 
-} catch (Exception $e) {
-    echo json_encode(['success' => false, 'error' => $e->getMessage()]);
+} catch (Throwable $e) {
+    error_log('get_user_lists.php: ' . $e->getMessage());
+    echo json_encode(['success' => false, 'error' => 'No se han podido cargar tus listas.']);
 }
 
 $conn->close();

@@ -1,51 +1,67 @@
 <?php
+require_once __DIR__ . '/../../includes/security.php';
+secure_session_start();
 include('../inicio_sesion/conexion.php');
-include '../../includes/functions.php';
-session_start();
+require_once __DIR__ . '/../../includes/functions.php';
 
-if (isset($_SESSION['rol']) && $_SESSION['rol'] == 'A') {
-    if (isset($_GET['id'])) {
-        $id = $_GET['id'];
+// TODO esquema: este archivo usa el esquema antiguo (nombre, apellidos, mail, usuario, estado y roles 'A'/'U'/'I'/'E');
+// database/schema.sql usa username/email/activo y roles 'admin'/'editor'/'usuario'/'guest'. Confirmar con la BD real.
+if (!isset($_SESSION['rol']) || $_SESSION['rol'] != 'A') {
+    header("Location: ../inicio_sesion/gestion.php");
+    exit();
+}
 
-        // Obtener datos del usuario
-        $sql = "SELECT * FROM usuarios WHERE id = ?";
-        $stmt = $conn->prepare($sql);
-        $stmt->bind_param("i", $id);
-        $stmt->execute();
-        $result = $stmt->get_result();
-        $usuario = $result->fetch_assoc();
+$id = filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT);
+if (!$id) {
+    http_response_code(400);
+    exit('Identificador de usuario no válido.');
+}
 
-        $stmt->close();
+if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+    csrf_verify();
+
+    // Actualizar datos del usuario
+    $nombre = (string) ($_POST['nombre'] ?? '');
+    $apellidos = (string) ($_POST['apellidos'] ?? '');
+    $mail = (string) ($_POST['mail'] ?? '');
+    $usuarioNombre = (string) ($_POST['usuario'] ?? '');
+    $rol = (string) ($_POST['rol'] ?? '');
+    $estado = (string) ($_POST['estado'] ?? '');
+
+    // Solo se aceptan los valores que ofrece el formulario
+    if (!in_array($rol, ['A', 'U', 'I', 'E'], true) || !in_array($estado, ['A', 'P', 'D', 'B'], true)) {
+        http_response_code(400);
+        exit('Datos no válidos.');
     }
 
-    if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-        // Actualizar datos del usuario
-        $nombre = $_POST['nombre'];
-        $apellidos = $_POST['apellidos'];
-        $mail = $_POST['mail'];
-        $usuarioNombre = $_POST['usuario'];
-        $rol = $_POST['rol'];
-        $estado = $_POST['estado'];
-
+    try {
         $sql = "UPDATE usuarios SET nombre = ?, apellidos = ?, mail = ?, usuario = ?, rol = ?, estado = ? WHERE id = ?";
         $stmt = $conn->prepare($sql);
         $stmt->bind_param("ssssssi", $nombre, $apellidos, $mail, $usuarioNombre, $rol, $estado, $id);
-
-        if ($stmt->execute()) {
-            $_SESSION['message'] = "Usuario actualizado exitosamente";
-        } else {
-            $_SESSION['message'] = "Error al actualizar el usuario";
-        }
-
+        $ok = $stmt->execute();
         $stmt->close();
-        $conn->close();
-        
-        header("Location: " . root_path('user_management.php'));
-        exit();
+        $_SESSION['message'] = $ok ? "Usuario actualizado exitosamente" : "Error al actualizar el usuario";
+    } catch (Throwable $e) {
+        error_log('editar_usuario.php: ' . $e->getMessage());
+        $_SESSION['message'] = "Error al actualizar el usuario";
     }
-} else {
-    header("Location: " . root_path('gestion.php'));
+
+    $conn->close();
+
+    header("Location: user_management.php");
     exit();
+}
+
+// Obtener datos del usuario
+$stmt = $conn->prepare("SELECT * FROM usuarios WHERE id = ?");
+$stmt->bind_param("i", $id);
+$stmt->execute();
+$usuario = $stmt->get_result()->fetch_assoc();
+$stmt->close();
+
+if (!$usuario) {
+    http_response_code(404);
+    exit('Usuario no encontrado.');
 }
 ?>
 
@@ -61,39 +77,40 @@ if (isset($_SESSION['rol']) && $_SESSION['rol'] == 'A') {
 <?php include('navbar.php'); ?>
     <div class="container mt-5">
         <h1>Editar Usuario</h1>
-        <form action="editar_usuario.php?id=<?php echo $id; ?>" method="POST">
+        <form action="editar_usuario.php?id=<?php echo (int) $id; ?>" method="POST">
+            <?= csrf_field() ?>
             <div class="mb-3">
                 <label for="nombre" class="form-label">Nombre</label>
-                <input type="text" class="form-control" id="nombre" name="nombre" value="<?php echo $usuario['nombre']; ?>" required>
+                <input type="text" class="form-control" id="nombre" name="nombre" value="<?php echo e($usuario['nombre'] ?? ''); ?>" required>
             </div>
             <div class="mb-3">
                 <label for="apellidos" class="form-label">Apellidos</label>
-                <input type="text" class="form-control" id="apellidos" name="apellidos" value="<?php echo $usuario['apellidos']; ?>" required>
+                <input type="text" class="form-control" id="apellidos" name="apellidos" value="<?php echo e($usuario['apellidos'] ?? ''); ?>" required>
             </div>
             <div class="mb-3">
                 <label for="mail" class="form-label">Mail</label>
-                <input type="email" class="form-control" id="mail" name="mail" value="<?php echo $usuario['mail']; ?>" required>
+                <input type="email" class="form-control" id="mail" name="mail" value="<?php echo e($usuario['mail'] ?? ''); ?>" required>
             </div>
             <div class="mb-3">
                 <label for="usuario" class="form-label">Usuario</label>
-                <input type="text" class="form-control" id="usuario" name="usuario" value="<?php echo $usuario['usuario']; ?>" required>
+                <input type="text" class="form-control" id="usuario" name="usuario" value="<?php echo e($usuario['usuario'] ?? ''); ?>" required>
             </div>
             <div class="mb-3">
                 <label for="rol" class="form-label">Rol</label>
                 <select class="form-select" id="rol" name="rol" required>
-                    <option value="A" <?php if ($usuario['rol'] == 'A') echo 'selected'; ?>>Administrador</option>
-                    <option value="U" <?php if ($usuario['rol'] == 'U') echo 'selected'; ?>>Usuario</option>
-                    <option value="I" <?php if ($usuario['rol'] == 'I') echo 'selected'; ?>>Invitado</option>
-                    <option value="E" <?php if ($usuario['rol'] == 'E') echo 'selected'; ?>>Editor</option>
+                    <option value="A" <?php if (($usuario['rol'] ?? '') == 'A') echo 'selected'; ?>>Administrador</option>
+                    <option value="U" <?php if (($usuario['rol'] ?? '') == 'U') echo 'selected'; ?>>Usuario</option>
+                    <option value="I" <?php if (($usuario['rol'] ?? '') == 'I') echo 'selected'; ?>>Invitado</option>
+                    <option value="E" <?php if (($usuario['rol'] ?? '') == 'E') echo 'selected'; ?>>Editor</option>
                 </select>
             </div>
             <div class="mb-3">
                 <label for="estado" class="form-label">Estado</label>
                 <select class="form-select" id="estado" name="estado" required>
-                    <option value="A" <?php if ($usuario['estado'] == 'A') echo 'selected'; ?>>Activo</option>
-                    <option value="P" <?php if ($usuario['estado'] == 'P') echo 'selected'; ?>>Preinscrito</option>
-                    <option value="D" <?php if ($usuario['estado'] == 'D') echo 'selected'; ?>>Desactivado</option>
-                    <option value="B" <?php if ($usuario['estado'] == 'B') echo 'selected'; ?>>Borrado</option>
+                    <option value="A" <?php if (($usuario['estado'] ?? '') == 'A') echo 'selected'; ?>>Activo</option>
+                    <option value="P" <?php if (($usuario['estado'] ?? '') == 'P') echo 'selected'; ?>>Preinscrito</option>
+                    <option value="D" <?php if (($usuario['estado'] ?? '') == 'D') echo 'selected'; ?>>Desactivado</option>
+                    <option value="B" <?php if (($usuario['estado'] ?? '') == 'B') echo 'selected'; ?>>Borrado</option>
                 </select>
             </div>
             <button type="submit" class="btn btn-primary">Guardar cambios</button>

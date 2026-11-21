@@ -1,6 +1,7 @@
 <?php
 ini_set('display_errors', 0);
-session_start();
+require_once __DIR__ . '/../../../includes/security.php';
+secure_session_start();
 require_once __DIR__ . '/../../inicio_sesion/conexion.php';
 require_once __DIR__ . '/../../inicio_sesion/config.php';
 
@@ -13,7 +14,7 @@ header('Content-Type: application/json');
 
 try {
     if (!isset($_SESSION['usuario'])) {
-        throw new Exception('Usuario no autenticado');
+        throw new InvalidArgumentException('Usuario no autenticado');
     }
 
     $username = $_SESSION['usuario'];
@@ -28,7 +29,7 @@ try {
     $stmt->bind_param("s", $username);
     $stmt->execute();
     $result = $stmt->get_result();
-    if ($result->num_rows === 0) throw new Exception('Usuario no encontrado en la base de datos');
+    if ($result->num_rows === 0) throw new InvalidArgumentException('Usuario no encontrado');
     $user_id = $result->fetch_assoc()['id'];
     $stmt->close();
 
@@ -76,9 +77,12 @@ try {
 
     echo json_encode(['success' => true, 'routes' => $routes, 'total' => (int)$total, 'page' => $page, 'limit' => $limit]);
 
-} catch (Exception $e) {
-    debug_log("Exception: " . $e->getMessage());
+} catch (InvalidArgumentException $e) {
     echo json_encode(['success' => false, 'error' => $e->getMessage()]);
+} catch (Throwable $e) {
+    debug_log("Exception: " . $e->getMessage());
+    error_log('completadausuario.php: ' . $e->getMessage());
+    echo json_encode(['success' => false, 'error' => 'No se han podido cargar las rutas. Inténtalo de nuevo más tarde.']);
 } finally {
     if (isset($conn)) $conn->close();
 }

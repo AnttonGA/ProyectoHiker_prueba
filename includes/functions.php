@@ -14,5 +14,6 @@ function root_path($path = '') {
     // Devuelve la ruta completa desde la raíz del proyecto
     return $root . '/' . ltrim($path, '/');
 }
-session_start()
+require_once __DIR__ . '/security.php';
+secure_session_start();
 ?>

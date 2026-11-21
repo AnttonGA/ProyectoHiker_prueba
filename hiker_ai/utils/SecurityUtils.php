@@ -172,6 +172,15 @@ class SecurityUtils {
      * @param array $payload Datos a codificar
      * @return string
      */
+    /** Secreto de firma: obligatorio en .env (JWT_SECRET); nunca un valor por defecto conocido */
+    private static function jwtSecret(): string {
+        $secret = $_ENV['JWT_SECRET'] ?? getenv('JWT_SECRET');
+        if (!is_string($secret) || $secret === '') {
+            throw new \Exception('JWT_SECRET no configurado en .env');
+        }
+        return $secret;
+    }
+
     private static function encodeJWT(array $payload): string {
         $header = [
             'typ' => 'JWT',
@@ -183,7 +192,7 @@ class SecurityUtils {
         
         $signature = hash_hmac('sha256', 
             "$encodedHeader.$encodedPayload", 
-            $_ENV['JWT_SECRET'] ?? 'default-secret-key',
+            self::jwtSecret(),
             true
         );
         
@@ -207,11 +216,11 @@ class SecurityUtils {
 
         $signature = hash_hmac('sha256',
             "{$parts[0]}.{$parts[1]}",
-            $_ENV['JWT_SECRET'] ?? 'default-secret-key',
+            self::jwtSecret(),
             true
         );
 
-        if (base64_encode($signature) !== $parts[2]) {
+        if (!hash_equals(base64_encode($signature), $parts[2])) {
             throw new \Exception('Invalid signature');
         }
 

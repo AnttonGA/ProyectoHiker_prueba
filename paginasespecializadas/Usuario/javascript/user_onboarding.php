@@ -4,7 +4,8 @@
  * Single query, lightweight, called once on page load.
  */
 ini_set('display_errors', 0);
-session_start();
+require_once __DIR__ . '/../../../includes/security.php';
+secure_session_start();
 require_once __DIR__ . '/../../inicio_sesion/conexion.php';
 
 header('Content-Type: application/json');

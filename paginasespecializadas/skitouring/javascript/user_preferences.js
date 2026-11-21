@@ -17,9 +17,12 @@ document.addEventListener('DOMContentLoaded', function() {
     function sendDataToServer() {
         updateInteractionData();
         
-        // Usamos sendBeacon para asegurar que los datos se envíen incluso si la página se está cerrando
+        // Usamos sendBeacon para asegurar que los datos se envíen incluso si la página se está cerrando.
+        // sendBeacon no admite cabeceras: el token CSRF va en el cuerpo (lo comprueba el servidor).
+        const csrfToken = typeof window.kahirCsrfToken === 'function' ? window.kahirCsrfToken() : '';
         navigator.sendBeacon('javascript/user_preferences.php', JSON.stringify({
-            interactionData: interactionData
+            interactionData: interactionData,
+            csrf_token: csrfToken
         }));
     }
 

@@ -2,9 +2,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const urlParams = new URLSearchParams(window.location.search);
     const rutaId = urlParams.get('id');
     let viewStartTime;
-    let mapInteractionStartTime;
-    let totalMapInteractionTime = 0;
-    let isInteractingWithMap = false;
+    let viewEndSent = false;
 
     fetch(`javascript/obtener_rutas.php?id=${encodeURIComponent(rutaId)}`)
         .then(response => { if (!response.ok) throw new Error(`HTTP ${response.status}`); return response.json(); })
@@ -146,7 +144,10 @@ document.addEventListener('DOMContentLoaded', function() {
                     hasExtra = true;
                     const p = document.createElement('p');
                     p.className = 'mb-2';
-                    p.innerHTML = `<strong>Q${i}:</strong> ${ruta[`pregunta${i}`]}`;
+                    const strong = document.createElement('strong');
+                    strong.textContent = `Q${i}:`;
+                    p.appendChild(strong);
+                    p.appendChild(document.createTextNode(' ' + String(ruta[`pregunta${i}`])));
                     preguntasDiv.appendChild(p);
                 }
             }
@@ -268,32 +269,8 @@ document.addEventListener('DOMContentLoaded', function() {
             map.fitBounds(e.target.getBounds());
             controlElevation.load(`rutas_st/${ruta.ruta_carpeta}/${ruta.gpx_path}`);
         }).addTo(map);
-
-        // Trackear interacciones con el mapa
-        map.on('mousedown', startMapInteraction);
-        map.on('mouseup', endMapInteraction);
-        map.on('mouseleave', endMapInteraction);
-        map.on('touchstart', startMapInteraction);
-        map.on('touchend', endMapInteraction);
-        map.on('zoomstart', startMapInteraction);
-        map.on('zoomend', endMapInteraction);
-        map.on('movestart', startMapInteraction);
-        map.on('moveend', endMapInteraction);
-    }
-
-    function startMapInteraction() {
-        if (!isInteractingWithMap) {
-            isInteractingWithMap = true;
-            mapInteractionStartTime = Date.now();
-        }
-    }
-
-    function endMapInteraction() {
-        if (isInteractingWithMap) {
-            isInteractingWithMap = false;
-            totalMapInteractionTime += Date.now() - mapInteractionStartTime;
-            trackInteraction('map_interaction', rutaId, null, Math.round(totalMapInteractionTime / 1000));
-        }
+        // Ya no se envía 'map_interaction': el ENUM de user_interactions no lo admite
+        // y hacía fallar (rollback) todo el lote.
     }
 
     function getDefaultImage(tipoRuta) {
@@ -324,16 +301,39 @@ document.addEventListener('DOMContentLoaded', function() {
             ? ruta.imagenes
             : [getDefaultImage(ruta.tipo_ruta)];
 
+        const fallback = getDefaultImage(ruta.tipo_ruta);
         imagenes.forEach((imagen, index) => {
-            const src = fixImgPath(imagen);
+            const src = safeUrl(fixImgPath(imagen), fallback);
             const item = document.createElement('div');
             item.className = 'gallery-item';
-            item.innerHTML = `<img src="${src}" alt="Photo ${index + 1}" loading="lazy"
-                                   onerror="this.src='${getDefaultImage(ruta.tipo_ruta)}'">
-                              <div class="gallery-item__zoom"><i class="bi bi-zoom-in"></i></div>`;
+            const img = document.createElement('img');
+            img.src = src;
+            img.alt = `Photo ${index + 1}`;
+            img.loading = 'lazy';
+            img.addEventListener('error', function onErr() {
+                img.removeEventListener('error', onErr);
+                img.src = fallback;
+            });
+            const zoom = document.createElement('div');
+            zoom.className = 'gallery-item__zoom';
+            zoom.innerHTML = '<i class="bi bi-zoom-in"></i>';
+            item.appendChild(img);
+            item.appendChild(zoom);
             item.addEventListener('click', () => openLightbox(src));
             galleryDiv.appendChild(item);
         });
+    }
+
+    // Solo URLs http(s) o relativas (evita javascript:, data:, etc.)
+    function safeUrl(url, fallback) {
+        const u = String(url || '').trim();
+        if (!u) return fallback;
+        try {
+            const parsed = new URL(u, window.location.href);
+            return (parsed.protocol === 'http:' || parsed.protocol === 'https:') ? u : fallback;
+        } catch (e) {
+            return fallback;
+        }
     }
 
     // Lightbox
@@ -360,7 +360,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const downloadDiv = document.getElementById('ruta-download');
         if (!downloadDiv) return;
         const downloadLink = document.createElement('a');
-        downloadLink.href = `rutas_st/${ruta.ruta_carpeta}/${ruta.gpx_path}`;
+        downloadLink.href = `rutas_st/${encodeURIComponent(ruta.ruta_carpeta || '')}/${encodeURIComponent(ruta.gpx_path || '')}`;
         downloadLink.innerHTML = '<i class="bi bi-download me-1"></i>GPX';
         downloadLink.classList.add('btn', 'btn-success', 'btn-sm');
         downloadLink.setAttribute('download', '');
@@ -407,35 +407,39 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
+    // Una sola vista por visita: 'view' al cargar y, al salir, 'view_end' con la duración
+    // (el servidor actualiza la fila de la vista en lugar de insertar otra).
     function iniciarSeguimientoVista(rutaId) {
         viewStartTime = Date.now();
         trackInteraction('view', rutaId);
-        window.addEventListener('beforeunload', function() {
+        window.addEventListener('pagehide', function() {
             finalizarSeguimientoVista(rutaId);
         });
     }
 
     function finalizarSeguimientoVista(rutaId) {
+        if (viewEndSent) return;
+        viewEndSent = true;
         const viewDuration = Math.round((Date.now() - viewStartTime) / 1000);
-        trackInteraction('view', rutaId, viewDuration);
+        trackInteraction('view_end', rutaId, viewDuration, true);
     }
 
-    function trackInteraction(type, routeId, viewDuration = null, mapInteractionTime = null) {
+    function trackInteraction(type, routeId, viewDuration = null, isUnload = false) {
         const interaction = { routeId, type };
         if (viewDuration !== null) {
             interaction.viewDuration = viewDuration;
         }
-        if (mapInteractionTime !== null) {
-            interaction.mapInteractionTime = mapInteractionTime;
-        }
-        
+
+        const csrfToken = typeof window.kahirCsrfToken === 'function' ? window.kahirCsrfToken() : '';
+        const headers = { 'Content-Type': 'application/json' };
+        if (csrfToken) headers['X-CSRF-Token'] = csrfToken;
+
         fetch('javascript/interaction_tracker.php', {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify([interaction]),
-            credentials: 'include'
+            headers: headers,
+            body: JSON.stringify({ interactions: [interaction], csrf_token: csrfToken }),
+            credentials: 'include',
+            keepalive: isUnload
         })
         .then(response => response.json())
         .then(data => {

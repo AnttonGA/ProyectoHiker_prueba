@@ -3,7 +3,8 @@ ini_set('display_errors', '0');
 error_reporting(0);
 ob_start();
 
-session_start();
+require_once __DIR__ . '/../../../includes/security.php';
+secure_session_start();
 header('Content-Type: application/json; charset=utf-8');
 
 // Desactivar excepciones mysqli para usar el patrón safeQuery

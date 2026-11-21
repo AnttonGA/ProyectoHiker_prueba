@@ -19,10 +19,24 @@ const ACT_LABEL  = {
 };
 
 /* ── Shared helpers ──────────────────────────────────── */
+// Escapa también comillas: se usa dentro de atributos (alt, data-name...)
 function escHtml(str) {
-  const d = document.createElement('div');
-  d.textContent = str ?? '';
-  return d.innerHTML;
+  return String(str ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+// Solo URLs http(s) o relativas para src/href
+function safeUrl(url) {
+  const u = String(url ?? '').trim();
+  if (!u) return '';
+  try {
+    const p = new URL(u, window.location.href);
+    return (p.protocol === 'http:' || p.protocol === 'https:') ? u : '';
+  } catch { return ''; }
 }
 
 function formatDate(iso) {
@@ -39,7 +53,9 @@ function formatDate(iso) {
  */
 function buildRouteCard(route, opts = {}) {
   const { isOwner = false, showCompleted = false } = opts;
-  const img     = route.imagenes?.[0] ?? '';
+  const img     = safeUrl(route.imagenes?.[0] ?? '');
+  const rid     = encodeURIComponent(route.id ?? '');
+  const num     = v => (Number.isFinite(Number(v)) ? Number(v) : 0);
   const diffCls = DIFF_CLASS[route.dificultad] ?? 'diff--easy';
   const diffLbl = DIFF_LABEL[route.dificultad] ?? (route.dificultad ?? '—');
   const actLbl  = ACT_LABEL[route.tipo_ruta]   ?? (route.tipo_ruta  ?? '—');
@@ -49,19 +65,19 @@ function buildRouteCard(route, opts = {}) {
 
   const completedBadge = (showCompleted && route.fecha_completada)
     ? `<p class="completed-date mt-1 mb-0">
-         <i class="bi bi-check-circle-fill"></i> Completed on ${formatDate(route.fecha_completada)}
+         <i class="bi bi-check-circle-fill"></i> Completed on ${escHtml(formatDate(route.fecha_completada))}
        </p>`
     : '';
 
   /* Stats + optional Edit live OUTSIDE the <a> so nesting is valid */
   const meta = `
     <div class="route-card-meta mt-2">
-      <span class="badge bg-light text-muted border"><i class="bi bi-eye"></i> ${route.view_count ?? 0}</span>
-      <span class="badge bg-light text-muted border"><i class="bi bi-download"></i> ${route.download_count ?? 0}</span>
-      <span class="badge bg-light text-muted border"><i class="bi bi-heart"></i> ${route.favorite_count ?? 0}</span>
-      <span class="badge bg-light text-muted border"><i class="bi bi-check-circle"></i> ${route.complete_count ?? 0}</span>
+      <span class="badge bg-light text-muted border"><i class="bi bi-eye"></i> ${num(route.view_count)}</span>
+      <span class="badge bg-light text-muted border"><i class="bi bi-download"></i> ${num(route.download_count)}</span>
+      <span class="badge bg-light text-muted border"><i class="bi bi-heart"></i> ${num(route.favorite_count)}</span>
+      <span class="badge bg-light text-muted border"><i class="bi bi-check-circle"></i> ${num(route.complete_count)}</span>
       ${isOwner
-        ? `<a href="edit_route.php?id=${route.id}" class="badge bg-primary-subtle text-primary border ms-auto text-decoration-none">
+        ? `<a href="edit_route.php?id=${rid}" class="badge bg-primary-subtle text-primary border ms-auto text-decoration-none">
              <i class="bi bi-pencil"></i> Edit
            </a>`
         : ''}
@@ -70,12 +86,12 @@ function buildRouteCard(route, opts = {}) {
   /* No wrapper div — route-card + meta are direct children of .col */
   return `
     <div class="col">
-      <a href="../skitouring/ruta.html?id=${route.id}" class="route-card">
+      <a href="../skitouring/ruta.html?id=${rid}" class="route-card">
         <div class="route-card__img-wrap">
-          <img src="${img}" alt="${escHtml(route.titulo)}" loading="lazy"
+          <img src="${escHtml(img)}" alt="${escHtml(route.titulo)}" loading="lazy"
                onerror="this.style.visibility='hidden'">
-          <span class="route-card__diff ${diffCls}">${diffLbl}</span>
-          <span class="route-card__activity">${actLbl}</span>
+          <span class="route-card__diff ${diffCls}">${escHtml(diffLbl)}</span>
+          <span class="route-card__activity">${escHtml(actLbl)}</span>
         </div>
         <div class="route-card__body">
           <h3 class="route-card__title">${escHtml(route.titulo)}</h3>

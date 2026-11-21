@@ -1,6 +1,7 @@
-
-
 <?php
+require_once __DIR__ . '/../../includes/security.php';
+secure_session_start();
+
 // Import PHPMailer classes into the global namespace
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\SMTP;
@@ -18,12 +19,14 @@ $message = "";
 
 // Validación de contraseña y actualización si se proporciona un token
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    csrf_verify();
+
     // Validación de la contraseña
     if (empty($_POST['password'])) {
         $passwordErr = "Contraseña es requerida";
     } else {
         $password = $_POST['password'];
-        $confirm_password = $_POST['confirm_password'];
+        $confirm_password = $_POST['confirm_password'] ?? '';
 
         // Validación de la longitud mínima de la contraseña
         if (strlen($password) < 8) {
@@ -52,32 +55,42 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
         // Si no hay errores de validación, continuar con la actualización
         if (empty($passwordErr)) {
-            if (isset($_GET['token'])) {
-                $token = $_GET['token'];
+            $token = isset($_GET['token']) && is_string($_GET['token']) ? $_GET['token'] : '';
 
-                // Verificar que el token existe en la base de datos
-                $stmt = $conn->prepare("SELECT id FROM usuarios WHERE token = ?");
-                $stmt->bind_param("s", $token);
-                $stmt->execute();
-                $stmt->store_result();
+            // Los tokens se generan con bin2hex(random_bytes(32)) (64 caracteres); se rechazan los vacíos o cortos
+            try {
+                if ($token !== '' && strlen($token) >= 32) {
+                    // TODO esquema: este archivo usa las columnas `token` y `password`; database/schema.sql
+                    // define `password_hash` y no tiene columna de token. Confirmar con la BD real.
+                    $stmt = $conn->prepare("SELECT id FROM usuarios WHERE token = ?");
+                    $stmt->bind_param("s", $token);
+                    $stmt->execute();
+                    $stmt->store_result();
 
-                if ($stmt->num_rows > 0) {
-                    // Token encontrado, proceder con la actualización de la contraseña sin hashing
-                    $stmt_update = $conn->prepare("UPDATE usuarios SET password = ?, token = NULL WHERE token = ?");
-                    $stmt_update->bind_param("ss", $password, $token);
+                    if ($stmt->num_rows > 0) {
+                        // Se guarda el hash de la contraseña, nunca el texto plano.
+                        // El token se vacía con '' (no NULL, por si la columna es NOT NULL); los tokens vacíos se rechazan arriba.
+                        $hash = password_hash($password, PASSWORD_DEFAULT);
+                        $stmt_update = $conn->prepare("UPDATE usuarios SET password = ?, token = '' WHERE token = ?");
+                        $stmt_update->bind_param("ss", $hash, $token);
 
-                    if ($stmt_update->execute()) {
-                        $message = 'Contraseña actualizada correctamente. <a href="gestion.php">Inicia sesion</a>';
+                        if ($stmt_update->execute()) {
+                            $message = 'Contraseña actualizada correctamente. <a href="gestion.php">Inicia sesion</a>';
+                        } else {
+                            error_log('change_password.php: ' . $stmt_update->error);
+                            $message = "Error al actualizar la contraseña.";
+                        }
+                        $stmt_update->close();
                     } else {
-                        $message = "Error al actualizar la contraseña.";
+                        $message = "Token no válido.";
                     }
-                    $stmt_update->close();
+                    $stmt->close();
                 } else {
-                    $message = "Token no válido.";
+                    $message = "Token no válido o no proporcionado.";
                 }
-                $stmt->close();
-            } else {
-                $message = "Token no proporcionado.";
+            } catch (Throwable $ex) {
+                error_log('change_password.php: ' . $ex->getMessage());
+                $message = "Error al actualizar la contraseña.";
             }
         }
     }
@@ -120,7 +133,8 @@ $conn->close();
     <?php endif; ?>
 
     <!-- Formulario de recuperación de contraseña -->
-    <form method="post" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]) . "?token=" . htmlspecialchars($_GET['token']); ?>" class="needs-validation" novalidate>
+    <form method="post" action="<?php echo e($_SERVER["PHP_SELF"]) . "?token=" . e(urlencode((string) ($_GET['token'] ?? ''))); ?>" class="needs-validation" novalidate>
+      <?= csrf_field() ?>
       <div class="mb-3">
         <label for="password" class="form-label">Nueva contraseña:</label>
         <input type="password" name="password" id="password" class="form-control" required>

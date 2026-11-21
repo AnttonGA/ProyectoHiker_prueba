@@ -15,6 +15,13 @@
 
 declare(strict_types=1);
 
+
+// Script de mantenimiento: solo se puede ejecutar desde la línea de comandos (php archivo.php),
+// nunca desde el navegador. Antes cualquiera podía lanzarlo por web sin iniciar sesión.
+if (PHP_SAPI !== 'cli') {
+    http_response_code(403);
+    exit('Solo disponible desde la línea de comandos.');
+}
 $DRY_RUN    = in_array('--dry-run',    $argv ?? []);
 $SKIP_ELEV  = in_array('--skip-elev', $argv ?? []);
 

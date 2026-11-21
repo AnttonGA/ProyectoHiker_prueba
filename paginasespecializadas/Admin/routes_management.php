@@ -1,14 +1,20 @@
 <?php
+require_once __DIR__ . '/../../includes/security.php';
+secure_session_start();
 include('../inicio_sesion/conexion.php');
-session_start();
 
+// TODO esquema: se comprueba el rol 'A' (esquema antiguo); database/schema.sql usa 'admin' y acceso.php guarda el rol tal cual viene de la BD.
 if (!isset($_SESSION['rol']) || $_SESSION['rol'] != 'A') {
     header('Location: ../inicio_sesion/gestion.php');
     exit();
 }
 
+// TODO esquema: migrar a BD (tabla rutas). rutas.json ya no existe en esta copia.
 $jsonFile = '../skitouring/javascript/rutas.json';
-$rutas = json_decode(file_get_contents($jsonFile), true);
+$rutas = is_readable($jsonFile) ? json_decode(file_get_contents($jsonFile), true) : [];
+if (!is_array($rutas)) {
+    $rutas = [];
+}
 ?>
 
 <!DOCTYPE html>
@@ -37,6 +43,10 @@ $rutas = json_decode(file_get_contents($jsonFile), true);
 <body>
     <div class="container mt-5">
         <h1>Gestión de Rutas</h1>
+        <?php if (!empty($_SESSION['message'])): ?>
+            <div class="alert alert-info"><?php echo e($_SESSION['message']); ?></div>
+            <?php unset($_SESSION['message']); ?>
+        <?php endif; ?>
         <div class="mb-3">
             <a href="../Usuario/subir_ruta.html" class="btn btn-success">Agregar Ruta</a>
         </div>
@@ -53,15 +63,19 @@ $rutas = json_decode(file_get_contents($jsonFile), true);
         </tr>
     </thead>
             <tbody>
-                <?php foreach ($rutas as $ruta) { ?>
+                <?php foreach ($rutas as $ruta) { if (!is_array($ruta) || !isset($ruta['id'])) { continue; } ?>
                     <tr>
-                        <td><?php echo $ruta['id']; ?></td>
-                        <td><?php echo $ruta['title']; ?></td>
-                        <td><?php echo ucfirst(str_replace('_', ' ', $ruta['tipo_ruta'])); ?></td>
-                        <td><?php echo ucfirst($ruta['difficulty']); ?></td>
+                        <td><?php echo e($ruta['id']); ?></td>
+                        <td><?php echo e($ruta['title'] ?? ''); ?></td>
+                        <td><?php echo e(ucfirst(str_replace('_', ' ', (string) ($ruta['tipo_ruta'] ?? '')))); ?></td>
+                        <td><?php echo e(ucfirst((string) ($ruta['difficulty'] ?? ''))); ?></td>
                         <td>
-                            <a href="editar_ruta.php?id=<?php echo $ruta['id']; ?>" class="btn btn-primary btn-sm">Editar</a>
-                            <a href="eliminar_ruta.php?id=<?php echo $ruta['id']; ?>" class="btn btn-danger btn-sm">Eliminar</a>
+                            <a href="editar_ruta.php?id=<?php echo (int) $ruta['id']; ?>" class="btn btn-primary btn-sm">Editar</a>
+                            <form method="POST" action="eliminar_ruta.php" class="d-inline" onsubmit="return confirm('¿Eliminar esta ruta y sus archivos? Esta acción no se puede deshacer.');">
+                                <?= csrf_field() ?>
+                                <input type="hidden" name="id" value="<?php echo (int) $ruta['id']; ?>">
+                                <button type="submit" class="btn btn-danger btn-sm">Eliminar</button>
+                            </form>
                         </td>
                     </tr>
                 <?php } ?>
@@ -82,13 +96,9 @@ function saveOriginalOrder() {
 // Función para asegurar la visibilidad de los botones
 function ensureButtonsVisibility() {
     const rows = Array.from(document.querySelectorAll('#routeTable tbody tr'));
+    // Los botones se generan en el servidor (eliminar es un formulario POST con token CSRF); no se reescriben con innerHTML.
     rows.forEach(row => {
-        const actionsCell = row.querySelector('td:last-child');
-        const id = row.querySelector('td:first-child').textContent;
-        actionsCell.innerHTML = `
-            <a href="editar_ruta.php?id=${id}" class="btn btn-primary btn-sm d-inline-block">Editar</a>
-            <a href="eliminar_ruta.php?id=${id}" class="btn btn-danger btn-sm d-inline-block">Eliminar</a>
-        `;
+        row.querySelectorAll('td:last-child .btn').forEach(btn => btn.classList.add('d-inline-block'));
     });
 }
 
@@ -169,14 +179,6 @@ function searchRoutes() {
         const shouldDisplay = textContent.includes(filter);
         row.style.display = shouldDisplay ? '' : 'none';
         
-        if (shouldDisplay) {
-            const actionsCell = row.querySelector('td:last-child');
-            const id = row.querySelector('td:first-child').textContent;
-            actionsCell.innerHTML = `
-                <a href="editar_ruta.php?id=${id}" class="btn btn-primary btn-sm d-inline-block">Editar</a>
-                <a href="eliminar_ruta.php?id=${id}" class="btn btn-danger btn-sm d-inline-block">Eliminar</a>
-            `;
-        }
     });
 }
 

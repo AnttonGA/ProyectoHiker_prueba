@@ -59,35 +59,35 @@ class ChatCard {
         return `
             <div class="route-card-content">
                 <div class="route-image">
-                    <img src="${route.image || 'default-route.jpg'}" 
-                         alt="${route.title}"
+                    <img src="${this.ccEsc(this.ccSafeUrl(route.image) || 'default-route.jpg')}" 
+                         alt="${this.ccEsc(route.title)}"
                          onerror="this.src='default-route.jpg'">
-                    <div class="difficulty-badge difficulty-${route.difficulty}">
-                        ${this.formatDifficulty(route.difficulty)}
+                    <div class="difficulty-badge difficulty-${this.ccEsc(route.difficulty)}">
+                        ${this.ccEsc(this.formatDifficulty(route.difficulty))}
                     </div>
                 </div>
                 <div class="route-details">
-                    <h3>${route.title}</h3>
+                    <h3>${this.ccEsc(route.title)}</h3>
                     <div class="route-stats">
                         <div class="stat">
                             <i class="fas fa-mountain"></i>
-                            <span>${route.elevation}m</span>
+                            <span>${this.ccEsc(route.elevation)}m</span>
                         </div>
                         <div class="stat">
                             <i class="fas fa-clock"></i>
-                            <span>${this.formatDuration(route.duration)}</span>
+                            <span>${this.ccEsc(this.formatDuration(route.duration))}</span>
                         </div>
                         <div class="stat">
                             <i class="fas fa-route"></i>
-                            <span>${route.length}km</span>
+                            <span>${this.ccEsc(route.length)}km</span>
                         </div>
                     </div>
-                    <p class="route-description">${route.description}</p>
+                    <p class="route-description">${this.ccEsc(route.description)}</p>
                     <div class="route-actions">
-                        <button class="btn-details" data-route-id="${route.id}">
+                        <button class="btn-details" data-route-id="${this.ccEsc(route.id)}">
                             Ver Detalles
                         </button>
-                        <button class="btn-save" data-route-id="${route.id}">
+                        <button class="btn-save" data-route-id="${this.ccEsc(route.id)}">
                             <i class="far fa-bookmark"></i>
                         </button>
                     </div>
@@ -110,7 +110,7 @@ class ChatCard {
                     <h3>Recomendación</h3>
                 </div>
                 <div class="recommendation-body">
-                    <p class="recommendation-text">${recommendation.message}</p>
+                    <p class="recommendation-text">${this.ccEsc(recommendation.message)}</p>
                     ${this.createRecommendationDetails(recommendation)}
                 </div>
                 <div class="recommendation-footer">
@@ -132,7 +132,7 @@ class ChatCard {
                     ${this.getActivityIcon(activity.type)}
                 </div>
                 <div class="activity-details">
-                    <h3>${activity.name}</h3>
+                    <h3>${this.ccEsc(activity.name)}</h3>
                     <div class="activity-info">
                         <div class="season-info">
                             <span>Mejor temporada:</span>
@@ -143,15 +143,15 @@ class ChatCard {
                             ${this.createDifficultyIndicator(activity.difficulty)}
                         </div>
                     </div>
-                    <p>${activity.description}</p>
+                    <p>${this.ccEsc(activity.description)}</p>
                 </div>
                 <div class="activity-requirements">
                     <h4>Equipo necesario</h4>
                     <ul class="equipment-list">
-                        ${activity.equipment.map(item => `
+                        ${(activity.equipment || []).map(item => `
                             <li>
                                 <i class="fas fa-check"></i>
-                                ${item}
+                                ${this.ccEsc(item)}
                             </li>
                         `).join('')}
                     </ul>
@@ -167,24 +167,24 @@ class ChatCard {
      */
     createSafetyCard(safety) {
         return `
-            <div class="safety-card-content ${safety.level}-level">
+            <div class="safety-card-content ${this.ccEsc(safety.level)}-level">
                 <div class="safety-header">
                     <i class="fas fa-exclamation-triangle"></i>
                     <h3>Información de Seguridad</h3>
                 </div>
                 <div class="safety-warnings">
-                    ${safety.warnings.map(warning => `
+                    ${(safety.warnings || []).map(warning => `
                         <div class="warning-item">
                             <i class="fas fa-exclamation-circle"></i>
-                            <span>${warning}</span>
+                            <span>${this.ccEsc(warning)}</span>
                         </div>
                     `).join('')}
                 </div>
                 <div class="safety-recommendations">
                     <h4>Recomendaciones</h4>
                     <ul>
-                        ${safety.recommendations.map(rec => `
-                            <li>${rec}</li>
+                        ${(safety.recommendations || []).map(rec => `
+                            <li>${this.ccEsc(rec)}</li>
                         `).join('')}
                     </ul>
                 </div>
@@ -245,6 +245,28 @@ class ChatCard {
     }
 
     // Métodos de utilidad
+
+    /** Escapa texto antes de insertarlo en HTML (nombre único: se carga junto a chat.js y weather_card.js) */
+    ccEsc(value) {
+        return String(value ?? '')
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
+    }
+
+    /** Solo URLs http(s) o relativas; devuelve '' para javascript:, data:, etc. */
+    ccSafeUrl(url) {
+        const u = String(url ?? '').trim();
+        if (!u) return '';
+        try {
+            const p = new URL(u, window.location.href);
+            return (p.protocol === 'http:' || p.protocol === 'https:') ? u : '';
+        } catch (e) {
+            return '';
+        }
+    }
 
     formatDifficulty(difficulty) {
         const labels = {

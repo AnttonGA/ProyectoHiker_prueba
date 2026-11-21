@@ -157,20 +157,41 @@ const ChatApp = {
 
     async sendMessage(message) {
         try {
+            // csrf.js añade la cabecera X-CSRF-Token a este POST
             const response = await fetch('hiker_ai/assets/js/chat_handler.php', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
+                credentials: 'same-origin',
                 body: JSON.stringify({
                     message,
                     context: this.context,
                     timestamp: Date.now()
                 })
             });
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
+
+            // El servidor responde JSON también en errores (401, 403, 429...):
+            // se intenta leer siempre para mostrar su mensaje.
+            let data = null;
+            try {
+                data = await response.json();
+            } catch (parseError) {
+                data = null;
             }
 
-            return await response.json();
+            if (!response.ok) {
+                const fallback = response.status === 401
+                    ? 'Debes iniciar sesión para usar el asistente.'
+                    : 'Ha ocurrido un error. Por favor, inténtalo de nuevo.';
+                const msg = (data && typeof data.message === 'string' && data.message) ? data.message : fallback;
+                const err = new Error(msg);
+                err.status = response.status;
+                throw err;
+            }
+            if (!data) {
+                throw new Error('Ha ocurrido un error. Por favor, inténtalo de nuevo.');
+            }
+
+            return data;
         } catch (error) {
             console.error('Error sending message:', error);
             throw error;
@@ -241,7 +262,7 @@ const ChatApp = {
         const div = document.createElement('div');
         div.className = 'weather-warning-box';
         div.innerHTML = lines.map(w =>
-            `<div class="weather-warning-item">⚠️ ${w}</div>`
+            `<div class="weather-warning-item">⚠️ ${this.chatEscapeHtml(w)}</div>`
         ).join('');
 
         this.addMessage('system', div);
@@ -384,12 +405,66 @@ const ChatApp = {
         this.addMessage('system', errorDiv);
     },
 
+    /** Escapa texto para insertarlo en HTML (nombre único: chatcard.js y weather_card.js se cargan a la vez) */
+    chatEscapeHtml(value) {
+        return String(value ?? '')
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
+    },
+
+    /** Devuelve la URL si es http(s) o relativa; si no (javascript:, data:...), '' */
+    chatSafeUrl(url) {
+        const u = String(url ?? '').trim();
+        if (!u) return '';
+        try {
+            const parsed = new URL(u, window.location.href);
+            return (parsed.protocol === 'http:' || parsed.protocol === 'https:') ? u : '';
+        } catch (e) {
+            return '';
+        }
+    },
+
+    /** Limpia el HTML generado por marked: solo href/src seguros y sin atributos on* */
+    chatSanitizeRendered(html) {
+        const tpl = document.createElement('template');
+        tpl.innerHTML = html;
+        tpl.content.querySelectorAll('script, iframe, object, embed, style, form').forEach(el => el.remove());
+        tpl.content.querySelectorAll('*').forEach(el => {
+            Array.from(el.attributes).forEach(attr => {
+                if (/^on/i.test(attr.name)) el.removeAttribute(attr.name);
+            });
+        });
+        tpl.content.querySelectorAll('a').forEach(a => {
+            const href = this.chatSafeUrl(a.getAttribute('href'));
+            if (href) {
+                a.setAttribute('href', href);
+                a.setAttribute('target', '_blank');
+                a.setAttribute('rel', 'noopener noreferrer');
+            } else {
+                a.removeAttribute('href');
+            }
+        });
+        tpl.content.querySelectorAll('img').forEach(img => {
+            const src = this.chatSafeUrl(img.getAttribute('src'));
+            if (src) img.setAttribute('src', src); else img.remove();
+        });
+        return tpl.innerHTML;
+    },
+
     formatMessage(content) {
         if (typeof content !== 'string') return '';
 
+        // Escapar el HTML crudo ANTES de marked: el Markdown sigue funcionando,
+        // pero cualquier etiqueta inyectada se muestra como texto.
+        const escaped = content
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;');
+
         // Usar marked.js si está disponible (renderiza Markdown completo)
         if (typeof marked !== 'undefined') {
-            // Configurar marked: sanitizar HTML, abrir links en nueva pestaña
             marked.setOptions({
                 breaks: true,      // \n → <br> dentro de párrafos
                 gfm: true,         // GitHub Flavored Markdown
@@ -397,22 +472,15 @@ const ChatApp = {
                 mangle: false,
             });
 
-            // Renderizar Markdown → HTML
-            let html = marked.parse(content);
-
-            // Añadir target="_blank" a todos los enlaces generados
-            html = html.replace(/<a href="/g, '<a target="_blank" rel="noopener noreferrer" href="');
-
-            return html;
+            // Renderizar Markdown → HTML y limpiar enlaces/imágenes
+            return this.chatSanitizeRendered(marked.parse(escaped));
         }
 
         // Fallback sin marked.js
-        return content
-            .replace(/&/g, '&amp;')
-            .replace(/</g, '&lt;')
+        return this.chatSanitizeRendered(escaped
             .replace(/>/g, '&gt;')
             .replace(/\n/g, '<br>')
-            .replace(/(https?:\/\/[^\s]+)/g, '<a href="$1" target="_blank" rel="noopener">$1</a>');
+            .replace(/(https?:\/\/[^\s<"]+)/g, '<a href="$1" target="_blank" rel="noopener noreferrer">$1</a>'));
     },
 
     showTypingIndicator() {
@@ -486,33 +554,38 @@ const ChatApp = {
         const duration  = fmtDuration(route.duration);
 
         // Badge de tiempo en coche — sobre la imagen (esquina inferior izquierda)
+        const esc = (v) => this.chatEscapeHtml(v);
+
         const driveBadge = route.drive_time_text
             ? `<span class="route-drive-badge">
-                   <i class="fas fa-car"></i> ${route.drive_time_text}
+                   <i class="fas fa-car"></i> ${esc(route.drive_time_text)}
                </span>`
             : '';
 
-        const routeUrl = `http://localhost/misproyectos/ProyectoHiker_seguridad/paginasespecializadas/skitouring/ruta.html?id=${route.id}`;
+        // Ruta relativa a la página del chat (index.php en la raíz del proyecto)
+        const routeUrl = `paginasespecializadas/skitouring/ruta.html?id=${encodeURIComponent(route.id ?? '')}`;
+        const placeholder = 'hiker_ai/assets/img/route-placeholder.jpg';
+        const imageUrl = this.chatSafeUrl(route.image) || placeholder;
 
         return `
             <div class="route-card-inner">
                 <div class="route-card-img-wrap">
-                    <img src="${route.image}"
-                         alt="${cleanTitle}"
-                         onerror="this.src='hiker_ai/assets/img/route-placeholder.jpg'">
-                    <span class="route-diff-badge" style="background:${diffColor}">${diffLabel}</span>
+                    <img src="${esc(imageUrl)}"
+                         alt="${esc(cleanTitle)}"
+                         onerror="this.onerror=null;this.src='${placeholder}'">
+                    <span class="route-diff-badge" style="background:${diffColor}">${esc(diffLabel)}</span>
                     <span class="route-act-badge"><i class="fas ${actIcon}"></i></span>
                     ${driveBadge}
                 </div>
                 <div class="route-card-body">
-                    ${locationLabel ? `<p class="route-card-location">${locationLabel}</p>` : ''}
-                    <h5 class="route-card-title">${cleanTitle}</h5>
+                    ${locationLabel ? `<p class="route-card-location">${esc(locationLabel)}</p>` : ''}
+                    <h5 class="route-card-title">${esc(cleanTitle)}</h5>
                     <div class="route-card-stats">
-                        <span><i class="fas fa-ruler-horizontal"></i> ${distance} km</span>
-                        <span><i class="fas fa-clock"></i> ${duration}</span>
-                        <span><i class="fas fa-arrow-up"></i> ${elevation}</span>
+                        <span><i class="fas fa-ruler-horizontal"></i> ${esc(distance)} km</span>
+                        <span><i class="fas fa-clock"></i> ${esc(duration)}</span>
+                        <span><i class="fas fa-arrow-up"></i> ${esc(elevation)}</span>
                     </div>
-                    <a href="${routeUrl}" class="btn btn-primary btn-sm route-card-btn" target="_blank">
+                    <a href="${esc(routeUrl)}" class="btn btn-primary btn-sm route-card-btn" target="_blank" rel="noopener noreferrer">
                         <i class="fas fa-map-marked-alt"></i> Ver ficha
                     </a>
                 </div>
@@ -523,6 +596,7 @@ const ChatApp = {
     createWeatherCardHTML(weather) {
         // Solo renderizar un campo si tiene valor real (evita "nullm", "undefined%", etc.)
         const val = (v) => v != null && v !== '' && !isNaN(v);
+        const esc = (v) => this.chatEscapeHtml(v);
 
         const detailItems = [
             val(weather.wind_speed)    ? `<div><i class="fas fa-wind"></i> ${weather.wind_speed} km/h</div>` : '',
@@ -537,13 +611,13 @@ const ChatApp = {
         return `
             <div class="weather-info">
                 <div class="current-weather">
-                    <span class="temperature">${weather.temperature}°C</span>
-                    <span class="conditions">${weather.conditions || ''}</span>
+                    <span class="temperature">${esc(weather.temperature)}°C</span>
+                    <span class="conditions">${esc(weather.conditions || '')}</span>
                 </div>
                 ${detailItems ? `<div class="weather-details">${detailItems}</div>` : ''}
                 ${weather.warnings && weather.warnings.length ? `
                     <div class="weather-warnings">
-                        ${weather.warnings.map(w => `<div class="warning">${w}</div>`).join('')}
+                        ${weather.warnings.map(w => `<div class="warning">${esc(w)}</div>`).join('')}
                     </div>
                 ` : ''}
             </div>

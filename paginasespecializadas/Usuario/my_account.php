@@ -1,17 +1,20 @@
 <?php
-session_start();
+require_once __DIR__ . '/../../includes/security.php';
+secure_session_start();
 if (!isset($_SESSION['usuario'])) {
-    header("Location: gestion.php");
+    header("Location: ../inicio_sesion/gestion.php");
     exit();
 }
-$username     = htmlspecialchars($_SESSION['usuario']);
-$avatarLetter = strtoupper(mb_substr($username, 0, 1));
+$usernameRaw  = (string) $_SESSION['usuario'];
+$username     = e($usernameRaw);
+$avatarLetter = e(mb_strtoupper(mb_substr($usernameRaw, 0, 1)));
 ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="csrf-token" content="<?= e(csrf_token()) ?>">
   <title>My Account — <?= $username ?></title>
   <link rel="icon" type="image/svg+xml" href="../../favicon.svg">
 
@@ -24,7 +27,7 @@ $avatarLetter = strtoupper(mb_substr($username, 0, 1));
 function cssTag(string $rel): string {
     $abs = __DIR__ . '/' . $rel;
     $v   = file_exists($abs) ? filemtime($abs) : time();
-    return "  <link href=\"{$rel}?v={$v}\" rel=\"stylesheet\">\n";
+    return '  <link href="' . e($rel . '?v=' . $v) . "\" rel=\"stylesheet\">\n";
 }
 echo cssTag('../estilos2.css');
 echo cssTag('css/my_account.css');
@@ -240,8 +243,10 @@ echo cssTag('css/my_account.css');
 function jsTag(string $rel): string {
     $abs = __DIR__ . '/' . $rel;
     $v   = file_exists($abs) ? filemtime($abs) : time();
-    return "  <script src=\"{$rel}?v={$v}\"></script>\n";
+    return '  <script src="' . e($rel . '?v=' . $v) . "\"></script>\n";
 }
+// csrf.js primero: añade X-CSRF-Token a los fetch() POST de los scripts de la página
+echo "  <script src=\"../../csrf.js\"></script>\n";
 echo jsTag('javascript/rutasusuario.js');   // loads shared helpers first
 echo jsTag('javascript/favoritosusuario.js');
 echo jsTag('javascript/completadasusuario.js');

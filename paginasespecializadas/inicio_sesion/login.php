@@ -1,4 +1,7 @@
-
+<?php
+require_once __DIR__ . '/../../includes/security.php';
+secure_session_start();
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -38,12 +41,16 @@
         // personalizar error
         if (isset($_GET['msg'])){
             $errores = ['error Nombre y usuario 0 ','Error EN DB 1 ','vacio 2'];
-            echo "<p>".$errores[$_GET['msg']]."</p>";
+            $indice = filter_var($_GET['msg'], FILTER_VALIDATE_INT);
+            if ($indice !== false && isset($errores[$indice])) {
+                echo "<p>" . e($errores[$indice]) . "</p>";
+            }
         }
         ?>
     </div>
     <h2 class="mb-4">Log In</h2>
     <form id="loginForm" name="form1" action="acceso.php" method="POST" onsubmit="return false;">
+        <?= csrf_field() ?>
         <div class="mb-3">
             <label for="usuario" class="form-label">User:</label>
             <input type="text" name="usuario" class="form-control" id="usuario">
