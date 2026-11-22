@@ -43,3 +43,6 @@ Thumbs.db
 
 # Credenciales de prueba locales
 .credenciales_prueba
+
+# Resultados de la batería de evaluación del asistente (se generan en cada ejecución)
+hiker_ai/tests/eval/results/

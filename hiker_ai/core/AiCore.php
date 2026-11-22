@@ -95,6 +95,18 @@ class AICore {
         'ochagavia'       => ['zone' => 'Western_Pyrenees', 'geocode' => 'Ochagavía, Navarra'],
         'roncal'          => ['zone' => 'Western_Pyrenees', 'geocode' => 'Valle del Roncal, Navarra'],
         'belagua'         => ['zone' => 'Western_Pyrenees', 'geocode' => 'Belagua, Navarra'],
+        // ── Montes vascos ───────────────────────────────────────────────────
+        'gorbea'          => ['zone' => 'Euskadi',          'geocode' => 'Gorbea, Euskadi'],
+        'gorbeia'         => ['zone' => 'Euskadi',          'geocode' => 'Gorbea, Euskadi'],
+        'anboto'          => ['zone' => 'Euskadi',          'geocode' => 'Anboto, Bizkaia'],
+        'urkiola'         => ['zone' => 'Euskadi',          'geocode' => 'Urkiola, Bizkaia'],
+        'aizkorri'        => ['zone' => 'Euskadi',          'geocode' => 'Aizkorri, Gipuzkoa'],
+        'aralar'          => ['zone' => 'Euskadi',          'geocode' => 'Aralar'],
+        'txindoki'        => ['zone' => 'Euskadi',          'geocode' => 'Txindoki, Gipuzkoa'],
+        'urbasa'          => ['zone' => 'Western_Pyrenees', 'geocode' => 'Urbasa, Navarra'],
+        'jaizkibel'       => ['zone' => 'Euskadi',          'geocode' => 'Jaizkibel, Gipuzkoa'],
+        'oiz'             => ['zone' => 'Euskadi',          'geocode' => 'Oiz, Bizkaia'],
+        'ernio'           => ['zone' => 'Euskadi',          'geocode' => 'Ernio, Gipuzkoa'],
         // ── Pirineo Central / Cataluña ──────────────────────────────────────
         'baqueira'        => ['zone' => 'Central_Pyrenees', 'geocode' => 'Baqueira-Beret, Lleida'],
         'baqueira beret'  => ['zone' => 'Central_Pyrenees', 'geocode' => 'Baqueira-Beret, Lleida'],
@@ -140,6 +152,32 @@ class AICore {
         'o cebreiro'      => ['zone' => 'Galicia',          'geocode' => 'O Cebreiro, Lugo'],
         'ancares'         => ['zone' => 'Galicia',          'geocode' => 'Os Ancares, Lugo'],
         'courel'          => ['zone' => 'Galicia',          'geocode' => 'Serra do Courel, Lugo'],
+    ];
+
+    /**
+     * Coordenadas fijas de los topónimos de montaña más buscados. Tienen prioridad sobre
+     * Nominatim, que a veces devuelve una calle o un pueblo homónimo lejos de la montaña.
+     */
+    private const PLACE_COORDS = [
+        'valle de tena' => [42.755, -0.320], 'sallent' => [42.771, -0.333], 'formigal' => [42.775, -0.364],
+        'panticosa' => [42.723, -0.281], 'candanchu' => [42.788, -0.528], 'astun' => [42.808, -0.505],
+        'benasque' => [42.605, 0.522], 'aneto' => [42.631, 0.656], 'ordesa' => [42.639, -0.057],
+        'bielsa' => [42.633, 0.219], 'broto' => [42.604, -0.123], 'torla' => [42.627, -0.110],
+        'hecho' => [42.738, -0.752], 'anso' => [42.756, -0.829], 'zuriza' => [42.858, -0.833],
+        'pineta' => [42.674, 0.128], 'isaba' => [42.861, -0.921], 'ochagavia' => [42.910, -1.090],
+        'roncesvalles' => [43.009, -1.320], 'belagua' => [42.955, -0.835], 'roncal' => [42.810, -0.955],
+        'gorbea' => [43.035, -2.780], 'gorbeia' => [43.035, -2.780], 'anboto' => [43.090, -2.594],
+        'urkiola' => [43.100, -2.640], 'aizkorri' => [42.951, -2.336], 'aralar' => [42.985, -2.050],
+        'txindoki' => [43.006, -2.085], 'urbasa' => [42.830, -2.130], 'jaizkibel' => [43.360, -1.860],
+        'oiz' => [43.225, -2.590], 'ernio' => [43.190, -2.100],
+        'baqueira' => [42.700, 0.930], 'baqueira beret' => [42.700, 0.930], 'espot' => [42.575, 1.087],
+        'aiguestortes' => [42.580, 0.950], 'nuria' => [42.397, 2.153], 'la molina' => [42.336, 1.940],
+        'sort' => [42.413, 1.130], 'val d aran' => [42.700, 0.800], 'bohi taull' => [42.520, 0.830],
+        'andorra' => [42.507, 1.521], 'fuente de' => [43.144, -4.813], 'potes' => [43.154, -4.623],
+        'cangas de onis' => [43.351, -5.130], 'covadonga' => [43.309, -5.056], 'somiedo' => [43.100, -6.250],
+        'navacerrada' => [40.790, -4.010], 'penalara' => [40.850, -3.955], 'la pedriza' => [40.750, -3.880],
+        'cotos' => [40.820, -3.960], 'mulhacen' => [37.053, -3.311], 'veleta' => [37.056, -3.366],
+        'moncayo' => [41.787, -1.839], 'teide' => [28.272, -16.642],
     ];
 
     /** Zonas adyacentes para el fallback de pocas rutas (Caso A). */
@@ -209,6 +247,25 @@ class AICore {
                 'awaiting'     => $sessionCtx['awaiting_clarification'] ?? null,
             ];
 
+            // 1b. Modo agente (Fase C): Sonnet decide qué herramientas usar
+            if ($this->agentEnabled() && empty($sessionCtx['awaiting_clarification'])) {
+                try {
+                    $extracted = ['intent' => 'general'];
+                    $response  = $this->handleAgentQuery($query, $userId, $userProfile, $history, $sessionCtx, $extracted);
+                    $intent    = $extracted['intent'];
+                    $this->saveInteraction($userId, $query, $response, $intent, $extracted);
+                    if ($sessionId > 0) {
+                        $this->saveSessionContext($sessionId, $this->updateSessionContext($sessionCtx, $extracted, $response));
+                    }
+                    return array_merge($response, [
+                        'intent'        => $intent,
+                        'processing_ms' => round((microtime(true) - $start) * 1000),
+                    ]);
+                } catch (\Throwable $e) {
+                    $this->logger->warning('Modo agente falló; se usa el flujo clásico', ['error' => $e->getMessage()]);
+                }
+            }
+
             // 2. Pre-Haiku: detectar route_followup sin coste de tokens cuando hay active_routes
             $followupOverride = $this->detectFollowupIntent($query, $sessionCtx);
             if ($followupOverride !== null) {
@@ -235,6 +292,19 @@ class AICore {
 
             $intent = $extracted['intent'];
 
+            // 3b. Fecha real de la salida ("este sábado" → 2026-11-28), calculada aquí y no por el modelo
+            $trip = TripDate::resolve($query);
+            if (!$trip && !empty($sessionCtx['last_trip'])
+                && in_array($intent, ['weather_query', 'safety_query', 'route_followup', 'route_request'], true)
+                && max($sessionCtx['last_trip']['dates']) >= (new \DateTimeImmutable('today', new \DateTimeZone('Europe/Madrid')))->format('Y-m-d')) {
+                $trip = $sessionCtx['last_trip'];
+                $extracted['trip_inherited'] = true;
+            }
+            if ($trip) {
+                $extracted['trip']       = $trip;
+                $extracted['days_ahead'] = $trip['days_ahead'];
+            }
+
             // 4. Herencia de zona: si intent geográfico y zone null → usar last_zone
             if (
                 empty($extracted['zone']) &&
@@ -260,7 +330,7 @@ class AICore {
             $auditRouteCount = count($response['routes'] ?? []);
 
             // 6. Guardar interacción y actualizar contexto de sesión
-            $this->saveInteraction($userId, $query, $response, $intent);
+            $this->saveInteraction($userId, $query, $response, $intent, $extracted);
 
             if ($sessionId > 0) {
                 $updatedCtx = $this->updateSessionContext($sessionCtx, $extracted, $response);
@@ -380,6 +450,16 @@ class AICore {
         }
         if (!empty($extracted['resolved_coords'])) {
             $ctx['last_coords'] = $extracted['resolved_coords'];
+            $ctx['last_label']  = $extracted['resolved_label'] ?? ($ctx['last_label'] ?? null);
+        }
+        if (!empty($extracted['last_search'])) {
+            $ctx['last_search'] = $extracted['last_search'];
+            $ctx['last_bbox']   = $extracted['last_search']['bbox'] ?? null;
+            $ctx['last_radius'] = $extracted['last_search']['radius_km'] ?? null;
+        }
+
+        if (!empty($extracted['trip'])) {
+            $ctx['last_trip'] = $extracted['trip'];
         }
 
         // Actualizar actividad si viene explícita
@@ -406,6 +486,9 @@ class AICore {
             }
         } elseif ($intent === 'route_followup') {
             // filter: actualizar active_routes con las rutas filtradas; preservar last_candidate_ids
+            if (($extracted['followup_subtype'] ?? '') === 'filter' && !empty($response['search_criteria'])) {
+                $ctx['last_search'] = $response['search_criteria'];
+            }
             if (($extracted['followup_subtype'] ?? '') === 'filter' && !empty($response['routes'])) {
                 $ctx['active_routes'] = array_values(array_filter(
                     array_map(fn($r) => (int)($r['id'] ?? 0), $response['routes'])
@@ -474,118 +557,78 @@ class AICore {
         string $userId,
         array  $prefs,
         array  $history,
-        array  $extracted,
+        array  &$extracted,
         array  $ctx
     ): array {
-        // ── Construir parámetros desde Haiku + perfil ────────────────────────
-        $rawZone = $extracted['zone'] ?? null;
+        // ── Dónde buscar ─────────────────────────────────────────────────────
+        $geo = $this->resolveSearchArea($query, $extracted, $ctx);
 
-        // Detección de topónimo concreto: resuelve "Valle de Tena" → geocode preciso
-        $specificLoc = $this->findSpecificLocationInQuery($query);
-        $zoneName    = $specificLoc ? $specificLoc['geocode'] : $rawZone;
-
-        // Si no hay zona → pedir clarificación
-        if (empty($zoneName)) {
+        if (!empty($extracted['out_of_coverage']) || !empty($geo['out_of_bounds'])) {
+            return $this->makeOutOfCoverageResponse($query, $geo['label'] ?? ($extracted['zone'] ?? ''), $history, $prefs);
+        }
+        if (empty($geo['coordinates'])) {
+            if (empty($extracted['zone'])) {
+                return $this->makeClarificationResponse('zone',
+                    '¿Por qué zona quieres salir? Dime un pueblo, valle o monte (p. ej. Jaca, Valle de Tena, Gorbea, Ordesa…).'
+                );
+            }
             return $this->makeClarificationResponse('zone',
-                '¿En qué zona o lugar buscas las rutas? (p. ej. Candanchú, Sierra Nevada, Picos de Europa, Teide…)'
+                "No he sabido situar «{$extracted['zone']}» en el mapa. ¿Me dices un pueblo o monte cercano?"
             );
         }
 
-        // Verificación rápida de zonas claramente fuera de cobertura.
-        // Nominatim puede devolver un pequeño municipio español homónimo (p. ej. "Los Alpes"
-        // en Álava) para rangos montañosos internacionales; la blocklist lo corta antes.
-        if ($this->isZoneOutOfCoverage($rawZone ?? $zoneName)) {
-            $text = $this->askClaude(
-                "El usuario pregunta: \"$query\"\n\n" .
-                "La zona mencionada está fuera de la cobertura de Kahir. " .
-                "Kahir cubre España (incluyendo Canarias y Baleares) y el sur de Francia. " .
-                "Explícalo amablemente y ofrece buscar en una zona de España o sur de Francia.",
-                $history, $prefs, 'general'
-            );
-            return ['type' => 'general', 'content' => $text];
-        }
-
-        // Actividad y dificultad: Haiku primero, luego perfil del usuario
-        $activity = $extracted['activity'] ?? $this->getFirstPreferredActivity($prefs);
-        $difficulty = $extracted['difficulty'] ?? ($prefs['experience_level'] ?? 'intermediate');
-
-        // ── Geocodificación de la zona ────────────────────────────────────────
-        $locationData = $this->resolveZoneName($zoneName);
-        // Si viene de topónimo concreto, preservar el nombre del usuario
-        if ($specificLoc && !empty($locationData['location'])) {
-            $locationData['location'] = $specificLoc['display_name'];
-        }
-
-        // Caso C: zona fuera de cobertura (fuera de España / sur de Francia / Islas)
-        if (!empty($locationData['out_of_bounds'])) {
-            $text = $this->askClaude(
-                "El usuario pregunta: \"$query\"\n\n" .
-                "La zona '{$zoneName}' está fuera de nuestra cobertura. " .
-                "Kahir cubre España (incluyendo Canarias y Baleares) y sur de Francia. " .
-                "Explícalo amablemente y ofrece buscar en una zona de España o sur de Francia.",
-                $history, $prefs, 'general'
-            );
-            return ['type' => 'general', 'content' => $text];
-        }
-
-        // ¿Es un lugar concreto geocodificado (Candanchú, Astún…) o una zona abstracta (Aragon)?
-        $isSpecificLocation = $locationData['is_specific_location'] ?? false;
+        // Actividad: la del mensaje; si no, la habitual del usuario
+        $activity = $extracted['activity'] ?? $this->getFirstPreferredActivity($prefs) ?? 'hiking';
+        // Dificultad: solo filtra si el usuario la pide (o va con niños). El nivel del perfil puntúa.
+        $difficulty = $extracted['difficulty'] ?? (!empty($extracted['with_kids']) ? 'beginner' : null);
 
         $params = [
-            'activity'    => $activity,
-            'difficulty'  => $difficulty,
-            'location'    => $locationData['location'] ?? $zoneName,
-            'zone'        => $locationData['zone']     ?? null,
-            'coordinates' => $locationData['coordinates'] ?? null,
-            'timeframe'   => $extracted['timeframe']   ?? 'today',
-            'days_ahead'  => $extracted['days_ahead']  ?? 0,
-            // Radio inicial de 80 km solo para lugares concretos geocodificados.
-            // Para zonas abstractas ("rutas en Aragon") se usa el filtro de zona clásico.
-            'proximity_km'=> $isSpecificLocation ? 80.0 : null,
+            'activity'        => $activity,
+            'difficulty'      => $difficulty,
+            'location'        => $geo['label'],
+            'place_label'     => $geo['label'],
+            'zone'            => $this->coordsToDbZone((float) $geo['coordinates']['lat'], (float) $geo['coordinates']['lon']),
+            'coordinates'     => $geo['coordinates'],
+            'bbox'            => $geo['bbox'] ?? null,
+            'radius_km'       => $geo['radius_km'] ?? 20.0,
+            'timeframe'       => $extracted['timeframe'] ?? 'today',
+            'days_ahead'      => $extracted['days_ahead'] ?? 0,
+            'max_elevation'   => $extracted['max_elevation'] ?? null,
+            'max_distance'    => $extracted['max_distance'] ?? null,
+            'min_distance'    => $extracted['min_distance'] ?? null,
+            'target_duration' => $extracted['target_duration'] ?? null,
+            'max_duration'    => $extracted['max_duration'] ?? null,
         ];
-
-        // Guardar coords resueltas para el contexto
-        if (!empty($params['coordinates'])) {
-            $extracted['resolved_coords'] = $params['coordinates'];
+        if (!empty($extracted['with_kids'])) {
+            $params['max_duration']  = $params['max_duration'] ?? 3.5;
+            $params['max_elevation'] = $params['max_elevation'] ?? 500;
         }
+        $isSpecificLocation = empty($params['bbox']);
+        $extracted['resolved_coords'] = $params['coordinates'];
+        $extracted['resolved_label']  = $geo['label'];
 
-        // Si no se pudieron resolver coordenadas → usar referencia de zona
-        if (empty($params['coordinates']) && !empty($params['zone'])) {
-            $ref = self::ZONE_REFERENCE_POINTS[$params['zone']] ?? null;
-            if ($ref) {
-                $params['coordinates'] = ['lat' => $ref['lat'], 'lon' => $ref['lon']];
-            }
-        }
-
-        // ── Comprobar meteorología ────────────────────────────────────────────
-        // Fetch weather when days_ahead >= 1 (mañana o más adelante) o cuando
-        // Haiku detectó explícitamente weather_check_needed.
+        // ── Tiempo para el día de la salida ───────────────────────────────────
         $weatherWarning = null;
-        $daysAhead = (int)($params['days_ahead'] ?? 0);
-        $needsWeather = ($extracted['weather_check_needed'] ?? false) || $daysAhead >= 1;
+        $trip      = $extracted['trip'] ?? null;
+        $tripDays  = [];
+        $daysAhead = (int) ($trip['days_ahead'] ?? 0);
+        try {
+            if ($trip) {
+                $tripDays = $this->weather->getForecastForDates(
+                    (float) $params['coordinates']['lat'], (float) $params['coordinates']['lon'], $trip['dates']
+                );
+                $params['weather'] = $tripDays;
+            } elseif (!empty($extracted['weather_check_needed'])) {
+                $params['weather'] = $this->weather->getCurrentWeather(
+                    (float) $params['coordinates']['lat'], (float) $params['coordinates']['lon']
+                );
+            }
+            if (!empty($params['weather']) && !$this->weather->isSafeForActivity($params['weather'], $activity)) {
+                $weatherWarning = $this->weather->getWeatherRecommendations($params['weather'], $activity);
+            }
+        } catch (\Throwable) { /* continuar sin tiempo */ }
 
-        if (!empty($params['coordinates']) && $needsWeather) {
-            try {
-                if ($daysAhead <= 1) {
-                    $weather = $this->weather->getCurrentWeather(
-                        (float)$params['coordinates']['lat'],
-                        (float)$params['coordinates']['lon']
-                    );
-                } else {
-                    $weather = $this->weather->getForecast(
-                        (float)$params['coordinates']['lat'],
-                        (float)$params['coordinates']['lon'],
-                        max(2, $daysAhead + 1)
-                    );
-                }
-                if (!empty($weather) && !$this->weather->isSafeForActivity($weather, $activity ?? 'hiking')) {
-                    $weatherWarning = $this->weather->getWeatherRecommendations($weather, $activity ?? 'hiking');
-                }
-                $params['weather'] = $weather;
-            } catch (\Exception) { /* continuar sin tiempo */ }
-        }
-
-        // ── Condiciones de montaña (AEMET + Météo-France + EAWS) ─────────────
+        // ── Condiciones de montaña (AEMET + Météo-France) ─────────────
         // Se ejecuta ANTES de buscar rutas para poder ajustar la dificultad
         $conditionsReport = null;
         if (!empty($params['coordinates']) && !empty($params['zone'])) {
@@ -624,90 +667,62 @@ class AICore {
                     $snowLine
                 );
 
-                // Ajustar dificultad antes de buscar rutas si las condiciones lo exigen
-                if (!empty($conditionsReport['conditions_index']) && $conditionsReport['conditions_index'] !== 'BUENAS') {
-                    $params['difficulty'] = $this->adjustDifficultyForConditions(
-                        $params['difficulty'],
-                        $conditionsReport['conditions_index']
-                    );
-                }
+                // Las condiciones no filtran rutas: se cuentan en el texto para que el usuario decida
             } catch (\Exception) { /* continuar sin datos de condiciones */ }
         }
 
         // ── Buscar rutas en BD ────────────────────────────────────────────────
+        // Se relaja paso a paso y cada relajación se le dice al usuario.
+        $relaxNotes = [];
         $results = $this->recommender->getRecommendations($params, $prefs, MAX_ROUTE_SUGGESTIONS);
-        // Capturar IDs del pool pre-scoring para route_followup filtros (se guardarán en sesión)
-        $extracted['last_candidate_ids'] = $this->recommender->getLastCandidateIds();
 
-        // ── Caso A: pocas rutas ───────────────────────────────────────────────
-        $expandedSearch  = false;
-        $expandedToAdj   = false;
-        $expandedRadius  = false;
-        $originalCount   = count($results);
-
-        // Paso 1: relajar dificultad si hay pocos resultados
-        if ($originalCount < 3 && !empty($params['difficulty'])) {
-            $relaxedDiff    = array_merge($params, ['difficulty' => null]);
-            $relaxedResults = $this->recommender->getRecommendations($relaxedDiff, $prefs, MAX_ROUTE_SUGGESTIONS);
-            if (count($relaxedResults) > $originalCount) {
-                $results        = $relaxedResults;
-                $expandedSearch = true;
-            }
-        }
-
-        // Paso 2a (modo proximidad): ampliar radio de 80 km a 150 km
-        if (count($results) < 3 && $isSpecificLocation && !empty($params['proximity_km'])) {
-            $wideParams  = array_merge($params, ['proximity_km' => 150.0, 'difficulty' => null]);
-            $wideResults = $this->recommender->getRecommendations($wideParams, $prefs, MAX_ROUTE_SUGGESTIONS);
-            if (count($wideResults) > count($results)) {
-                $results        = $wideResults;
-                $expandedRadius = true;
-                $expandedSearch = true;
-            }
-        }
-
-        // Paso 2b (modo zona): añadir zona adyacente como antes
-        if (count($results) < 3 && !$isSpecificLocation && !empty($params['zone'])) {
-            $adjZone = self::ZONE_ADJACENCY[$params['zone']] ?? null;
-            if ($adjZone) {
-                $adjParams  = ['zone' => $adjZone, 'activity' => $activity];
-                $adjResults = $this->recommender->getFallbackRecommendations($adjParams);
-                if (!empty($adjResults)) {
-                    $needed        = MAX_ROUTE_SUGGESTIONS - count($results);
-                    $results       = array_merge($results, array_slice($adjResults, 0, $needed));
-                    $expandedToAdj = true;
-                    $expandedSearch= true;
+        if (count($results) < 3 && !empty($params['difficulty'])) {
+            $relaxed = $this->recommender->getRecommendations(array_merge($params, ['difficulty' => null]), $prefs, MAX_ROUTE_SUGGESTIONS);
+            if (count($relaxed) > count($results)) {
+                // Primero las del nivel pedido, después el resto
+                $ids = array_map(fn($r) => (int) $r['route']['id'], $results);
+                foreach ($relaxed as $r) {
+                    if (count($results) >= MAX_ROUTE_SUGGESTIONS) break;
+                    if (!in_array((int) $r['route']['id'], $ids, true)) $results[] = $r;
                 }
+                $relaxNotes[] = 'Hay pocas rutas de la dificultad pedida; he añadido alguna de otro nivel (indícalo).';
             }
         }
+        if (count($results) < 3 && $isSpecificLocation) {
+            foreach ([40.0, 70.0] as $wider) {
+                if ($wider <= (float) $params['radius_km']) continue;
+                $wide = $this->recommender->getRecommendations(array_merge($params, ['radius_km' => $wider]), $prefs, MAX_ROUTE_SUGGESTIONS);
+                if (count($wide) > count($results)) {
+                    $results = $wide;
+                    $params['radius_km'] = $wider;
+                    $relaxNotes = ["He tenido que ampliar la búsqueda a {$wider} km de {$geo['label']} (dilo)."];
+                }
+                if (count($results) >= 3) break;
+            }
+        }
+        $extracted['last_candidate_ids'] = $this->recommender->getLastCandidateIds();
+        $extracted['last_search'] = array_diff_key($params, ['weather' => 1]);
 
         if (empty($results)) {
             $text = $this->askClaude(
                 "El usuario pregunta: \"$query\"\n\n" .
-                "No se han encontrado rutas con esos criterios. Explica esto amablemente y " .
-                "sugiere ampliar la búsqueda (zona, dificultad o actividad). " .
+                "No hay en el catálogo de Kahir rutas de " . $this->activityEs($activity) . " que cumplan esos criterios cerca de {$geo['label']}. " .
+                "Explícalo en 2 frases y propone una alternativa concreta (otra actividad, otro nivel o una zona cercana). " .
                 "NO inventes rutas ni lugares.",
                 $history, $prefs, 'route_request'
             );
             return ['type' => 'no_routes', 'content' => $text, 'weather_warning' => $weatherWarning];
         }
 
-        // ── Calcular tiempos en coche (OSRM en paralelo) ──────────────────────
-        if (!empty($params['coordinates'])) {
-            $destinations = array_map(function ($r) {
-                $route = $r['route'];
-                // Soporte para distintos nombres de columna en la tabla rutas
-                $lat = $route['startLat'] ?? $route['start_lat'] ?? $route['latitud_inicio'] ?? null;
-                $lon = $route['startLng'] ?? $route['start_lng'] ?? $route['start_lon'] ?? $route['longitud_inicio'] ?? null;
-                return ['lat' => $lat, 'lon' => $lon];
-            }, $results);
-
+        // ── Tiempos en coche (OSRM en paralelo), solo informativos ───────────
+        $destinations = array_map(fn($r) => [
+            'lat' => $r['route']['start_lat'] ?? null,
+            'lon' => $r['route']['start_lng'] ?? null,
+        ], $results);
+        try {
             $driveTimes = $this->geocoding->getDrivingTimeBatch(
-                (float)$params['coordinates']['lat'],
-                (float)$params['coordinates']['lon'],
-                $destinations
+                (float) $params['coordinates']['lat'], (float) $params['coordinates']['lon'], $destinations
             );
-
             foreach ($results as $i => &$result) {
                 if (!empty($driveTimes[$i])) {
                     $result['route']['drive_time_minutes'] = $driveTimes[$i]['minutes'];
@@ -715,109 +730,49 @@ class AICore {
                 }
             }
             unset($result);
+        } catch (\Throwable) { /* sin tiempos en coche */ }
 
-            // En modo proximidad: filtrar rutas con tiempo en coche > 90 min
-            // y ordenar las que quedan de más cercana a más lejana.
-            if ($isSpecificLocation) {
-                $withTime    = array_filter($results, fn($r) => isset($r['route']['drive_time_minutes']));
-                $halfOrMore  = count($withTime) >= max(1, (int)(count($results) / 2));
+        // ── Texto de Sonnet con los datos reales de las rutas ────────────────
+        $count    = count($results);
+        $locLabel = $geo['label'] ?: 'la zona';
+        $routeList = $this->formatRoutesForPrompt($results);
+        $notes = $relaxNotes ? "\nNOTAS DE BÚSQUEDA: " . implode(' ', $relaxNotes) : '';
 
-                if ($halfOrMore) {
-                    // Filtrar a ≤ 90 min; mantener rutas sin dato OSRM para no perder resultados
-                    $filtered = array_values(array_filter($results, function ($r) {
-                        $mins = $r['route']['drive_time_minutes'] ?? null;
-                        return $mins === null || $mins <= 90;
-                    }));
-
-                    // Solo aplicar el filtro si quedan al menos 2 rutas
-                    if (count($filtered) >= 2) {
-                        $results = $filtered;
-                    }
-
-                    // Ordenar por tiempo en coche ascendente
-                    usort($results, function ($a, $b) {
-                        $ta = $a['route']['drive_time_minutes'] ?? 9999;
-                        $tb = $b['route']['drive_time_minutes'] ?? 9999;
-                        return $ta <=> $tb;
-                    });
-                }
-            }
-        }
-
-        // ── Intro de 1 frase con Sonnet ───────────────────────────────────────
-        // Normalizar nombres de campo para que funcione con cualquier esquema de BD
-        foreach ($results as &$r) {
-            if (!isset($r['route']['title']) && isset($r['route']['nombre'])) {
-                $r['route']['title'] = $r['route']['nombre'];
-            }
-        }
-        unset($r);
-
-        $count = count($results);
-        $loc   = $params['location'] ?? $params['zone'] ?? '';
-
-        $expandNote = '';
-        if ($expandedRadius) {
-            $expandNote = " He ampliado el radio de búsqueda a 150 km para encontrar más opciones.";
-        } elseif ($expandedToAdj) {
-            $adjZoneName = self::ZONE_ADJACENCY[$params['zone'] ?? ''] ?? 'zona adyacente';
-            $expandNote  = " He ampliado la búsqueda a {$adjZoneName} para completar resultados.";
-        } elseif ($expandedSearch) {
-            $expandNote  = " He relajado el filtro de dificultad para mostrar más opciones.";
-        }
-
-        // Nota de condiciones de montaña para el prompt introductorio
         $conditionsNote = '';
         if (!empty($conditionsReport['conditions_index']) && $conditionsReport['conditions_index'] !== 'BUENAS') {
-            $conditionsNote = " [Condiciones: {$conditionsReport['conditions_index']}]";
+            $conditionsNote .= "\nCondiciones de montaña: {$conditionsReport['conditions_index']}.";
         }
         if (!empty($conditionsReport['narrative_context'])) {
-            $conditionsNote .= " Contexto de montaña: {$conditionsReport['narrative_context']}";
+            $conditionsNote .= " {$conditionsReport['narrative_context']}";
         }
         if (!empty($conditionsReport['cota_nieve_est'])) {
-            $conditionsNote .= " Cota de nieve del manto estimada: ~{$conditionsReport['cota_nieve_est']} m.";
+            $conditionsNote .= " Cota de nieve estimada: ~{$conditionsReport['cota_nieve_est']} m.";
         }
 
-        // ── Fiabilidad del pronóstico: nota para Sonnet según days_ahead ────────
-        // days_ahead 0-2: pronóstico fiable en montaña → sin nota
-        // days_ahead 3-5: fiabilidad media → mencionar incertidumbre
-        // days_ahead 6+:  orientativo → decirlo explícitamente
-        $forecastReliabilityNote = '';
-        if ($daysAhead >= 6) {
-            $forecastReliabilityNote =
-                "\nNOTA DE PRONÓSTICO: El horizonte es de {$daysAhead} días — orientativo en montaña. " .
-                "Menciona brevemente que el usuario debería revisar las condiciones 48h antes de salir.";
-        } elseif ($daysAhead >= 3) {
-            $forecastReliabilityNote =
-                "\nNOTA DE PRONÓSTICO: A {$daysAhead} días el margen de error en montaña es notable. " .
-                "Menciona la incertidumbre de forma natural, sin alarmar.";
+        $forecastBlock = '';
+        if ($trip) {
+            $forecastBlock = "\nHoy es " . TripDate::label(date('Y-m-d')) . ". La salida es el {$trip['label']}.";
+            if ($tripDays) {
+                $forecastBlock .= "\nPrevisión para ese día en {$locLabel}:\n" . $this->summarizeForecastForPrompt($tripDays, count($tripDays) - 1);
+                if ($daysAhead >= 4) {
+                    $forecastBlock .= "\n(A {$daysAhead} días la previsión en montaña es orientativa: dilo de pasada.)";
+                }
+            } else {
+                $forecastBlock .= "\nAún no hay previsión para esa fecha (más de 16 días): dilo.";
+            }
         }
+        $safetyHint = $activity === 'ski_touring'
+            ? "\nEs esquí de travesía: recuerda en una frase consultar el boletín de aludes (AEMET) antes de salir."
+            : '';
 
-        // ── Intro text with optional best-day forecast ────────────────────────
-        $locLabel = $loc ?: 'la zona';
-
-        // Cuando hay días por delante (>= 1) y datos de tiempo, incluir pronóstico
-        // para que Sonnet pueda recomendar un día concreto.
-        if ($daysAhead >= 1 && !empty($params['weather'])) {
-            $forecastSummary = $this->summarizeForecastForPrompt($params['weather'], $daysAhead);
-            $introPrompt =
-                "El usuario pregunta: \"$query\"\n\n" .
-                "He encontrado {$count} rutas en/cerca de {$locLabel}.{$expandNote}{$conditionsNote}\n\n" .
-                "Pronóstico para los próximos {$daysAhead} días en {$locLabel}:\n{$forecastSummary}" .
-                $forecastReliabilityNote . "\n\n" .
-                "Escribe una respuesta breve (máximo 3 frases / 60 palabras):\n" .
-                "1) Presenta las rutas encontradas cerca de \"{$locLabel}\" (no uses el nombre técnico de zona).\n" .
-                "2) Indica de forma concreta cuál es el mejor día del pronóstico para salir de ruta y por qué (p. ej. temperatura, lluvia, viento).\n" .
-                "NO describas rutas individuales.";
-        } else {
-            $introPrompt =
-                "El usuario pregunta: \"$query\"\n\n" .
-                "He encontrado {$count} rutas" . ($loc ? " en/cerca de \"{$loc}\"" : '') . ".{$expandNote}{$conditionsNote}" .
-                $forecastReliabilityNote . " " .
-                "Escribe EXACTAMENTE una sola frase de introducción (máximo 20 palabras). " .
-                "Usa el nombre de lugar que el usuario mencionó, no el nombre técnico de zona. " .
-                "NO describas rutas individuales.";
-        }
+        $introPrompt =
+            "El usuario pregunta: \"$query\"\n\n" .
+            "Rutas encontradas cerca de {$locLabel} (datos reales del catálogo):\n{$routeList}{$notes}{$conditionsNote}{$forecastBlock}{$safetyHint}\n\n" .
+            "Escribe 2–3 frases (máximo 70 palabras): presenta las rutas y di cuál encaja mejor con lo que pide y por qué, " .
+            "usando SOLO los datos de la lista (no inventes cifras, accesos ni lugares). " .
+            ($tripDays ? "Di en media frase qué tiempo se espera ese día (y si hay dos días, cuál es mejor). " : '') .
+            "Si hay notas de búsqueda, menciónalas con naturalidad. Las tarjetas con los detalles ya se muestran debajo." .
+            $this->languageInstruction($extracted);
 
         $text = $this->askClaude($introPrompt, $history, $prefs, 'route_request');
 
@@ -827,7 +782,7 @@ class AICore {
             'routes'            => array_map(fn($r) => $r['route'], $results),
             'reasons'           => array_map(fn($r) => $r['reasons'], $results),
             'weather_warning'   => $weatherWarning,
-            'expanded_search'   => $expandedSearch,
+            'expanded_search'   => !empty($relaxNotes),
             'conditions_report' => $conditionsReport,
         ];
     }
@@ -850,11 +805,16 @@ class AICore {
         $zoneName     = $specificLoc ? $specificLoc['geocode'] : ($extracted['zone'] ?? null);
         $displayName  = $specificLoc ? $specificLoc['display_name'] : null; // nombre para el usuario
 
-        // Resolver zona → coordenadas
+        // Resolver zona → coordenadas (mismo criterio que la búsqueda de rutas: regiones,
+        // topónimos con coordenadas fijas, zona de la conversación)
         $coords = null;
         $locationName = null;
+        $geo = $this->resolveSearchArea($query, $extracted, $ctx);
 
-        if (!empty($zoneName)) {
+        if (!empty($geo['coordinates'])) {
+            $coords       = $geo['coordinates'];
+            $locationName = $geo['label'];
+        } elseif (!empty($zoneName)) {
             $locData = $this->resolveZoneName($zoneName);
             $coords       = $locData['coordinates'] ?? null;
             // Prioridad: nombre exacto del usuario > nombre de Nominatim > zona extraída
@@ -892,7 +852,7 @@ class AICore {
         // (útil cuando el usuario dice "y en ese sitio" / "dime las condiciones en spot")
         if (empty($coords) && !empty($ctx['last_coords'])) {
             $coords       = $ctx['last_coords'];
-            $locationName = $locationName ?? ($ctx['last_zone'] ?? null);
+            $locationName = $locationName ?? ($ctx['last_label'] ?? $ctx['last_zone'] ?? null);
         }
 
         // Fallback 2: preferencias del usuario
@@ -925,7 +885,7 @@ class AICore {
         $lat  = (float)$coords['lat'];
         $lon  = (float)$coords['lon'];
 
-        // ── Condiciones de montaña (AEMET + Météo-France + EAWS) ─────────────
+        // ── Condiciones de montaña (AEMET + Météo-France) ─────────────
         $condNarrative   = '';
         $conditionsRep   = null;
         try {
@@ -941,10 +901,44 @@ class AICore {
                 $snowLine
             );
             if (!empty($conditionsRep['narrative_context'])) {
-                $condNarrative = "\nCondiciones de montaña adicionales (AEMET/EAWS):\n" .
+                $condNarrative = "\nCondiciones de montaña adicionales (fuentes oficiales):\n" .
                                  $conditionsRep['narrative_context'];
             }
         } catch (\Exception) { /* sin datos de condiciones */ }
+
+        // ── Día concreto ("el sábado", "mañana", o la fecha de la salida de la que hablamos) ──
+        if (!empty($extracted['trip'])) {
+            $trip = $extracted['trip'];
+            try {
+                $days = $this->weather->getForecastForDates($lat, $lon, $trip['dates']);
+            } catch (\Throwable) {
+                $days = [];
+            }
+            $where = $locationName ?? 'la zona';
+            if (!$days) {
+                $text = "Todavía no hay previsión fiable para el {$trip['label']} en {$where}: los modelos llegan a unos 16 días vista. "
+                      . "Vuelve a preguntarme unos días antes y te digo cómo se presenta.";
+                return ['type' => 'weather_info', 'content' => $text, 'location' => $locationName, 'days' => 0];
+            }
+            $activityCtx = $ctx['last_activity'] ?? ($extracted['activity'] ?? 'hiking');
+            $prompt = "El usuario pregunta: \"$query\"\n" .
+                      "Hoy es " . TripDate::label(date('Y-m-d')) . ".\n" .
+                      "Lugar: {$where}. Día consultado: {$trip['label']}.\n" .
+                      "Previsión (Open-Meteo, a la altitud del punto):\n" . $this->summarizeForecastForPrompt($days, count($days) - 1) .
+                      $condNarrative . "\n" .
+                      ((int) $trip['days_ahead'] >= 4 ? "A {$trip['days_ahead']} días la previsión en montaña es orientativa: dilo.\n" : '') .
+                      "Interpreta la previsión de ESE día para " . $this->activityEs($activityCtx) . " y da una recomendación práctica." .
+                      $this->languageInstruction($extracted);
+            $text = $this->askClaude($prompt, $history, $prefs, 'weather_query');
+            return [
+                'type'              => 'weather_info',
+                'content'           => $text,
+                'forecast'          => $days,
+                'location'          => $locationName,
+                'days'              => count($days),
+                'conditions_report' => $conditionsRep,
+            ];
+        }
 
         try {
             if ($daysAhead <= 1) {
@@ -967,7 +961,7 @@ class AICore {
                                 $snowLine
                             );
                             if (!empty($conditionsRep['narrative_context'])) {
-                                $condNarrative = "\nCondiciones de montaña adicionales (AEMET/EAWS):\n" .
+                                $condNarrative = "\nCondiciones de montaña adicionales (fuentes oficiales):\n" .
                                                  $conditionsRep['narrative_context'];
                             }
                         } catch (\Exception) { /* mantener conditionsRep original */ }
@@ -1136,8 +1130,12 @@ class AICore {
         $safetyDisplayName = $specificLoc ? $specificLoc['display_name'] : ($extracted['zone'] ?? null);
 
         $coords = null;
+        $geo = $this->resolveSearchArea($query, $extracted, $ctx);
 
-        if (!empty($zoneName)) {
+        if (!empty($geo['coordinates'])) {
+            $coords = $geo['coordinates'];
+            $safetyDisplayName = $geo['label'];
+        } elseif (!empty($zoneName)) {
             $locData = $this->resolveZoneName($zoneName);
             $coords  = $locData['coordinates'] ?? null;
 
@@ -1204,7 +1202,7 @@ class AICore {
                     $parts[] = "Riesgo elevado de barro (lluvia reciente: " . round($condRep['precip_3d_mm'], 1) . " mm en 3 días).";
                 }
                 if (!empty($parts)) {
-                    $conditionsSection = "\n\nCondiciones de montaña en {$safetyLocLabel} (AEMET/EAWS):\n" .
+                    $conditionsSection = "\n\nCondiciones de montaña en {$safetyLocLabel} (fuentes oficiales):\n" .
                                         implode(' ', $parts);
                 }
             } catch (\Exception) { /* sin datos de condiciones */ }
@@ -1227,20 +1225,17 @@ class AICore {
         string $userId,
         array  $prefs,
         array  $history,
-        array  $extracted,
+        array  &$extracted,
         array  $ctx
     ): array {
-        // Perfil insuficiente → onboarding
-        $totalInteractions = (int)($prefs['total_interactions'] ?? 0);
+        // Perfil insuficiente → onboarding (basta con conocer actividad y nivel)
         $hasActivity = !empty($prefs['preferred_activities']);
         $hasLevel    = !empty($prefs['experience_level']);
-
-        if ($totalInteractions < 3 || !$hasActivity || !$hasLevel) {
+        if (!$hasActivity || !$hasLevel) {
             $text = $this->askClaude(
                 "El usuario quiere recomendaciones personalizadas pero no tenemos datos de su perfil. " .
                 "Hazle tres preguntas en un solo mensaje conversacional para conocer: " .
-                "1) qué actividad practica habitualmente, 2) su nivel, 3) en qué zonas de España suele salir " .
-                "(Pirineos, Sierra Nevada, Picos de Europa, Canarias, etc.).",
+                "1) qué actividad practica habitualmente, 2) su nivel, 3) por qué zona suele salir.",
                 $history, $prefs, 'onboarding'
             );
             return [
@@ -1251,234 +1246,86 @@ class AICore {
             ];
         }
 
-        // Normalizar preferred_activities (puede ser string CSV o array)
         $activityRaw = $prefs['preferred_activities'] ?? null;
         $preferredActivity = is_array($activityRaw)
             ? trim($activityRaw[0] ?? 'hiking')
             : trim(explode(',', $activityRaw ?? 'hiking')[0]);
 
-        // Perfil completo → evaluar tiempo en zonas preferidas en paralelo
-        $preferredZones = is_array($prefs['preferred_locations'])
-            ? $prefs['preferred_locations']
-            : array_filter(array_map('trim', explode(',', $prefs['preferred_locations'] ?? '')));
-
-        if (empty($preferredZones)) {
-            // Fallback 1: user_zones (zonas registradas automáticamente al buscar rutas)
-            $numericId = $this->resolveUserId($userId);
-            if ($numericId) {
-                $preferredZones = $this->inferZonesFromUserZones($numericId);
-            }
-            // Fallback 2: rutas favoritas del usuario → extraer ubicacion más frecuente
-            if (empty($preferredZones) && $numericId) {
-                $preferredZones = $this->inferZonesFromFavorites($numericId);
-            }
-        }
-
-        if (empty($preferredZones)) {
-            // Último recurso: zona con más rutas en la BD para la actividad del usuario.
-            // Garantiza que un usuario nuevo con actividad pero sin historial geográfico
-            // recibe rutas en vez de una clarification vacía.
-            $preferredZones = $this->inferZonesFromPopularRoutes($preferredActivity);
-        }
-
-        if (empty($preferredZones)) {
+        // ── Dónde suele salir el usuario ─────────────────────────────────────
+        $home = $this->findUserHomeArea($userId, $ctx);
+        if (!$home) {
             return $this->makeClarificationResponse('zone',
-                '¿En qué zonas te gustaría que busque? (p. ej. Pirineos, Sierra Nevada, Picos de Europa, Canarias…)'
+                '¿Por qué zona sueles salir? Dime un pueblo o valle y te propongo rutas a tu medida.'
             );
         }
-
-        // ── Evaluación paralela del tiempo por zona ───────────────────────────
-        // Recopilar coordenadas de referencia y lanzar batch
-        $zoneKeys   = [];
-        $batchCoords = [];
-        foreach ($preferredZones as $zone) {
-            $ref = self::ZONE_REFERENCE_POINTS[$zone] ?? null;
-            if (!$ref) continue;
-            $zoneKeys[]   = $zone;
-            $batchCoords[] = ['lat' => $ref['lat'], 'lon' => $ref['lon']];
-        }
-
-        $weatherResults = [];
-        if (!empty($batchCoords)) {
-            try {
-                $weatherResults = $this->weather->getCurrentWeatherBatch($batchCoords);
-            } catch (\Exception) { /* continuar sin datos de tiempo */ }
-        }
-
-        // Clasificar zonas por seguridad
-        $zoneWeather = [];
-        foreach ($zoneKeys as $idx => $zone) {
-            $ref = self::ZONE_REFERENCE_POINTS[$zone];
-            $w   = $weatherResults[$idx] ?? null;
-            $safe = $w ? $this->weather->isSafeForActivity($w, $preferredActivity) : null;
-            $zoneWeather[$zone] = ['weather' => $w, 'safe' => $safe, 'ref' => $ref];
-        }
-
-        // Elegir zona ganadora: primero con tiempo seguro, luego "menos mala"
-        $bestZone   = null;
-        $bestCoords = null;
-        $allUnsafe  = true;
-
-        foreach ($zoneWeather as $zone => $data) {
-            if ($data['safe'] === true) {
-                $bestZone   = $zone;
-                $bestCoords = $data['ref'];
-                $allUnsafe  = false;
-                break;
-            }
-        }
-
-        // Si ninguna zona es segura → elegir la primera con datos (menos mala)
-        if (!$bestZone) {
-            foreach ($zoneWeather as $zone => $data) {
-                if ($data['weather'] !== null) {
-                    $bestZone   = $zone;
-                    $bestCoords = $data['ref'];
-                    break;
-                }
-            }
-        }
-
-        // Fallback sin datos de tiempo → primera zona preferida
-        if (!$bestZone) {
-            $bestZone = $zoneKeys[0] ?? null;
-            $ref = $bestZone ? (self::ZONE_REFERENCE_POINTS[$bestZone] ?? null) : null;
-            $bestCoords = $ref;
-            $allUnsafe  = false; // sin datos no advertimos
-        }
-
-        if (!$bestZone) {
-            return ['type' => 'general', 'content' => 'No he podido determinar una zona adecuada. ¿En qué zona de España te gustaría buscar?'];
-        }
-
-        // ── Buscar rutas en la zona ganadora ─────────────────────────────────
-        // Para zonas que no están en la BD como columna `location`, activar modo
-        // proximidad (bounding box) en lugar del filtro de zona exacto.
-        $knownDbZones = ['Aragon', 'Western_Pyrenees', 'Central_Pyrenees', 'Euskadi'];
-        $useProximity = !in_array($bestZone, $knownDbZones, true);
+        $bestCoords = $home['coordinates'];
+        $allUnsafe  = false;
 
         $params = [
-            'zone'         => $bestZone,
-            'activity'     => $preferredActivity,
-            'difficulty'   => $prefs['experience_level'] ?? 'intermediate',
-            'coordinates'  => $bestCoords ? ['lat' => (float)$bestCoords['lat'], 'lon' => (float)$bestCoords['lon']] : null,
-            'proximity_km' => ($useProximity && $bestCoords) ? 120.0 : null,
+            'activity'    => $preferredActivity,
+            'coordinates' => $bestCoords,
+            'radius_km'   => 40.0,
+            'place_label' => $home['label'],
+            'zone'        => $this->coordsToDbZone((float) $bestCoords['lat'], (float) $bestCoords['lon']),
         ];
-        if (!empty($zoneWeather[$bestZone]['weather'])) {
-            $params['weather'] = $zoneWeather[$bestZone]['weather'];
-        }
-
-        // ── Condiciones de montaña para la zona ganadora ─────────────────────
-        $perCondRep = null;
+        // Tiempo actual en esa zona (solo para contarlo, no filtra)
+        try {
+            $params['weather'] = $this->weather->getCurrentWeather((float) $bestCoords['lat'], (float) $bestCoords['lon']);
+            $allUnsafe = !empty($params['weather']) && !$this->weather->isSafeForActivity($params['weather'], $preferredActivity);
+        } catch (\Throwable) { /* sin tiempo */ }
+        $perCondRep  = null;
         $perCondNote = '';
-        if ($bestCoords) {
-            try {
-                $pLat     = (float)$bestCoords['lat'];
-                $pLon     = (float)$bestCoords['lon'];
-                $precip3d = $this->weather->getPrecip3d($pLat, $pLon);
-                $zoneCotaRef = [
-                    'Aragon' => 1600, 'Western_Pyrenees' => 1500, 'Central_Pyrenees' => 1700,
-                    'Euskadi' => 1200, 'Cantabria' => 1400, 'Sistema_Central' => 1500,
-                    'Sierra_Nevada' => 2000, 'Galicia' => 800, 'Andalucia' => 1000,
-                    'Sistema_Iberico' => 1200, 'Levante' => 900, 'Canarias' => 1400,
-                    'Baleares' => 900, 'Francia_Sur' => 1600,
-                ];
-                $snowLine   = $this->weather->getSnowLine($pLat, $pLon);
-                $perCondRep = $this->mountainConditions->buildConditionsReport(
-                    $pLat, $pLon, $bestZone, $preferredActivity,
-                    $zoneCotaRef[$bestZone] ?? 1200,
-                    $precip3d, null, $snowLine
-                );
-                // Ajustar dificultad antes de buscar
-                if (!empty($perCondRep['conditions_index']) && $perCondRep['conditions_index'] !== 'BUENAS') {
-                    $params['difficulty'] = $this->adjustDifficultyForConditions(
-                        $params['difficulty'], $perCondRep['conditions_index']
-                    );
-                }
-                if (!empty($perCondRep['narrative_context'])) {
-                    $perCondNote = "\nCondiciones de montaña: {$perCondRep['narrative_context']}";
-                }
-                if (!empty($perCondRep['cota_nieve_est'])) {
-                    $perCondNote .= " Cota de nieve del manto estimada: ~{$perCondRep['cota_nieve_est']} m.";
-                }
-            } catch (\Exception) { /* continuar sin datos */ }
-        }
+        $bestZone    = $home['label'];
 
         $results = $this->recommender->getRecommendations($params, $prefs, MAX_ROUTE_SUGGESTIONS);
+        if (count($results) < 3) {
+            $results = $this->recommender->getRecommendations(array_merge($params, ['radius_km' => 80.0]), $prefs, MAX_ROUTE_SUGGESTIONS);
+        }
+        $extracted['resolved_coords'] = $bestCoords;
+        $extracted['resolved_label']  = $home['label'];
+        $extracted['last_search']     = array_diff_key($params, ['weather' => 1]);
 
         if (empty($results)) {
             $text = $this->askClaude(
-                "No se han encontrado rutas adecuadas para el perfil del usuario en {$bestZone}. " .
-                "Explícalo amablemente y sugiere ampliar criterios o explorar otras zonas.",
+                "No hay rutas de " . $this->activityEs($preferredActivity) . " en el catálogo cerca de {$home['label']} que encajen con el perfil del usuario. " .
+                "Explícalo en 2 frases y pregúntale por otra zona.",
                 $history, $prefs, 'personalized_recommendation'
             );
             return ['type' => 'no_routes', 'content' => $text];
         }
 
-        // ── Calcular tiempos en coche desde el punto de referencia de zona ───
-        if (!empty($bestCoords)) {
-            $destinations = array_map(function ($r) {
-                $route = $r['route'];
-                $lat = $route['startLat'] ?? $route['start_lat'] ?? $route['latitud_inicio'] ?? null;
-                $lon = $route['startLng'] ?? $route['start_lng'] ?? $route['start_lon'] ?? $route['longitud_inicio'] ?? null;
-                return ['lat' => $lat, 'lon' => $lon];
-            }, $results);
-
-            try {
-                $driveTimes = $this->geocoding->getDrivingTimeBatch(
-                    (float)$bestCoords['lat'],
-                    (float)$bestCoords['lon'],
-                    $destinations
-                );
-
-                foreach ($results as $i => &$result) {
-                    if (!empty($driveTimes[$i])) {
-                        $result['route']['drive_time_minutes'] = $driveTimes[$i]['minutes'];
-                        $result['route']['drive_km']           = $driveTimes[$i]['km'];
-                    }
+        try {
+            $driveTimes = $this->geocoding->getDrivingTimeBatch(
+                (float) $bestCoords['lat'], (float) $bestCoords['lon'],
+                array_map(fn($r) => ['lat' => $r['route']['start_lat'] ?? null, 'lon' => $r['route']['start_lng'] ?? null], $results)
+            );
+            foreach ($results as $i => &$result) {
+                if (!empty($driveTimes[$i])) {
+                    $result['route']['drive_time_minutes'] = $driveTimes[$i]['minutes'];
+                    $result['route']['drive_km']           = $driveTimes[$i]['km'];
                 }
-                unset($result);
-            } catch (\Exception) { /* continuar sin tiempos en coche */ }
-        }
+            }
+            unset($result);
+        } catch (\Throwable) { /* sin tiempos en coche */ }
+        $zoneWeather = [];
 
-        // ── Construir prompt para Sonnet ─────────────────────────────────────
-        $zoneCtxParts = [];
-        foreach ($zoneWeather as $zone => $data) {
-            if ($data['weather'] === null) continue;
-            $label = $data['safe'] === true ? '✅ buenas condiciones' : '⚠️ condiciones desfavorables';
-            $zoneCtxParts[] = "{$zone}: {$label}";
-        }
-        $zoneCtxStr = implode('; ', $zoneCtxParts);
-
-        $weatherWarnMsg = null;
-        if ($allUnsafe && !empty($zoneWeather[$bestZone]['weather'])) {
-            $recs = $this->weather->getWeatherRecommendations($zoneWeather[$bestZone]['weather'], $preferredActivity);
-            $weatherWarnMsg = $recs;
-        }
-
-        $trimmedResults = array_map(
-            fn($r) => array_merge($r, ['route' => $this->trimRouteForPrompt($r['route'])]),
-            $results
-        );
-        $routeSummary = $this->formatRoutesForPrompt($trimmedResults);
-
-        $allUnsafeNote = $allUnsafe
-            ? "NOTA IMPORTANTE: ninguna zona tiene condiciones ideales hoy. He elegido {$bestZone} como la mejor opción disponible. Menciónalo con honestidad pero sin dramatismo.\n"
-            : '';
-
+        // ── Texto con los datos reales ───────────────────────────────────────
+        $weatherWarnMsg = $allUnsafe ? $this->weather->getWeatherRecommendations($params['weather'], $preferredActivity) : null;
+        $levelEs = ['beginner' => 'iniciación', 'intermediate' => 'intermedio', 'advanced' => 'avanzado', 'expert' => 'experto'][$prefs['experience_level']] ?? $prefs['experience_level'];
         $text = $this->askClaude(
-            "El usuario pide recomendaciones personalizadas.\n" .
-            "Perfil: nivel {$prefs['experience_level']}, actividad habitual {$preferredActivity}" .
+            "El usuario pide: \"{$query}\"\n" .
+            "Perfil: nivel {$levelEs}, actividad habitual " . $this->activityEs($preferredActivity) .
             (isset($prefs['comfortable_effort'])
                 ? ", va cómodo con rutas de esfuerzo MIDE ~{$prefs['comfortable_effort']}/5 (según sus valoraciones)"
                 : '') . ".\n" .
-            ($zoneCtxStr ? "Condiciones por zona: {$zoneCtxStr}.\n" : '') .
-            $allUnsafeNote .
-            "Zona elegida: {$bestZone}." . $perCondNote . "\n\n" .
-            "Rutas encontradas:\n{$routeSummary}\n\n" .
-            "Explica de forma personal y motivadora por qué estas rutas y esta zona.",
+            "Zona: alrededor de {$home['label']} ({$home['why']}).\n" .
+            ($allUnsafe ? "Ojo: el tiempo ahora mismo no es bueno para salir; dilo sin dramatismo.\n" : '') .
+            "\nRutas elegidas (datos reales):\n" . $this->formatRoutesForPrompt($results) . "\n\n" .
+            "En 2–3 frases explica por qué estas rutas encajan con su nivel y su zona, usando SOLO estos datos. " .
+            "Las tarjetas con los detalles se muestran debajo.",
             $history, $prefs, 'personalized_recommendation'
         );
+        $perCondRep = null;
 
         return [
             'type'              => 'route_suggestions',
@@ -1491,6 +1338,47 @@ class AICore {
     }
 
     // ─────────────────────────────────────────────────────────────────────────
+
+    /**
+     * Zona habitual del usuario: la de esta conversación, sus zonas guardadas o el centro
+     * de las rutas que ha hecho / marcado como favoritas. Null si no hay pistas.
+     */
+    private function findUserHomeArea(string $userId, array $ctx): ?array {
+        if (!empty($ctx['last_coords'])) {
+            return ['coordinates' => $ctx['last_coords'], 'label' => $ctx['last_label'] ?? 'la zona de la que hablamos', 'why' => 'la zona de esta conversación'];
+        }
+        $uid = $this->resolveUserId($userId);
+        if (!$uid) return null;
+        try {
+            $st = $this->conn->prepare("SELECT nombre, lat, lng FROM user_zones WHERE usuario_id = ? ORDER BY frecuencia DESC, ultima_vez DESC LIMIT 1");
+            $st->bind_param('i', $uid);
+            $st->execute();
+            if ($z = $st->get_result()->fetch_assoc()) {
+                return ['coordinates' => ['lat' => (float) $z['lat'], 'lon' => (float) $z['lng']], 'label' => $z['nombre'], 'why' => 'donde más buscas rutas'];
+            }
+        } catch (\Throwable) { /* tabla opcional */ }
+        try {
+            $st = $this->conn->prepare(
+                "SELECT AVG(r.start_lat) lat, AVG(r.start_lng) lng, COUNT(*) n,
+                        MAX(r.titulo) ejemplo
+                 FROM rutas r
+                 WHERE r.id IN (SELECT ruta_id FROM user_favorites WHERE usuario_id = ?
+                                UNION SELECT ruta_id FROM user_completed WHERE usuario_id = ?
+                                UNION SELECT ruta_id FROM route_feedback WHERE usuario_id = ?)"
+            );
+            $st->bind_param('iii', $uid, $uid, $uid);
+            $st->execute();
+            $c = $st->get_result()->fetch_assoc();
+            if ($c && (int) $c['n'] > 0 && $c['lat'] !== null) {
+                $coords = ['lat' => (float) $c['lat'], 'lon' => (float) $c['lng']];
+                $place  = $this->geocoding->reverseGeocode($coords['lat'], $coords['lon']);
+                $addr   = $place['address'] ?? [];
+                $label  = $addr['village'] ?? $addr['town'] ?? $addr['city'] ?? $addr['municipality'] ?? $addr['county'] ?? 'tu zona habitual';
+                return ['coordinates' => $coords, 'label' => $label, 'why' => 'cerca de las rutas que has hecho o guardado'];
+            }
+        } catch (\Throwable) { /* sin historial */ }
+        return null;
+    }
 
     private function handleGeneralQuery(
         string $query,
@@ -1668,6 +1556,10 @@ PROMPT;
         $types  .= 'i';
 
         try {
+            // Asegurar que existe la fila del usuario antes de actualizar
+            $ins = $this->conn->prepare('INSERT IGNORE INTO user_preferences (usuario_id) VALUES (?)');
+            $ins->bind_param('i', $userId);
+            $ins->execute();
             $stmt = $this->conn->prepare(
                 'UPDATE user_preferences SET ' . implode(', ', $sets) . ' WHERE usuario_id = ?'
             );
@@ -1686,6 +1578,549 @@ PROMPT;
      * Resuelve un nombre de zona/lugar a coordenadas y zona de BD.
      * Orden: tabla locations → Nominatim → detectZoneFromQuery.
      */
+    // =========================================================================
+    // MODO AGENTE (Fase C): Sonnet con herramientas
+    // Se activa con KAHIR_AGENT=1 en .env. Si falla, processQuery sigue con el flujo clásico.
+    // =========================================================================
+
+    private const AGENT_SYSTEM =
+        "Eres Kahir, asistente de montaña. Ayudas a elegir rutas del catálogo de Kahir (España, Andorra y sur de Francia; " .
+        "sobre todo Pirineos y País Vasco), a entender la previsión y a salir seguro.\n\n" .
+        "CÓMO TRABAJAS:\n" .
+        "- Usa las herramientas para obtener datos reales. Nunca inventes rutas, cifras, accesos ni previsiones.\n" .
+        "- Para recomendar rutas llama a buscar_rutas con el lugar y los criterios del usuario. Si pide 'algo más corto', " .
+        "'más fácil' u otra variación, vuelve a buscar con criterios ajustados respecto a las rutas mostradas y excluye las ya vistas.\n" .
+        "- Si el usuario no dice lugar, usa el de la conversación; si no hay, usa perfil_usuario para ver su zona habitual; si tampoco, pregúntale.\n" .
+        "- Si menciona un día ('el sábado', 'mañana'), consulta prevision para ese día y ese lugar o ruta.\n" .
+        "- En esquí de travesía, raquetas o preguntas de aludes, consulta boletin_aludes. Si no está disponible, dilo y remite al boletín oficial; " .
+        "nunca estimes tú un nivel de peligro.\n" .
+        "- 'La primera', 'la segunda'… se refieren a las rutas mostradas (lista en el contexto). Para detalles usa ver_ruta; para comparar, comparar_rutas.\n" .
+        "- Solo usa guardar_salida si el usuario pide expresamente guardar o apuntar una salida.\n" .
+        "- Si una búsqueda tuvo que ampliarse o relajar algo, dilo. Si la zona está fuera de cobertura, dilo y ofrece una alternativa.\n\n" .
+        "- Responde solo a lo que pide el último mensaje. Si pregunta por el tiempo, da la previsión sin volver a buscar rutas; " .
+        "si pregunta por una ruta ya mostrada, no busques otras. No repitas previsiones ni datos que ya diste en la conversación.\n" .
+        "- Si necesitas varias herramientas independientes, llámalas a la vez en el mismo turno.\n\n" .
+        "CÓMO RESPONDES:\n" .
+        "- Breve y útil: como mucho 120 palabras salvo que pidan detalle. Las rutas que devuelven las herramientas se muestran como tarjetas " .
+        "debajo de tu texto: no repitas todos sus datos, di cuál encaja mejor y por qué.\n" .
+        "- No hables de herramientas, del sistema ni de la base de datos. No muestres JSON.\n" .
+        "- Responde en el idioma del usuario.";
+
+    private function agentEnabled(): bool {
+        return (string) (getenv('KAHIR_AGENT') ?: ($_ENV['KAHIR_AGENT'] ?? '')) === '1';
+    }
+
+    /** Definiciones de herramientas (orden fijo para que la caché de prompt funcione). */
+    private function agentToolDefinitions(): array {
+        $acts  = ['hiking', 'ski_touring', 'btt', 'cycle_touring'];
+        $diffs = ['beginner', 'intermediate', 'advanced', 'expert'];
+        return [
+            ['name' => 'buscar_rutas',
+             'description' => 'Busca rutas del catálogo cerca de un lugar (pueblo, valle, monte) o dentro de una región (Bizkaia, Pirineo navarro…). ' .
+                              'Devuelve hasta 5 rutas ordenadas por encaje con el usuario, con distancia al lugar y motivos.',
+             'input_schema' => ['type' => 'object', 'properties' => [
+                 'lugar'          => ['type' => 'string', 'description' => 'Lugar tal como lo dice el usuario. Vacío = el de la conversación.'],
+                 'actividad'      => ['type' => 'string', 'enum' => $acts],
+                 'dificultad'     => ['type' => 'string', 'enum' => $diffs, 'description' => 'Solo si el usuario la pide.'],
+                 'max_desnivel_m' => ['type' => 'number'],
+                 'min_km'         => ['type' => 'number'],
+                 'max_km'         => ['type' => 'number'],
+                 'duracion_horas' => ['type' => 'number', 'description' => 'Duración deseada aproximada.'],
+                 'max_horas'      => ['type' => 'number'],
+                 'con_ninos'      => ['type' => 'boolean'],
+                 'excluir_ids'    => ['type' => 'array', 'items' => ['type' => 'integer'], 'description' => 'Rutas ya mostradas que no repetir.'],
+             ]]],
+            ['name' => 'ver_ruta',
+             'description' => 'Datos completos de una ruta del catálogo: cifras, descripción y punto de inicio.',
+             'input_schema' => ['type' => 'object', 'properties' => ['id' => ['type' => 'integer']], 'required' => ['id']]],
+            ['name' => 'comparar_rutas',
+             'description' => 'Datos de varias rutas para compararlas.',
+             'input_schema' => ['type' => 'object', 'properties' => ['ids' => ['type' => 'array', 'items' => ['type' => 'integer']]], 'required' => ['ids']]],
+            ['name' => 'prevision',
+             'description' => 'Previsión meteorológica diaria (Open-Meteo) para un día concreto en un lugar o en el inicio de una ruta.',
+             'input_schema' => ['type' => 'object', 'properties' => [
+                 'fecha'   => ['type' => 'string', 'description' => "Día en palabras del usuario ('el sábado', 'mañana', 'hoy', '5 de diciembre') o AAAA-MM-DD."],
+                 'lugar'   => ['type' => 'string'],
+                 'ruta_id' => ['type' => 'integer'],
+             ], 'required' => ['fecha']]],
+            ['name' => 'boletin_aludes',
+             'description' => 'Boletín oficial de peligro de aludes (AEMET / Météo-France) y condiciones de montaña de una zona.',
+             'input_schema' => ['type' => 'object', 'properties' => ['lugar' => ['type' => 'string']], 'required' => ['lugar']]],
+            ['name' => 'perfil_usuario',
+             'description' => 'Nivel, actividades, esfuerzo con el que va cómodo y zona habitual del usuario.',
+             'input_schema' => ['type' => 'object', 'properties' => new \stdClass()]],
+            ['name' => 'guardar_salida',
+             'description' => 'Guarda una salida planificada (ruta + fecha + notas) en las listas privadas del usuario. Solo si lo pide expresamente.',
+             'input_schema' => ['type' => 'object', 'properties' => [
+                 'ruta_id' => ['type' => 'integer'],
+                 'fecha'   => ['type' => 'string'],
+                 'notas'   => ['type' => 'string'],
+             ], 'required' => ['ruta_id']]],
+        ];
+    }
+
+    /** Contexto que cambia en cada turno (va después de la parte cacheada del system prompt). */
+    private function agentDynamicContext(array $prefs, array $ctx): string {
+        $levelEs = ['beginner' => 'iniciación', 'intermediate' => 'intermedio', 'advanced' => 'avanzado', 'expert' => 'experto'];
+        $lines = ['Hoy es ' . TripDate::label(date('Y-m-d')) . ' de ' . date('Y') . '.'];
+        $acts = array_map(fn($a) => $this->activityEs($a), (array) ($prefs['preferred_activities'] ?? []));
+        $lines[] = 'Usuario: nivel ' . ($levelEs[$prefs['experience_level'] ?? ''] ?? 'desconocido')
+                 . ($acts ? ', practica ' . implode(', ', $acts) : '')
+                 . (isset($prefs['comfortable_effort']) ? ", va cómodo con esfuerzo MIDE ~{$prefs['comfortable_effort']}/5" : '') . '.';
+        if (!empty($ctx['last_label'])) $lines[] = "Lugar del que se habla: {$ctx['last_label']}.";
+        if (!empty($ctx['last_trip']['label'])) $lines[] = "Fecha de la salida de la que se habla: {$ctx['last_trip']['label']}.";
+        if (!empty($ctx['last_routes'])) {
+            $lines[] = 'Rutas mostradas en esta conversación (en orden):';
+            foreach (array_slice($ctx['last_routes'], 0, 5) as $i => $r) {
+                $lines[] = ($i + 1) . '. [id ' . (int) ($r['id'] ?? 0) . '] ' . $this->routeFactsLine($r);
+            }
+        }
+        return implode("\n", $lines);
+    }
+
+    /** Fila de ruta → datos compactos para la herramienta. */
+    private function agentRouteOut(array $r, array $reasons = []): array {
+        return array_filter([
+            'id'          => (int) $r['id'],
+            'nombre'      => str_replace('_', ' ', (string) ($r['titulo'] ?? '')),
+            'actividad'   => $r['tipo_ruta'] ?? null,
+            'km'          => round((float) ($r['distancia_km'] ?? 0), 1),
+            'desnivel_m'  => (int) ($r['elevacion_ganada'] ?? 0),
+            'horas_mide'  => isset($r['horas_mide']) ? round((float) $r['horas_mide'], 1) : null,
+            'dificultad'  => $r['dificultad'] ?? null,
+            'esfuerzo'    => isset($r['esfuerzo']) ? (int) $r['esfuerzo'] : null,
+            'cota_max_m'  => !empty($r['elevacion_max']) ? (int) $r['elevacion_max'] : null,
+            'km_al_lugar' => isset($r['dist_km']) ? round((float) $r['dist_km'], 1) : null,
+            'motivos'     => $reasons ?: null,
+        ], fn($v) => $v !== null && $v !== '');
+    }
+
+    private function agentFetchRoutes(array $ids): array {
+        $ids = array_values(array_unique(array_filter(array_map('intval', $ids))));
+        if (!$ids) return [];
+        $in = implode(',', array_fill(0, count($ids), '?'));
+        $st = $this->conn->prepare("SELECT * FROM rutas WHERE id IN ($in) AND estado = 'publicada'");
+        $st->bind_param(str_repeat('i', count($ids)), ...$ids);
+        $st->execute();
+        $byId = array_column($st->get_result()->fetch_all(MYSQLI_ASSOC), null, 'id');
+        return array_values(array_filter(array_map(fn($id) => $byId[$id] ?? null, $ids)));
+    }
+
+    /** Ejecuta una herramienta. $state acumula lo que verá el usuario (tarjetas, contexto de sesión). */
+    private function agentRunTool(string $name, array $in, string $userId, array $prefs, array $ctx, array &$state): array {
+        switch ($name) {
+            case 'buscar_rutas': {
+                $lugar = trim((string) ($in['lugar'] ?? ''));
+                $ex = ['zone' => $lugar ?: null];
+                if ($lugar === '' && !empty($ctx['last_coords'])) $ex['inherited_zone'] = true;
+                $geo = $lugar === '' && empty($ctx['last_coords'])
+                    ? (($h = $this->findUserHomeArea($userId, $ctx)) ? ['label' => $h['label'], 'coordinates' => $h['coordinates'], 'bbox' => null, 'radius_km' => 40.0] : [])
+                    : $this->resolveSearchArea($lugar, $ex, $ctx);
+                if (!empty($geo['out_of_bounds'])) return ['fuera_de_cobertura' => true, 'lugar' => $lugar];
+                if (empty($geo['coordinates'])) return ['error' => 'No se ha podido situar el lugar en el mapa. Pide al usuario un pueblo o monte cercano.'];
+
+                $criteria = array_filter([
+                    'activity'        => $in['actividad'] ?? ($this->getFirstPreferredActivity($prefs) ?? 'hiking'),
+                    'difficulty'      => $in['dificultad'] ?? (!empty($in['con_ninos']) ? 'beginner' : null),
+                    'coordinates'     => $geo['coordinates'],
+                    'bbox'            => $geo['bbox'] ?? null,
+                    'radius_km'       => $geo['radius_km'] ?? 20.0,
+                    'place_label'     => $geo['label'],
+                    'max_elevation'   => $in['max_desnivel_m'] ?? (!empty($in['con_ninos']) ? 500 : null),
+                    'min_distance'    => $in['min_km'] ?? null,
+                    'max_distance'    => $in['max_km'] ?? null,
+                    'target_duration' => $in['duracion_horas'] ?? null,
+                    'max_duration'    => $in['max_horas'] ?? (!empty($in['con_ninos']) ? 3.5 : null),
+                    'exclude_ids'     => $in['excluir_ids'] ?? null,
+                ], fn($v) => $v !== null);
+
+                $notes = [];
+                $results = $this->recommender->getRecommendations($criteria, $prefs, MAX_ROUTE_SUGGESTIONS);
+                if (count($results) < 3 && !empty($criteria['difficulty'])) {
+                    $more = $this->recommender->getRecommendations(array_diff_key($criteria, ['difficulty' => 1]), $prefs, MAX_ROUTE_SUGGESTIONS);
+                    $ids = array_map(fn($r) => (int) $r['route']['id'], $results);
+                    foreach ($more as $r) {
+                        if (count($results) >= MAX_ROUTE_SUGGESTIONS) break;
+                        if (!in_array((int) $r['route']['id'], $ids, true)) $results[] = $r;
+                    }
+                    if (count($more)) $notes[] = 'Pocas rutas de esa dificultad: se añaden otras de distinto nivel.';
+                }
+                if (count($results) < 3 && empty($criteria['bbox'])) {
+                    foreach ([40.0, 70.0] as $w) {
+                        if ($w <= $criteria['radius_km']) continue;
+                        $wide = $this->recommender->getRecommendations(array_merge($criteria, ['radius_km' => $w]), $prefs, MAX_ROUTE_SUGGESTIONS);
+                        if (count($wide) > count($results)) {
+                            $results = $wide;
+                            $criteria['radius_km'] = $w;
+                            $notes = ["Búsqueda ampliada a {$w} km de {$geo['label']}."];
+                        }
+                        if (count($results) >= 3) break;
+                    }
+                }
+                $state['routes']  = array_map(fn($r) => $r['route'], $results);
+                $state['reasons'] = array_map(fn($r) => $r['reasons'], $results);
+                $state['type']    = 'route_suggestions';
+                $state['extracted']['intent']          = 'route_request';
+                $state['extracted']['resolved_coords'] = $geo['coordinates'];
+                $state['extracted']['resolved_label']  = $geo['label'];
+                $state['extracted']['last_search']     = $criteria;
+                $state['extracted']['last_candidate_ids'] = $this->recommender->getLastCandidateIds();
+                return [
+                    'lugar'  => $geo['label'],
+                    'busqueda' => !empty($criteria['bbox']) ? 'dentro de la región' : "radio {$criteria['radius_km']} km",
+                    'notas'  => $notes ?: null,
+                    'aviso_seguridad' => in_array($criteria['activity'], ['ski_touring', 'snowshoeing'], true)
+                        ? 'Menciona en una frase que hay que consultar el boletín oficial de aludes antes de salir (o usa boletin_aludes).'
+                        : null,
+                    'rutas'  => array_map(fn($r) => $this->agentRouteOut($r['route'], $r['reasons']), $results),
+                ];
+            }
+
+            case 'ver_ruta': {
+                $r = $this->agentFetchRoutes([(int) ($in['id'] ?? 0)])[0] ?? null;
+                if (!$r) return ['error' => 'Esa ruta no existe en el catálogo.'];
+                if (empty($state['routes'])) {
+                    $state['route'] = $r;
+                    $state['type']  = 'route_detail';
+                }
+                $out = $this->agentRouteOut($r);
+                $desc = trim(strip_tags((string) ($r['descripcion'] ?? '')));
+                $out['descripcion'] = $desc !== '' ? mb_substr($desc, 0, 700) : 'Sin descripción en el catálogo.';
+                $out['inicio'] = ['lat' => (float) $r['start_lat'], 'lon' => (float) $r['start_lng']];
+                return $out;
+            }
+
+            case 'comparar_rutas': {
+                $rows = $this->agentFetchRoutes(array_slice((array) ($in['ids'] ?? []), 0, 5));
+                if (empty($state['routes']) && $rows) {
+                    $state['routes'] = $rows;
+                    $state['reasons'] = [];
+                    $state['type'] = 'route_suggestions';
+                    $state['extracted']['intent'] = 'route_followup';
+                    $state['extracted']['followup_subtype'] = 'conjunto';
+                }
+                return ['rutas' => array_map(fn($r) => $this->agentRouteOut($r), $rows)];
+            }
+
+            case 'prevision': {
+                $fecha = trim((string) ($in['fecha'] ?? 'hoy'));
+                $trip = preg_match('/^\d{4}-\d{2}-\d{2}$/', $fecha)
+                    ? ['dates' => [$fecha], 'label' => TripDate::label($fecha), 'days_ahead' => (int) (new \DateTimeImmutable('today'))->diff(new \DateTimeImmutable($fecha))->days]
+                    : (TripDate::resolve($fecha) ?? TripDate::resolve('hoy'));
+                $coords = null; $label = null;
+                if (!empty($in['ruta_id']) && ($r = $this->agentFetchRoutes([(int) $in['ruta_id']])[0] ?? null)) {
+                    $coords = ['lat' => (float) $r['start_lat'], 'lon' => (float) $r['start_lng']];
+                    $label  = 'inicio de «' . str_replace('_', ' ', $r['titulo']) . '»';
+                } else {
+                    $lugar = trim((string) ($in['lugar'] ?? ''));
+                    $ex = ['zone' => $lugar ?: null, 'inherited_zone' => $lugar === ''];
+                    $geo = $this->resolveSearchArea($lugar, $ex, $ctx);
+                    $coords = $geo['coordinates'] ?? null;
+                    $label  = $geo['label'] ?? $lugar;
+                }
+                if (!$coords) return ['error' => 'No sé para qué lugar consultar la previsión.'];
+                $days = $this->weather->getForecastForDates((float) $coords['lat'], (float) $coords['lon'], $trip['dates']);
+                $state['extracted']['trip'] = $trip;
+                if (empty($state['routes'])) {
+                    $state['type'] = 'weather_info';
+                    $state['extracted']['intent'] = $state['extracted']['intent'] === 'general' ? 'weather_query' : $state['extracted']['intent'];
+                }
+                if (!$days) return ['lugar' => $label, 'dia' => $trip['label'], 'disponible' => false,
+                                    'motivo' => 'Aún no hay previsión para esa fecha (horizonte de unos 16 días).'];
+                return [
+                    'lugar' => $label, 'dia' => $trip['label'], 'dias_vista' => $trip['days_ahead'],
+                    'fiabilidad' => $trip['days_ahead'] >= 4 ? 'orientativa' : 'buena',
+                    'prevision' => array_map(fn($d) => [
+                        'dia' => TripDate::label($d['date']), 'resumen' => $d['description'],
+                        'temp_min_c' => $d['temp_min'], 'temp_max_c' => $d['temp_max'],
+                        'lluvia_mm' => $d['precipitation'], 'prob_lluvia' => $d['precip_probability'],
+                        'nieve_cm' => $d['snowfall'], 'viento_max_kmh' => $d['windspeed_max'], 'rachas_kmh' => $d['windgusts_max'],
+                    ], $days),
+                ];
+            }
+
+            case 'boletin_aludes': {
+                $lugar = trim((string) ($in['lugar'] ?? ''));
+                $geo = $this->resolveSearchArea($lugar, ['zone' => $lugar ?: null, 'inherited_zone' => $lugar === ''], $ctx);
+                if (empty($geo['coordinates'])) return ['error' => 'Zona no reconocida.'];
+                $c = $geo['coordinates'];
+                $rep = $this->mountainConditions->buildConditionsReport(
+                    (float) $c['lat'], (float) $c['lon'], $this->coordsToDbZone((float) $c['lat'], (float) $c['lon']),
+                    'ski_touring', 1800, $this->weather->getPrecip3d((float) $c['lat'], (float) $c['lon'])
+                );
+                return array_filter([
+                    'zona' => $geo['label'],
+                    'boletin_disponible' => $rep['avalanche_level'] !== null,
+                    'nivel_peligro' => $rep['avalanche_level'],
+                    'fuente' => $rep['avalanche_source'],
+                    'aviso' => $rep['avalanche_level'] === null
+                        ? 'No se ha podido consultar el boletín oficial. No des un nivel: remite al boletín de AEMET (Pirineo navarro-aragonés / catalán), ICGC o Météo-France.'
+                        : null,
+                    'contexto' => $rep['narrative_context'] ?: null,
+                ], fn($v) => $v !== null && $v !== '');
+            }
+
+            case 'perfil_usuario': {
+                $home = $this->findUserHomeArea($userId, $ctx);
+                return array_filter([
+                    'nivel' => $prefs['experience_level'] ?? null,
+                    'actividades' => $prefs['preferred_activities'] ?? [],
+                    'esfuerzo_comodo' => $prefs['comfortable_effort'] ?? null,
+                    'zona_habitual' => $home['label'] ?? null,
+                ], fn($v) => $v !== null && $v !== []);
+            }
+
+            case 'guardar_salida': {
+                $uid = $this->resolveUserId($userId);
+                $r = $this->agentFetchRoutes([(int) ($in['ruta_id'] ?? 0)])[0] ?? null;
+                if (!$uid || !$r) return ['error' => 'No se ha podido guardar: ruta o usuario no válidos.'];
+                $trip = !empty($in['fecha']) ? TripDate::resolve((string) $in['fecha']) : null;
+                $nombre = mb_substr('Salida' . ($trip ? ' ' . $trip['label'] : '') . ' · ' . str_replace('_', ' ', $r['titulo']), 0, 100);
+                $desc = trim((string) ($in['notas'] ?? ''));
+                $st = $this->conn->prepare("INSERT INTO user_lists (usuario_id, nombre, descripcion, privada) VALUES (?, ?, ?, 1)");
+                $st->bind_param('iss', $uid, $nombre, $desc);
+                $st->execute();
+                $listId = (int) $this->conn->insert_id;
+                $rid = (int) $r['id'];
+                $st = $this->conn->prepare("INSERT INTO user_list_routes (lista_id, ruta_id) VALUES (?, ?)");
+                $st->bind_param('ii', $listId, $rid);
+                $st->execute();
+                return ['guardada' => true, 'lista' => $nombre, 'donde' => 'Mi cuenta → Mis listas'];
+            }
+        }
+        return ['error' => "Herramienta desconocida: $name"];
+    }
+
+    /**
+     * Turno completo en modo agente. Devuelve la respuesta en el mismo formato que el flujo clásico
+     * y deja en $extracted lo necesario para el contexto de sesión.
+     */
+    private function handleAgentQuery(string $query, string $userId, array $prefs, array $history, array $ctx, array &$extracted): array {
+        $system = [
+            ['type' => 'text', 'text' => self::AGENT_SYSTEM, 'cache_control' => ['type' => 'ephemeral']],
+            ['type' => 'text', 'text' => $this->agentDynamicContext($prefs, $ctx)],
+        ];
+        $messages = [];
+        foreach (array_slice($history, -6) as $m) {
+            if (!empty($m['content'])) {
+                $messages[] = ['role' => $m['role'] === 'assistant' ? 'assistant' : 'user', 'content' => (string) $m['content']];
+            }
+        }
+        while ($messages && $messages[0]['role'] !== 'user') array_shift($messages);
+        $messages[] = ['role' => 'user', 'content' => $query];
+
+        $state = ['type' => 'general', 'routes' => [], 'reasons' => [], 'extracted' => ['intent' => 'general']];
+        $tools = $this->agentToolDefinitions();
+        $text  = '';
+        for ($i = 0; $i < 5; $i++) {
+            $resp = $this->claude->callWithTools($messages, $system, $tools, 1000);
+            $messages[] = ['role' => 'assistant', 'content' => $resp['content'] ?? []];
+            if (($resp['stop_reason'] ?? '') !== 'tool_use') {
+                foreach (($resp['content'] ?? []) as $b) if (($b['type'] ?? '') === 'text') $text .= $b['text'];
+                break;
+            }
+            $results = [];
+            foreach (($resp['content'] ?? []) as $b) {
+                if (($b['type'] ?? '') !== 'tool_use') continue;
+                try {
+                    $out = $this->agentRunTool($b['name'], (array) ($b['input'] ?? []), $userId, $prefs, $ctx, $state);
+                    $results[] = ['type' => 'tool_result', 'tool_use_id' => $b['id'],
+                                  'content' => json_encode($out, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES)];
+                } catch (\Throwable $e) {
+                    $this->logger->warning('Herramienta del agente falló', ['tool' => $b['name'], 'error' => $e->getMessage()]);
+                    $results[] = ['type' => 'tool_result', 'tool_use_id' => $b['id'], 'is_error' => true,
+                                  'content' => 'La herramienta ha fallado; continúa sin esos datos y dilo si es relevante.'];
+                }
+            }
+            $messages[] = ['role' => 'user', 'content' => $results];
+        }
+        if (trim($text) === '') {
+            throw new AIException('El agente no produjo respuesta', 'AGENT_EMPTY');
+        }
+
+        // Si vuelve a mostrar exactamente las mismas rutas que ya estaban en pantalla, no se repiten las tarjetas
+        $ids = array_map(fn($r) => (int) $r['id'], $state['routes']);
+        if ($ids && $ids === array_map('intval', $ctx['active_routes'] ?? [])) {
+            $state['routes'] = [];
+            if ($state['type'] === 'route_suggestions') $state['type'] = !empty($state['extracted']['trip']) ? 'weather_info' : 'general';
+            unset($state['extracted']['last_search'], $state['extracted']['last_candidate_ids']);
+            if (($state['extracted']['intent'] ?? '') === 'route_request') $state['extracted']['intent'] = 'route_followup';
+        }
+
+        $extracted = array_merge($extracted, $state['extracted']);
+        $out = ['type' => $state['type'], 'content' => trim($text), 'agent' => true];
+        if ($state['routes']) {
+            $out['type']    = 'route_suggestions';
+            $out['routes']  = $state['routes'];
+            $out['reasons'] = $state['reasons'];
+        } elseif (!empty($state['route'])) {
+            $out['route'] = $state['route'];
+        }
+        return $out;
+    }
+
+    // =========================================================================
+    // ÁREA DE BÚSQUEDA
+    // =========================================================================
+
+    /**
+     * Regiones con nombre propio que Nominatim no resuelve bien (o resuelve a un punto).
+     * Caja [sur, norte, oeste, este]. Claves en minúsculas y sin acentos.
+     */
+    private const REGIONS = [
+        'pirineo navarro'   => ['label' => 'el Pirineo navarro',   'bbox' => [42.75, 43.15, -1.75, -0.72]],
+        'pirineo aragones'  => ['label' => 'el Pirineo aragonés',  'bbox' => [42.35, 42.95, -1.00, 0.78]],
+        'pirineo catalan'   => ['label' => 'el Pirineo catalán',   'bbox' => [42.10, 42.90, 0.65, 3.30]],
+        'pirineo de lleida' => ['label' => 'el Pirineo de Lleida', 'bbox' => [42.20, 42.90, 0.65, 1.95]],
+        'pirineo de huesca' => ['label' => 'el Pirineo de Huesca', 'bbox' => [42.35, 42.95, -1.00, 0.78]],
+        'pirineo frances'   => ['label' => 'el Pirineo francés',   'bbox' => [42.55, 43.35, -1.80, 3.10]],
+        'bizkaia'           => ['label' => 'Bizkaia',              'bbox' => [43.00, 43.46, -3.45, -2.41]],
+        'vizcaya'           => ['label' => 'Bizkaia',              'bbox' => [43.00, 43.46, -3.45, -2.41]],
+        'gipuzkoa'          => ['label' => 'Gipuzkoa',             'bbox' => [42.89, 43.40, -2.61, -1.72]],
+        'guipuzcoa'         => ['label' => 'Gipuzkoa',             'bbox' => [42.89, 43.40, -2.61, -1.72]],
+        'araba'             => ['label' => 'Araba',                'bbox' => [42.47, 43.22, -3.29, -2.22]],
+        'alava'             => ['label' => 'Araba',                'bbox' => [42.47, 43.22, -3.29, -2.22]],
+        'euskadi'           => ['label' => 'Euskadi',              'bbox' => [42.47, 43.46, -3.45, -1.72]],
+        'pais vasco'        => ['label' => 'Euskadi',              'bbox' => [42.47, 43.46, -3.45, -1.72]],
+        'navarra'           => ['label' => 'Navarra',              'bbox' => [41.91, 43.32, -2.50, -0.72]],
+        'huesca'            => ['label' => 'Huesca',               'bbox' => [41.35, 42.93, -0.95, 0.77]],
+        'picos de europa'   => ['label' => 'Picos de Europa',      'bbox' => [43.08, 43.32, -5.10, -4.50]],
+        'sierra nevada'     => ['label' => 'Sierra Nevada',        'bbox' => [36.90, 37.20, -3.60, -2.90]],
+        'guadarrama'        => ['label' => 'la Sierra de Guadarrama', 'bbox' => [40.60, 41.05, -4.30, -3.65]],
+        'gredos'            => ['label' => 'la Sierra de Gredos',  'bbox' => [40.15, 40.45, -5.65, -4.75]],
+    ];
+
+    /** Tipos de Nominatim que son regiones administrativas (se busca dentro de su caja). */
+    private const REGION_KINDS = ['state', 'province', 'county', 'region', 'state_district', 'country'];
+
+    /**
+     * Decide dónde buscar: devuelve ['label', 'coordinates', 'bbox'|null, 'radius_km'] o ['out_of_bounds' => true].
+     */
+    private function resolveSearchArea(string $query, array $extracted, array $ctx): array {
+        $norm = $this->normalizeText($query);
+        $zone = $extracted['zone'] ?? null;
+
+        // 1. Región con nombre propio en el mensaje o en la zona extraída
+        $keys = array_keys(self::REGIONS);
+        usort($keys, fn($a, $b) => strlen($b) - strlen($a));
+        foreach ([$norm, $zone ? $this->normalizeText($zone) : ''] as $text) {
+            if ($text === '') continue;
+            foreach ($keys as $key) {
+                if (preg_match('/\b' . preg_quote($key, '/') . '\b/u', $text)) {
+                    return $this->areaFromBbox(self::REGIONS[$key]['bbox'], self::REGIONS[$key]['label']);
+                }
+            }
+        }
+
+        // 0. Zona claramente fuera de cobertura mencionada en el mensaje (Alpes, Dolomitas…)
+        if ($this->isZoneOutOfCoverage($query)) return ['out_of_bounds' => true, 'label' => $zone ?? ''];
+
+        // 2. Zona heredada de la conversación ("¿y algo más corto?", "allí")
+        if (!empty($extracted['inherited_zone']) && !empty($ctx['last_coords'])) {
+            return [
+                'label'       => $ctx['last_label'] ?? ($zone ?? 'la zona'),
+                'coordinates' => $ctx['last_coords'],
+                'bbox'        => $ctx['last_bbox'] ?? null,
+                'radius_km'   => (float) ($ctx['last_radius'] ?? 20),
+            ];
+        }
+
+        // 3. Topónimo conocido o zona libre → geocodificar
+        $specific = $this->findSpecificLocationInQuery($query);
+        if ($specific && isset(self::PLACE_COORDS[$specific['key']])) {
+            [$lat, $lon] = self::PLACE_COORDS[$specific['key']];
+            return [
+                'label'       => $specific['display_name'],
+                'coordinates' => ['lat' => $lat, 'lon' => $lon],
+                'bbox'        => null,
+                'radius_km'   => 20.0,
+            ];
+        }
+        $name     = $specific['geocode'] ?? $zone;
+        if (empty($name)) return [];
+        if ($this->isZoneOutOfCoverage($zone ?? $name)) return ['out_of_bounds' => true, 'label' => $zone ?? $name];
+
+        $loc = $this->resolveZoneName($name);
+        if (!empty($loc['out_of_bounds'])) return ['out_of_bounds' => true, 'label' => $zone ?? $name];
+        if (empty($loc['coordinates'])) return ['label' => $zone ?? $name];
+
+        $label  = $specific['display_name'] ?? ($zone ?: ($loc['location'] ?? $name));
+        $radius = 20.0;
+        $bbox   = $loc['bbox'] ?? null;
+        if ($bbox) {
+            $diag = $this->haversineKm($bbox[0], $bbox[2], $bbox[1], $bbox[3]);
+            if (in_array($loc['kind'] ?? '', self::REGION_KINDS, true) && $diag > 35) {
+                $area = $this->areaFromBbox($bbox, $label);
+                $area['coordinates'] = $loc['coordinates'];
+                return $area;
+            }
+            // Valles, sierras o macizos: radio según su tamaño
+            $radius = max(20.0, min(35.0, $diag / 2));
+        }
+        return [
+            'label'       => $label,
+            'coordinates' => $loc['coordinates'],
+            'bbox'        => null,
+            'radius_km'   => $radius,
+        ];
+    }
+
+    private function areaFromBbox(array $bbox, string $label): array {
+        [$s, $n, $w, $e] = $bbox;
+        return [
+            'label'       => $label,
+            'coordinates' => ['lat' => ($s + $n) / 2, 'lon' => ($w + $e) / 2],
+            'bbox'        => $bbox,
+            'radius_km'   => round($this->haversineKm($s, $w, $n, $e) / 2, 1),
+        ];
+    }
+
+    private function haversineKm(float $lat1, float $lon1, float $lat2, float $lon2): float {
+        $dLat = deg2rad($lat2 - $lat1);
+        $dLon = deg2rad($lon2 - $lon1);
+        $a = sin($dLat / 2) ** 2 + cos(deg2rad($lat1)) * cos(deg2rad($lat2)) * sin($dLon / 2) ** 2;
+        return 12742 * asin(min(1, sqrt($a)));
+    }
+
+    private function normalizeText(string $text): string {
+        $t = mb_strtolower($text, 'UTF-8');
+        return strtr($t, [
+            'á' => 'a', 'é' => 'e', 'í' => 'i', 'ó' => 'o', 'ú' => 'u', 'ü' => 'u', 'ñ' => 'n',
+            'à' => 'a', 'è' => 'e', 'ò' => 'o', 'ç' => 'c',
+        ]);
+    }
+
+    /** Respuesta honesta cuando la zona está fuera del catálogo. */
+    private function makeOutOfCoverageResponse(string $query, string $place, array $history, array $prefs): array {
+        $text = $this->askClaude(
+            "El usuario pregunta: \"$query\"\n\n" .
+            "La zona" . ($place ? " «{$place}»" : '') . " está fuera de la cobertura de Kahir: el catálogo tiene rutas de España, " .
+            "Andorra y el sur de Francia (sobre todo Pirineos y País Vasco). Dilo claramente en 1–2 frases, sin inventar rutas, " .
+            "y ofrece buscar algo parecido dentro de la cobertura (p. ej. alta montaña en el Pirineo).",
+            $history, $prefs, 'general'
+        );
+        return ['type' => 'general', 'content' => $text, 'out_of_coverage' => true];
+    }
+
+    private function activityEs(?string $activity): string {
+        return match ($activity) {
+            'ski_touring'   => 'esquí de travesía',
+            'btt'           => 'BTT',
+            'cycle_touring' => 'cicloturismo',
+            'climbing'      => 'escalada',
+            'snowshoeing'   => 'raquetas',
+            default         => 'senderismo',
+        };
+    }
+
+    /** Pide a Sonnet que responda en el idioma del usuario si no escribe en español. */
+    private function languageInstruction(array $extracted): string {
+        $lang = $extracted['language'] ?? 'es';
+        if ($lang === 'es') return '';
+        $names = ['en' => 'inglés', 'eu' => 'euskera', 'fr' => 'francés', 'ca' => 'catalán', 'de' => 'alemán', 'it' => 'italiano', 'pt' => 'portugués'];
+        return "\nResponde en " . ($names[$lang] ?? "el idioma del usuario ($lang)") . '.';
+    }
+
     private function resolveZoneName(string $zoneName): array {
         $result = [];
 
@@ -1723,7 +2158,9 @@ PROMPT;
             } else {
                 return [
                     'location'             => $zoneName,
-                    'coordinates'          => $coords,
+                    'coordinates'          => ['lat' => $coords['lat'], 'lon' => $coords['lon']],
+                    'bbox'                 => $coords['bbox'] ?? null,
+                    'kind'                 => $coords['kind'] ?? null,
                     'zone'                 => $this->coordsToDbZone((float)$coords['lat'], (float)$coords['lon']),
                     'is_specific_location' => true,   // lugar geocodificado → modo proximidad
                 ];
@@ -1752,7 +2189,9 @@ PROMPT;
             }
             return [
                 'location'             => $zoneName,
-                'coordinates'          => $coordsLoose,
+                'coordinates'          => ['lat' => $coordsLoose['lat'], 'lon' => $coordsLoose['lon']],
+                'bbox'                 => $coordsLoose['bbox'] ?? null,
+                'kind'                 => $coordsLoose['kind'] ?? null,
                 'zone'                 => $this->coordsToDbZone((float)$coordsLoose['lat'], (float)$coordsLoose['lon']),
                 'is_specific_location' => true,
             ];
@@ -1794,6 +2233,7 @@ PROMPT;
                 // Reconstruir el nombre de display con capitalización original
                 $display = implode(' ', array_map('ucfirst', explode(' ', $keyword)));
                 return [
+                    'key'          => $keyword,
                     'display_name' => $display,
                     'zone'         => $data['zone'],
                     'geocode'      => $data['geocode'],
@@ -1942,7 +2382,7 @@ PROMPT;
             $day = $days[$i] ?? null;
             if (!is_array($day)) continue;
 
-            $date  = $day['date']          ?? "Día " . ($i + 1);
+            $date  = !empty($day['date']) ? TripDate::label($day['date']) : "Día " . ($i + 1);
             $tmax  = $day['temp_max']      ?? '?';
             $tmin  = $day['temp_min']      ?? '?';
             $rain  = $day['precipitation'] ?? 0;
@@ -2046,8 +2486,7 @@ PROMPT;
         ], array_slice($history, -4));   // últimos 4 mensajes
 
         $response = $this->claude->processQuery($userPrompt, $context, $intent);
-        return $response['content']
-            ?? (is_array($response) ? json_encode($response, JSON_UNESCAPED_UNICODE) : (string)$response);
+        return (string) ($response['content'] ?? '');
     }
 
     /**
@@ -2086,18 +2525,35 @@ PROMPT;
         }
     }
 
-    private function saveInteraction(string $userId, string $query, array $response, string $intent): void {
+    /**
+     * Aprende del chat: cada lugar donde el usuario busca rutas se guarda en user_zones
+     * (frecuencia + última vez), que luego usa la recomendación personalizada.
+     * (La conversación ya queda en chat_messages; user_interactions es solo para rutas.)
+     */
+    private function saveInteraction(string $userId, string $query, array $response, string $intent, array $extracted = []): void {
+        if (empty($extracted['resolved_coords']) || empty($extracted['resolved_label'])) return;
+        if (!in_array($intent, ['route_request', 'personalized_recommendation'], true)) return;
         try {
-            $numericId = $this->resolveUserId($userId);
-            if (!$numericId) return;
-            $stmt = $this->conn->prepare(
-                "INSERT INTO user_interactions (usuario_id, ruta_id, tipo)
-                 VALUES (?, NULL, ?)"
-            );
-            $stmt->bind_param("is", $numericId, $intent);
-            $stmt->execute();
-        } catch (\Exception $e) {
-            $this->logger->error('saveInteraction error', ['error' => $e->getMessage()]);
+            $uid = $this->resolveUserId($userId);
+            if (!$uid) return;
+            $name = mb_substr((string) $extracted['resolved_label'], 0, 100);
+            $lat  = (float) $extracted['resolved_coords']['lat'];
+            $lng  = (float) $extracted['resolved_coords']['lon'];
+            $st = $this->conn->prepare("SELECT id FROM user_zones WHERE usuario_id = ? AND nombre = ? LIMIT 1");
+            $st->bind_param('is', $uid, $name);
+            $st->execute();
+            $row = $st->get_result()->fetch_assoc();
+            if ($row) {
+                $st = $this->conn->prepare("UPDATE user_zones SET frecuencia = frecuencia + 1, ultima_vez = NOW(), lat = ?, lng = ? WHERE id = ?");
+                $st->bind_param('ddi', $lat, $lng, $row['id']);
+            } else {
+                $radius = (int) round((float) ($extracted['last_search']['radius_km'] ?? 20));
+                $st = $this->conn->prepare("INSERT INTO user_zones (usuario_id, nombre, lat, lng, radio_km, frecuencia, ultima_vez) VALUES (?, ?, ?, ?, ?, 1, NOW())");
+                $st->bind_param('isddi', $uid, $name, $lat, $lng, $radius);
+            }
+            $st->execute();
+        } catch (\Throwable $e) {
+            $this->logger->warning('saveInteraction error', ['error' => $e->getMessage()]);
         }
     }
 
@@ -2378,39 +2834,36 @@ PROMPT;
         }
     }
 
+    /** Lista compacta de rutas con los datos reales del catálogo (para Sonnet). */
     private function formatRoutesForPrompt(array $results): string {
         $lines = [];
         foreach (array_slice($results, 0, 5) as $i => $r) {
-            $route   = $r['route'];
-            $lines[] = sprintf(
-                "%d. **%s** | %s | %s | %.1f km | %d h | +%d m | %s",
-                $i + 1,
-                $route['title']      ?? ($route['titulo'] ?? ($route['nombre'] ?? 'Sin nombre')),
-                $route['difficulty'] ?? ($route['dificultad'] ?? '-'),
-                $route['tipo_ruta']  ?? '-',
-                (float)($route['distance'] ?? ($route['distancia_km'] ?? ($route['length'] ?? 0))),
-                (int)($route['duration']   ?? ($route['duracion_horas'] ?? 0)),
-                (int)($route['elevation']  ?? ($route['elevacion_ganada'] ?? 0)),
-                $route['location']   ?? ($route['ubicacion'] ?? '-')
-            );
+            $lines[] = ($i + 1) . '. ' . $this->routeFactsLine($r['route'] ?? $r, $r['reasons'] ?? []);
         }
         return implode("\n", $lines);
     }
 
-    /**
-     * Extrae solo los campos que Sonnet necesita para generar la frase intro.
-     * Evita pasar el objeto completo de BD con todos sus campos (imagen, coords, etc.)
-     */
-    private function trimRouteForPrompt(array $route): array {
-        return [
-            'title'      => $route['title']      ?? ($route['titulo'] ?? ($route['nombre'] ?? 'Sin nombre')),
-            'difficulty' => $route['difficulty']  ?? '-',
-            'tipo_ruta'  => $route['tipo_ruta']   ?? '-',
-            'distance'   => (float)($route['length'] ?? ($route['distance'] ?? 0)),
-            'duration'   => (int)($route['duration']  ?? 0),
-            'elevation'  => (int)($route['elevation']  ?? 0),
-            'location'   => $route['location']    ?? '-',
+    /** Una línea con los datos de una ruta: nombre, actividad, km, desnivel, horas, dificultad, esfuerzo. */
+    private function routeFactsLine(array $route, array $reasons = []): string {
+        $name = $route['titulo'] ?? $route['title'] ?? 'Sin nombre';
+        $km   = (float) ($route['distancia_km'] ?? $route['distance'] ?? 0);
+        $up   = (int) ($route['elevacion_ganada'] ?? $route['elevation'] ?? 0);
+        $h    = (float) ($route['horas_mide'] ?? $route['duracion_horas'] ?? $route['duration'] ?? 0);
+        $parts = [
+            "«{$name}»",
+            $this->activityEs($route['tipo_ruta'] ?? null),
+            str_replace('.', ',', (string) round($km, 1)) . ' km',
+            "+{$up} m",
+            $h > 0 ? str_replace('.', ',', (string) round($h, 1)) . ' h (MIDE)' : null,
+            'dificultad ' . ($route['dificultad'] ?? $route['difficulty'] ?? '-'),
+            isset($route['esfuerzo']) ? "esfuerzo {$route['esfuerzo']}/5" : null,
+            !empty($route['elevacion_max']) ? 'cota máx. ' . (int) $route['elevacion_max'] . ' m' : null,
+            isset($route['dist_km']) ? 'sale a ' . round((float) $route['dist_km']) . ' km del lugar' : null,
+            isset($route['drive_time_minutes']) ? (int) $route['drive_time_minutes'] . ' min en coche' : null,
         ];
+        $line = implode(' · ', array_filter($parts));
+        if ($reasons) $line .= ' — encaja porque: ' . implode('; ', $reasons);
+        return $line;
     }
 
     // =========================================================================
@@ -2497,6 +2950,15 @@ PROMPT;
         $isConjunto = false;
         $isFilter   = false;
         $ordinalIdx = null;
+
+        // "Compara las dos primeras" / "¿cuál es la más corta?" → conjunto (aunque lleve un ordinal)
+        if (preg_match('/\bcompar|\bdiferencia|\bcu[aá]l\b|\bentre\s+(ellas|ambas|las)/u', $q)) {
+            return ['intent' => 'route_followup', 'followup_subtype' => 'conjunto', 'ordinal_index' => null];
+        }
+        // "¿Y algo más corto?", "alguna con menos desnivel" → nueva búsqueda relativa a las mostradas
+        if (preg_match('/\b(mas|menos)\s+(cort|larg|facil|suave|dur|dificil|exigente|desnivel|distancia|km|horas|tiempo|cerca)/u', $q)) {
+            return ['intent' => 'route_followup', 'followup_subtype' => 'filter', 'ordinal_index' => null];
+        }
 
         foreach ($ordinalPatterns as $i => $pat) {
             if (preg_match($pat, $q)) {
@@ -2638,6 +3100,12 @@ PROMPT;
                     'content' => 'No tengo los datos de las rutas anteriores disponibles. ¿Quieres que busque nuevas rutas?'];
         }
 
+        $qn = $this->normalizeText($query);
+        if (preg_match('/\b(dos|2)\s+primer|\bprimer[ao]s?\s+(dos|2)\b|\bprimera\s+y\s+(la\s+)?segunda/u', $qn)) {
+            $lastRoutes = array_slice($lastRoutes, 0, 2);
+        } elseif (preg_match('/\b(tres|3)\s+primer|\bprimer[ao]s?\s+(tres|3)\b/u', $qn)) {
+            $lastRoutes = array_slice($lastRoutes, 0, 3);
+        }
         $blocks = [];
         foreach (array_slice($lastRoutes, 0, 5) as $i => $route) {
             $blocks[] = "Ruta " . ($i + 1) . ":\n" . $this->buildRouteDataBlock($route, 'compact');
@@ -2670,6 +3138,40 @@ PROMPT;
         array  $ctx
     ): array {
         $candidateIds = $ctx['last_candidate_ids'] ?? [];
+        $lastRoutes   = $ctx['last_routes'] ?? [];
+        $filters      = $this->parseFilterCriteria($query, $lastRoutes);
+
+        // Con la búsqueda anterior guardada: repetirla con el filtro (no solo sobre el pool viejo)
+        if (!empty($ctx['last_search']) && !empty($filters)) {
+            $criteria = array_merge($ctx['last_search'], $filters);
+            if (!empty($filters['difficulty'])) unset($criteria['difficulty_in']);
+            $results = $this->recommender->getRecommendations($criteria, $prefs, MAX_ROUTE_SUGGESTIONS);
+            if (count($results) < 2 && empty($criteria['bbox'])) {
+                $criteria['radius_km'] = max(40.0, (float) ($criteria['radius_km'] ?? 20) * 2);
+                $results = $this->recommender->getRecommendations($criteria, $prefs, MAX_ROUTE_SUGGESTIONS);
+            }
+            if (empty($results)) {
+                $text = $this->askClaude(
+                    "El usuario pidió: \"{$query}\" sobre las rutas anteriores, pero no hay ninguna en el catálogo que lo cumpla cerca. " .
+                    "Dilo en una frase y sugiere qué relajar.",
+                    $history, $prefs, 'route_request'
+                );
+                return ['type' => 'general', 'content' => $text];
+            }
+            $text = $this->askClaude(
+                "El usuario pidió: \"{$query}\" respecto a las rutas que le mostré.\n\n" .
+                "Nuevas rutas (datos reales):\n" . $this->formatRoutesForPrompt($results) . "\n\n" .
+                "En 1–2 frases presenta estas opciones y di cuál encaja mejor, usando SOLO estos datos.",
+                $history, $prefs, 'route_request'
+            );
+            return [
+                'type'    => 'route_suggestions',
+                'content' => $text,
+                'routes'  => array_map(fn($r) => $r['route'], $results),
+                'reasons' => array_map(fn($r) => $r['reasons'], $results),
+                'search_criteria' => $criteria,
+            ];
+        }
 
         // Sin pool de candidatos → usar las rutas activas directamente como conjunto
         if (empty($candidateIds)) {
@@ -2680,7 +3182,6 @@ PROMPT;
             );
         }
 
-        $filters = $this->parseFilterCriteria($query);
         $routes  = $this->fetchRoutesWithFilter($candidateIds, $filters, MAX_ROUTE_SUGGESTIONS);
 
         if (empty($routes)) {
@@ -2728,11 +3229,29 @@ PROMPT;
     /**
      * Extrae criterios de filtro estructurados desde texto libre del usuario.
      */
-    private function parseFilterCriteria(string $query): array
+    private function parseFilterCriteria(string $query, array $shown = []): array
     {
         $q       = mb_strtolower($query, 'UTF-8');
         $q       = strtr($q, ['á'=>'a','é'=>'e','í'=>'i','ó'=>'o','ú'=>'u','ü'=>'u','ñ'=>'n']);
         $filters = [];
+
+        // Comparativos respecto a lo ya mostrado ("más corta", "menos desnivel", "más larga")
+        $km   = array_filter(array_map(fn($r) => (float) ($r['distancia_km'] ?? $r['distance'] ?? 0), $shown));
+        $elev = array_filter(array_map(fn($r) => (float) ($r['elevacion_ganada'] ?? $r['elevation'] ?? 0), $shown));
+        if ($km && preg_match('/\bmas\s+cort|\bmenos\s+(distancia|km|largo|larga)/u', $q)) {
+            $filters['max_distance'] = round(min($km) * 0.95, 1);
+            $filters['exclude_ids'] = array_map(fn($r) => (int) ($r['id'] ?? 0), $shown);
+        }
+        if ($km && preg_match('/\bmas\s+larg/u', $q)) {
+            $filters['min_distance'] = round(max($km) * 1.05, 1);
+        }
+        if ($elev && preg_match('/\bmenos\s+desnivel|\bmas\s+(facil|suave)/u', $q)) {
+            $filters['max_elevation'] = max(50, round(min($elev) * 0.9));
+            $filters['exclude_ids'] = array_map(fn($r) => (int) ($r['id'] ?? 0), $shown);
+        }
+        if ($elev && preg_match('/\bmas\s+(desnivel|dur|dificil|exigente)/u', $q)) {
+            $filters['min_elevation'] = round(max($elev) * 1.1);
+        }
 
         // Distancia máxima
         if (preg_match('/(?:menos\s+de|maximo|no\s+mas\s+de)\s+(\d+(?:[.,]\d+)?)\s*km/u', $q, $m)) {
@@ -2763,7 +3282,7 @@ PROMPT;
             $filters['difficulty'] = 'advanced';
         }
         // Corta / larga sin número
-        if (empty($filters['max_distance']) && preg_match('/\b(?:corta|poca\s+distancia)\b/u', $q)) {
+        if (empty($filters['max_distance']) && preg_match('/\b(?:corta|corto|poca\s+distancia)\b/u', $q)) {
             $filters['max_distance'] = 10.0;
         }
         if (empty($filters['min_distance']) && preg_match('/\b(?:larga|mucha\s+distancia)\b/u', $q)) {
@@ -2778,30 +3297,12 @@ PROMPT;
      */
     private function buildRouteDataBlock(array $route, string $mode = 'compact'): string
     {
-        $name = $route['title']      ?? ($route['titulo'] ?? ($route['nombre'] ?? 'Sin nombre'));
-        $diff = $route['difficulty'] ?? ($route['dificultad']      ?? '-');
-        $dist = (float)($route['distance'] ?? ($route['distancia_km'] ?? ($route['length'] ?? 0)));
-        $dur  = (float)($route['duration'] ?? ($route['duracion_horas'] ?? 0));
-        $elev = (int)($route['elevation']  ?? ($route['elevacion_ganada'] ?? 0));
-        $loc  = $route['location']   ?? ($route['ubicacion']       ?? '-');
-        $tipo = $route['tipo_ruta']  ?? '-';
-
-        $compact = "Nombre: {$name}\nDificultad: {$diff}\n" .
-                   "Distancia: {$dist} km | Duración: {$dur} h | Desnivel: +{$elev} m\n" .
-                   "Ubicación: {$loc} | Tipo: {$tipo}";
-
-        if ($mode === 'compact') return $compact;
-
-        // Modo full: añadir descripción truncada
-        $desc     = $route['description'] ?? ($route['descripcion'] ?? '');
-        $startLat = $route['startLat']    ?? ($route['start_lat']  ?? ($route['latitud_inicio']  ?? null));
-        $startLon = $route['startLng']    ?? ($route['start_lng']  ?? ($route['longitud_inicio'] ?? null));
-
-        $full = $compact;
-        if (!empty($desc))      $full .= "\nDescripción: " . mb_substr($desc, 0, 300);
-        if ($startLat !== null) $full .= "\nInicio: {$startLat}, {$startLon}";
-
-        return $full;
+        $block = $this->routeFactsLine($route);
+        if ($mode === 'compact') return $block;
+        $desc = trim((string) ($route['descripcion'] ?? $route['description'] ?? ''));
+        if ($desc !== '') $block .= "\nDescripción: " . mb_substr(strip_tags($desc), 0, 600);
+        if (!empty($route['start_lat'])) $block .= "\nInicio: {$route['start_lat']}, {$route['start_lng']}";
+        return $block;
     }
 
     /**
@@ -2811,12 +3312,7 @@ PROMPT;
     {
         try {
             $stmt = $this->conn->prepare(
-                "SELECT id, titulo AS title, dificultad AS difficulty,
-                        distancia_km AS distance, duracion_horas AS duration,
-                        elevacion_ganada AS elevation, ubicacion AS location,
-                        tipo_ruta, descripcion AS description,
-                        latitud_inicio AS startLat, longitud_inicio AS startLng
-                 FROM rutas WHERE id = ? LIMIT 1"
+                "SELECT * FROM rutas WHERE id = ? AND estado = 'publicada' LIMIT 1"
             );
             $stmt->bind_param('i', $id);
             $stmt->execute();
@@ -2839,12 +3335,7 @@ PROMPT;
             $placeholders = implode(',', array_fill(0, count($ids), '?'));
             $types        = str_repeat('i', count($ids));
             $stmt = $this->conn->prepare(
-                "SELECT id, titulo AS title, dificultad AS difficulty,
-                        distancia_km AS distance, duracion_horas AS duration,
-                        elevacion_ganada AS elevation, ubicacion AS location,
-                        tipo_ruta, descripcion AS description,
-                        latitud_inicio AS startLat, longitud_inicio AS startLng
-                 FROM rutas WHERE id IN ({$placeholders}) LIMIT 10"
+                "SELECT * FROM rutas WHERE id IN ({$placeholders}) AND estado = 'publicada' LIMIT 10"
             );
             $stmt->bind_param($types, ...$ids);
             $stmt->execute();
@@ -2905,12 +3396,8 @@ PROMPT;
             $types   .= 'i';
 
             $stmt = $this->conn->prepare(
-                "SELECT id, titulo AS title, dificultad AS difficulty,
-                        distancia_km AS distance, duracion_horas AS duration,
-                        elevacion_ganada AS elevation, ubicacion AS location,
-                        tipo_ruta
-                 FROM rutas
-                 WHERE " . implode(' AND ', $where) . "
+                "SELECT * FROM rutas
+                 WHERE estado = 'publicada' AND " . implode(' AND ', $where) . "
                  LIMIT ?"
             );
             $stmt->bind_param($types, ...$params);

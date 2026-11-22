@@ -5,7 +5,6 @@
  * Fuentes de datos (con fallback en cascada):
  *   1. AEMET OpenData  → alertas CAP + BPA (aludes) + estaciones nivométricas (España)
  *   2. Météo-France    → alertas vigilancia + BRA (aludes) + estaciones Nivôses (Francia)
- *   3. EAWS            → peligro de aludes paneuropeo (fallback sin clave)
  *
  * Todas las llamadas están cacheadas en fichero temporal.
  * AEMET usa un proceso de dos pasos: primera petición → URL datos → segunda petición.
@@ -22,7 +21,6 @@ class MountainConditionsService {
     private const CACHE_BPA   = 14400;  // 4 h  — boletines de aludes (se publican 1x/día)
     private const CACHE_ALERT = 1800;   // 30 min — alertas más dinámicas
     private const CACHE_SNOW  = 3600;   // 1 h  — estaciones nivométricas
-    private const CACHE_EAWS  = 14400;  // 4 h  — EAWS
     private const CACHE_TOKEN = 3500;   // ~58 min — token OAuth2 MF (válido 1 h)
 
     // ── Zonas de montaña AEMET ────────────────────────────────────────────
@@ -111,25 +109,9 @@ class MountainConditionsService {
         ],
     ];
 
-    // ── Regiones EAWS ─────────────────────────────────────────────────────
-    // Subset de IDs para España y sur de Francia
-    private const EAWS_REGIONS = [
-        // Pirineo español
-        ['id' => 'es-na',      'lat_min' => 42.3, 'lat_max' => 43.5, 'lon_min' => -2.0, 'lon_max' => -1.0, 'name' => 'Pirineo Navarro'],
-        ['id' => 'es-ar-09',   'lat_min' => 42.3, 'lat_max' => 43.2, 'lon_min' => -1.0, 'lon_max' =>  0.0, 'name' => 'Pirineo Aragonés Occ.'],
-        ['id' => 'es-ar-10',   'lat_min' => 42.3, 'lat_max' => 43.0, 'lon_min' =>  0.0, 'lon_max' =>  0.8, 'name' => 'Pirineo Aragonés Or.'],
-        ['id' => 'es-ct-l-09', 'lat_min' => 42.0, 'lat_max' => 43.0, 'lon_min' =>  0.8, 'lon_max' =>  1.6, 'name' => 'Aran-Pallars'],
-        ['id' => 'es-ct-l-10', 'lat_min' => 42.0, 'lat_max' => 43.0, 'lon_min' =>  1.6, 'lon_max' =>  3.2, 'name' => 'Pirineo Catalán'],
-        // Cantábrica
-        ['id' => 'es-cantabrica', 'lat_min' => 42.5, 'lat_max' => 43.8, 'lon_min' => -7.0, 'lon_max' => -3.5, 'name' => 'Cordillera Cantábrica'],
-        // Sierra Nevada
-        ['id' => 'es-gr',      'lat_min' => 36.5, 'lat_max' => 38.0, 'lon_min' => -4.0, 'lon_max' => -2.0, 'name' => 'Sierra Nevada'],
-        // Pirineo francés
-        ['id' => 'fr-64',      'lat_min' => 43.0, 'lat_max' => 44.5, 'lon_min' => -2.0, 'lon_max' => -0.5, 'name' => 'Pyrénées-Atlantiques'],
-        ['id' => 'fr-65',      'lat_min' => 43.0, 'lat_max' => 44.5, 'lon_min' => -0.5, 'lon_max' =>  1.0, 'name' => 'Hautes-Pyrénées'],
-        ['id' => 'fr-09',      'lat_min' => 43.0, 'lat_max' => 44.5, 'lon_min' =>  1.0, 'lon_max' =>  2.2, 'name' => 'Ariège'],
-        ['id' => 'fr-66',      'lat_min' => 42.5, 'lat_max' => 44.0, 'lon_min' =>  2.2, 'lon_max' =>  3.5, 'name' => 'Pyrénées-Orientales'],
-    ];
+
+    /** Segundos que se considera caída una fuente tras un error (corta-circuito). */
+    private const HOST_DOWN_TTL = 900;
 
     public function __construct() {
         $this->logger = new LoggerService('mountain_conditions');
@@ -179,8 +161,9 @@ class MountainConditionsService {
             'alert_types'        => [],     // ['viento', 'nieve', ...]
             'alert_areas'        => [],     // areaDesc de las features afectadas
             'avalanche_level'    => null,   // 1–5  (solo de fuente oficial)
-            'avalanche_source'   => null,   // 'AEMET'|'MeteoFrance'|'EAWS'
+            'avalanche_source'   => null,   // 'AEMET (boletín nivológico)'|'MeteoFrance'
             'avalanche_massif'   => null,
+            'avalanche_unavailable' => false, // true si tocaba boletín y no se pudo obtener
             'snow_depth_cm'      => null,
             'snow_station_name'  => null,
             'snow_station_alt'   => null,
@@ -218,9 +201,13 @@ class MountainConditionsService {
 
         // ── 2. Boletín de aludes (solo en zonas y temporada relevantes) ───
         if ($isMountainZone && $isSnowRelevant) {
+            // Solo fuentes oficiales: boletín nivológico de AEMET y BRA de Météo-France
             $bpa = $isFrenchSide
-                ? ($this->getMFBRA($lat, $lon)  ?? $this->getAemetBPA($lat, $lon)  ?? $this->getEAWS($lat, $lon))
-                : ($this->getAemetBPA($lat, $lon) ?? $this->getMFBRA($lat, $lon)   ?? $this->getEAWS($lat, $lon));
+                ? ($this->getMFBRA($lat, $lon)    ?? $this->getAemetNivo($lat, $lon))
+                : ($this->getAemetNivo($lat, $lon) ?? $this->getMFBRA($lat, $lon));
+            if (!$bpa && $this->isPyrenees($lat, $lon)) {
+                $report['avalanche_unavailable'] = true;
+            }
 
             if ($bpa) {
                 $report['avalanche_level']  = $bpa['level'];
@@ -556,6 +543,46 @@ class MountainConditionsService {
     // BOLETINES DE ALUDES
     // =========================================================================
 
+    /** Pirineo (vertiente sur y norte) — zona con boletín de peligro de aludes. */
+    private function isPyrenees(float $lat, float $lon): bool {
+        return $lat >= 42.2 && $lat <= 43.2 && $lon >= -2.0 && $lon <= 3.3;
+    }
+
+    /**
+     * Boletín de peligro de aludes de AEMET (predicción nivológica).
+     * Área 1: Pirineo navarro y aragonés · Área 0: Pirineo catalán.
+     */
+    private function getAemetNivo(float $lat, float $lon): ?array {
+        if (!$this->isPyrenees($lat, $lon) || empty(AEMET_API_KEY)) return null;
+        $area  = $lon < 0.75 ? '1' : '0';
+        $label = $area === '1' ? 'Pirineo navarro y aragonés' : 'Pirineo catalán';
+
+        $cacheKey = 'aemet_nivo_' . $area;
+        $cached   = $this->getCache($cacheKey, self::CACHE_BPA);
+        if ($cached !== null) return $cached;
+
+        try {
+            $meta = $this->aemetRequest(AEMET_BASE_URL . "/prediccion/especifica/nivologica/{$area}");
+            if (empty($meta['datos'])) return null;
+            $body = $this->httpGet($meta['datos']);
+            if (!$body) return null;
+            // AEMET sirve el texto en ISO-8859-15
+            if (!mb_check_encoding($body, 'UTF-8')) {
+                $body = mb_convert_encoding($body, 'UTF-8', 'ISO-8859-15');
+            }
+            $data   = json_decode($body, true);
+            $result = $this->parseAemetBPA(is_array($data) ? $data : [$body], $label);
+            if ($result) {
+                $result['source'] = 'AEMET (boletín nivológico)';
+                $this->setCache($cacheKey, $result, self::CACHE_BPA);
+            }
+            return $result;
+        } catch (\Exception $e) {
+            $this->logger->warning('AEMET nivológica error', ['area' => $area, 'error' => $e->getMessage()]);
+            return null;
+        }
+    }
+
     private function getAemetBPA(float $lat, float $lon): ?array {
         $zoneData = $this->coordsToAemetZone($lat, $lon);
         if (!$zoneData) return null;
@@ -743,71 +770,7 @@ class MountainConditionsService {
         }
     }
 
-    private function getEAWS(float $lat, float $lon): ?array {
-        $region = $this->coordsToEAWSRegion($lat, $lon);
-        if (!$region) return null;
 
-        $cacheKey = "eaws_{$region['id']}";
-        $cached   = $this->getCache($cacheKey, self::CACHE_EAWS);
-        if ($cached !== null) return $cached;
-
-        try {
-            // EAWS JSON endpoint — standard CAAML v6 aggregation
-            $url  = "https://api.avalanches.org/v1/public/avalanchecenter/{$region['id']}/bulletin/latest?lang=es";
-            $body = $this->httpGet($url, ['Accept' => 'application/json']);
-
-            // Fallback al endpoint alternativo conocido de EAWS
-            if (!$body) {
-                $url  = "https://www.avalanches.org/wp-content/uploads/forecasts/{$region['id']}/en.json";
-                $body = $this->httpGet($url, ['Accept' => 'application/json']);
-            }
-
-            if (!$body) return null;
-
-            $data   = json_decode($body, true);
-            $result = $this->parseEAWS($data ?? [], $region['name']);
-            if ($result) $this->setCache($cacheKey, $result, self::CACHE_EAWS);
-            return $result;
-
-        } catch (\Exception $e) {
-            $this->logger->warning('EAWS error', ['region' => $region['id'], 'error' => $e->getMessage()]);
-            return null;
-        }
-    }
-
-    private function parseEAWS(array $data, string $regionName): ?array {
-        // EAWS CAAML v6 JSON format
-        $bulletins = $data['bulletins'] ?? (isset($data['dangerRatings']) ? [$data] : []);
-        if (empty($bulletins)) return null;
-
-        $bulletin = $bulletins[0];
-        $ratings  = $bulletin['dangerRatings'] ?? [];
-        $level    = null;
-
-        // Buscar la valoración más alta del día (puede haber por altitud)
-        foreach ($ratings as $rating) {
-            $raw = $rating['mainValue'] ?? null;
-            $levelMap = ['low'=>1, 'limited'=>2, 'considerable'=>3, 'high'=>4, 'very_high'=>5,
-                         'no_snow'=>0, 'no_rating'=>null];
-            $num = $levelMap[$raw] ?? null;
-            if ($num !== null && ($level === null || $num > $level)) {
-                $level = $num;
-            }
-        }
-
-        $narrative = $bulletin['avalancheProblems'][0]['comment'] ??
-                     $bulletin['snowpackStructureComment']['comment'] ??
-                     $bulletin['highlights'] ?? null;
-
-        if ($level === null) return null;
-
-        return [
-            'level'     => $level,
-            'massif'    => $regionName,
-            'narrative' => $narrative ? mb_substr(strip_tags((string)$narrative), 0, 500) : null,
-            'source'    => 'EAWS',
-        ];
-    }
 
     // =========================================================================
     // ESTACIONES DE NIEVE
@@ -950,9 +913,9 @@ class MountainConditionsService {
             $parts[] = "Alerta AEMET {$level}" . ($types ? " por {$types}" : '') . "{$areas}.";
         }
 
-        // Peligro de aludes (solo de fuente oficial: AEMET, Météo-France o EAWS)
+        // Peligro de aludes (solo de fuente oficial: AEMET o Météo-France)
         if ($report['avalanche_level'] !== null) {
-            $src    = $report['avalanche_source'] ?? 'EAWS';
+            $src    = $report['avalanche_source'] ?? 'boletín oficial';
             $massif = $report['avalanche_massif'] ? " ({$report['avalanche_massif']})" : '';
             $emoji  = match(true) {
                 $report['avalanche_level'] >= 4 => '🔴',
@@ -961,6 +924,10 @@ class MountainConditionsService {
                 default                          => '🟢',
             };
             $parts[] = "Peligro de aludes {$emoji} nivel {$report['avalanche_level']}/5 según {$src}{$massif}.";
+        } elseif (!empty($report['avalanche_unavailable'])) {
+            $parts[] = "BOLETÍN DE ALUDES NO DISPONIBLE: no se ha podido consultar el boletín oficial de peligro de aludes. "
+                     . "No estimes ningún nivel de peligro: dilo y remite al boletín de AEMET (Pirineo navarro y aragonés / catalán), "
+                     . "del ICGC en Cataluña o de Météo-France (BRA) en la vertiente francesa.";
         }
 
         // Nieve medida (estación AEMET o modelo Open-Meteo)
@@ -1016,15 +983,6 @@ class MountainConditionsService {
         return null;
     }
 
-    private function coordsToEAWSRegion(float $lat, float $lon): ?array {
-        foreach (self::EAWS_REGIONS as $region) {
-            if ($lat >= $region['lat_min'] && $lat <= $region['lat_max']
-             && $lon >= $region['lon_min'] && $lon <= $region['lon_max']) {
-                return $region;
-            }
-        }
-        return null;
-    }
 
     // =========================================================================
     // HELPERS
@@ -1044,6 +1002,10 @@ class MountainConditionsService {
     }
 
     private function httpGet(string $url, array $headers = []): ?string {
+        $host = parse_url($url, PHP_URL_HOST) ?: 'unknown';
+        if ($this->getCache('down_' . $host, self::HOST_DOWN_TTL) !== null) {
+            return null; // fuente caída o sin permiso hace poco: no esperar otra vez
+        }
         $ch         = curl_init($url);
         $httpHeaders = ['User-Agent: KahirAI/1.0 (mountain-assistant)'];
         foreach ($headers as $k => $v) {
@@ -1061,8 +1023,10 @@ class MountainConditionsService {
         $err  = curl_error($ch);
         curl_close($ch);
 
-        if ($err) {
-            $this->logger->warning('HTTP error', ['url' => substr($url, 0, 80), 'err' => $err]);
+        if ($err || in_array($code, [401, 403, 429, 500, 502, 503, 504], true)) {
+            // No se registra la URL completa: puede llevar la api_key en la query
+            $this->logger->warning('Fuente externa no disponible', ['host' => $host, 'http' => $code, 'err' => $err ?: null]);
+            $this->setCache('down_' . $host, ['code' => $code], self::HOST_DOWN_TTL);
             return null;
         }
         return ($code === 200 && $body) ? $body : null;

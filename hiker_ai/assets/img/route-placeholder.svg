@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" aria-label="Ruta sin foto">
+  <!-- Imagen genérica para rutas sin foto: cordal de montaña en la paleta de Kahir -->
+  <rect width="640" height="360" fill="#EFE9DD"/>
+  <circle cx="500" cy="95" r="34" fill="#E3C9A8"/>
+  <path d="M0 270 L110 170 L170 215 L260 120 L345 205 L410 160 L520 250 L640 190 L640 360 L0 360 Z" fill="#A0A88A"/>
+  <path d="M260 120 L290 148 L275 150 L262 140 L248 152 L236 146 Z" fill="#F7F3EA"/>
+  <path d="M0 300 L90 245 L190 290 L300 220 L420 285 L520 240 L640 280 L640 360 L0 360 Z" fill="#7A8F5C"/>
+  <path d="M0 330 L120 300 L250 335 L380 300 L520 325 L640 305 L640 360 L0 360 Z" fill="#5F7444"/>
+  <path d="M150 360 C 230 330, 300 345, 330 318 S 420 300, 460 290" fill="none" stroke="#C7BEAB" stroke-width="4" stroke-dasharray="10 9" stroke-linecap="round"/>
+</svg>

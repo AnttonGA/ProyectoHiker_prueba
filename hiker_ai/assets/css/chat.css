@@ -644,6 +644,18 @@
 }
 .route-card-stats .k-chip { font-size: .8rem; }
 
+/* Por qué se recomienda cada ruta */
+.route-card-reasons {
+    list-style: none;
+    margin: -.3rem 0 .9rem;
+    padding: 0;
+    font-size: .82rem;
+    color: var(--k-ink-2);
+}
+.route-card-reasons li { display: flex; gap: .35rem; align-items: baseline; line-height: 1.35; }
+.route-card-reasons li + li { margin-top: .15rem; }
+.route-card-reasons .bi { color: var(--k-moss-hover); flex-shrink: 0; }
+
 .route-card-btn {
     display: inline-flex;
     align-items: center;

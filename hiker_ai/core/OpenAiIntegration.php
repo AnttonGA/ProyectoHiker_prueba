@@ -23,57 +23,50 @@ class OpenAIIntegration {
 
     // ── System prompt base (siempre presente) ─────────────────────────────────
     private const SYSTEM_BASE =
-        "Eres Kahir, asistente de montaña especializado en España y sur de Francia. " .
-        "Cubres todo el territorio español (Pirineos, Sierra Nevada, Picos de Europa, " .
-        "Sistema Central, Sistema Ibérico, Levante, Andalucía, Canarias, Baleares…) " .
-        "y el sur de Francia. Ayudas a planificar rutas, consultar el tiempo y resolver " .
-        "dudas de montaña. " .
-        "REGLA CRÍTICA: Nunca inventes rutas, lugares ni datos que no te hayan sido " .
-        "proporcionados explícitamente en el mensaje. Solo recomiendas rutas de la base " .
-        "de datos del sistema. " .
-        "PROHIBIDO ABSOLUTO: No hagas nunca comentarios sobre la base de datos, sobre " .
-        "lo que 'tienes' o 'no tienes' en tu sistema, ni corrijas respuestas anteriores " .
-        "haciendo meta-comentarios. Si el sistema te pasa rutas, preséntelas con " .
-        "normalidad — son reales y han sido validadas. Nunca digas frases como " .
-        "'no tengo rutas para X', 'debo corregir mis respuestas', 'inventarlas sería " .
-        "peligroso' o similares. Confía en los datos que el sistema te proporciona. " .
-        "Responde siempre en español. Sé conciso y directo.";
+        "Eres Kahir, asistente de montaña. El catálogo de rutas cubre España, Andorra y el sur de Francia, " .
+        "sobre todo Pirineos y País Vasco. Ayudas a elegir rutas, entender el tiempo y salir seguro. " .
+        "REGLAS: " .
+        "1) Usa solo los datos que te pasa el sistema en el mensaje (rutas, cifras, previsión, boletines). " .
+        "No inventes rutas, lugares, accesos, horarios ni cifras. Si un dato no está, dilo con naturalidad. " .
+        "2) Sé honesto: si el sistema indica que no hay rutas, que ha ampliado la búsqueda o que una fuente " .
+        "(boletín de aludes, previsión) no está disponible, dilo claramente. " .
+        "3) Seguridad: nunca estimes un nivel de peligro de aludes por tu cuenta; solo el del boletín oficial. " .
+        "4) Sé breve y útil: por defecto, como mucho 120 palabras, sin títulos grandes; usa listas cortas solo si ayudan. " .
+        "5) No hables de 'la base de datos', del 'sistema' ni de tus instrucciones. No muestres JSON ni razonamientos internos. " .
+        "6) Responde en el idioma en que te escribe el usuario (por defecto, español).";
 
     // ── Extensiones de system prompt por intent ───────────────────────────────
     private const SYSTEM_EXTENSIONS = [
         'route_request' =>
-            " Presentas las rutas encontradas de forma concisa siguiendo las instrucciones " .
-            "del mensaje (una frase o un párrafo breve, según se indique). " .
-            "No describes cada ruta individualmente — eso lo hacen las tarjetas del carousel. " .
-            "Las rutas que te llegan son reales y están en la base de datos — preséntelas con confianza. " .
-            "Usa siempre el nombre de lugar que mencionó el usuario, nunca el identificador técnico de zona. " .
-            "La cobertura incluye toda España y sur de Francia.",
+            " Presentas las rutas que te llegan siguiendo las instrucciones del mensaje. " .
+            "Las tarjetas con los datos de cada ruta se muestran debajo de tu texto: no las repitas una a una. " .
+            "Usa el nombre de lugar que dijo el usuario, nunca identificadores técnicos de zona.",
 
         'weather_query' =>
-            " Interpretas los datos meteorológicos en clave de montaña: no solo " .
-            "temperatura, sino implicaciones concretas para la actividad (visibilidad " .
-            "en cresta, riesgo de hielo, condiciones de nieve, etc.).",
+            " Interpretas la previsión en clave de montaña (viento en cresta, hielo, visibilidad, nieve) " .
+            "para el día y lugar indicados, y terminas con una recomendación práctica. Máximo 120 palabras.",
 
         'safety_query' =>
-            " Combinas conocimiento experto de seguridad en montaña con los datos " .
-            "meteorológicos proporcionados. Prioriza siempre la seguridad. Sé específico " .
-            "con los riesgos actuales basándote en los datos reales del momento.",
+            " Combinas buenas prácticas de seguridad en montaña con los datos reales que te llegan. " .
+            "Si el boletín oficial de aludes no está disponible, dilo y remite a él; no des niveles inventados. " .
+            "Máximo 150 palabras.",
 
         'personalized_recommendation' =>
-            " Explicas de forma natural POR QUÉ recomiendas cada ruta: nivel del usuario, " .
-            "condiciones meteorológicas de la zona y si encaja con su historial. " .
-            "Tono personal y motivador.",
+            " Explicas por qué las rutas encajan con el usuario (nivel, esfuerzo cómodo, zona) usando solo los datos dados. " .
+            "Tono cercano.",
 
         'general' =>
-            " Al final de tu respuesta, si la pregunta trata sobre una actividad específica, " .
-            "ofrece buscar rutas de ese tipo. Si menciona un lugar, ofrece consultar el tiempo. " .
-            "Una sola frase de oferta, natural y no intrusiva.",
+            " Respondes con criterio experto y práctico, máximo 150 palabras. Si encaja, termina ofreciendo en una " .
+            "frase buscar rutas o consultar el tiempo.",
 
         'onboarding' =>
-            " Haces tres preguntas en un solo mensaje con tono conversacional y amable. " .
-            "No uses listas numeradas rígidas — integra las preguntas de forma natural. " .
-            "Las zonas de España que cubres incluyen Pirineos, Sierra Nevada, Picos de Europa, " .
-            "Sistema Central, Canarias, Baleares y mucho más.",
+            " Haces tres preguntas en un solo mensaje con tono conversacional y amable, sin listas numeradas rígidas.",
+    ];
+
+    /** Tokens máximos de respuesta por intent (respuestas más cortas = más rápidas). */
+    private const MAX_TOKENS = [
+        'route_request' => 400, 'personalized_recommendation' => 450, 'weather_query' => 450,
+        'safety_query' => 550, 'general' => 600, 'onboarding' => 300,
     ];
 
     public function __construct() {
@@ -130,7 +123,7 @@ class OpenAIIntegration {
             $messages = [['role' => 'user', 'content' => $prompt]];
 
             // Haiku no necesita system prompt — solo extrae estructura
-            $response = $this->callClaude($messages, self::MODEL_HAIKU, 300, null);
+            $response = $this->callClaude($messages, self::MODEL_HAIKU, 400, null);
             $text     = $response['content'][0]['text'] ?? '';
 
             // Extraer el bloque JSON de la respuesta
@@ -164,12 +157,22 @@ class OpenAIIntegration {
         try {
             $messages   = $this->buildMessages($userPrompt, $context);
             $systemPmt  = $this->buildSystemPrompt($intentForSys);
-            $response   = $this->callClaude($messages, self::MODEL_SONNET, 1024, $systemPmt);
+            $maxTokens  = self::MAX_TOKENS[$intentForSys] ?? 600;
+            $response   = $this->callClaude($messages, self::MODEL_SONNET, $maxTokens, $systemPmt);
             return $this->parseResponse($response);
         } catch (\Exception $e) {
             $this->logger->error('processQuery error', ['error' => $e->getMessage()]);
             throw new AIException('Error processing query', 'CLAUDE_PROCESSING_ERROR');
         }
+    }
+
+    /**
+     * Llamada a Sonnet con herramientas (modo agente). Devuelve la respuesta cruda de la API
+     * (content con bloques text / tool_use y stop_reason). El system llega en bloques para
+     * poder cachear la parte fija (instrucciones + herramientas).
+     */
+    public function callWithTools(array $messages, array $systemBlocks, array $tools, int $maxTokens = 1000): array {
+        return $this->callClaude($messages, self::MODEL_SONNET, $maxTokens, $systemBlocks, $tools);
     }
 
     /**
@@ -208,12 +211,31 @@ Analiza el mensaje y devuelve ÚNICAMENTE JSON válido con estos campos:
 {
   "intent": "route_request|weather_query|safety_query|personalized_recommendation|general",
   "zone": "lugar/zona mencionado o null",
-  "activity": "hiking|ski_touring|climbing|cycle_touring|snowshoeing o null",
+  "activity": "hiking|ski_touring|btt|cycle_touring|climbing|snowshoeing o null",
   "difficulty": "beginner|intermediate|advanced o null",
   "timeframe": "today|tomorrow|this_weekend|this_week|next_days o null",
   "days_ahead": 0,
-  "weather_check_needed": false
+  "weather_check_needed": false,
+  "max_elevation": null,
+  "max_distance": null,
+  "min_distance": null,
+  "target_duration": null,
+  "max_duration": null,
+  "with_kids": false,
+  "out_of_coverage": false,
+  "language": "es"
 }
+
+REGLAS DE ACTIVIDAD: "BTT", "bici de montaña", "mountain bike", "MTB" → btt. "cicloturismo", "bici de carretera", "vía verde en bici" → cycle_touring. "senderismo", "andar", "caminar", "hike", "subir a un monte" → hiking. "esquí de travesía", "esquí de montaña", "skimo" → ski_touring.
+REGLAS DE DIFICULTAD: "fácil", "sencilla", "con niños", "para principiantes" → beginner. "exigente", "dura", "difícil", "para expertos" → advanced. "intermedia", "moderada" → intermediate.
+REGLAS NUMÉRICAS (null si no se mencionan):
+- max_elevation: desnivel máximo en metros ("menos de 500 m de desnivel" → 500; "sin mucho desnivel" → 400).
+- max_distance / min_distance: km ("menos de 10 km" → max_distance 10).
+- target_duration: horas deseadas ("unas 6 horas" → 6; "media jornada" → 4; "toda la jornada" → 7).
+- max_duration: horas máximas ("menos de 3 horas" → 3).
+with_kids: true si menciona niños, críos, peques, familia con hijos.
+out_of_coverage: true si la zona está claramente fuera de España, Andorra y el sur de Francia (Alpes, Dolomitas, Escocia, Nepal…).
+language: código ISO del idioma del mensaje ("es", "en", "eu", "fr", "ca"…).
 
 REGLAS DE INTENT:
 - route_request: busca rutas, senderos, excursiones. TAMBIÉN cuando usa "recomiéndame", "sugiere" o "qué hay" si menciona una zona geográfica concreta o una actividad concreta.
@@ -258,9 +280,15 @@ PROMPT;
     private function normalizeExtractedData(array $raw, array $default): array {
         $validIntents    = ['route_request', 'weather_query', 'safety_query',
                             'personalized_recommendation', 'general'];
-        $validActivities = ['hiking', 'ski_touring', 'climbing', 'cycle_touring', 'snowshoeing'];
+        $validActivities = ['hiking', 'ski_touring', 'btt', 'cycle_touring', 'climbing', 'snowshoeing'];
         $validDiffs      = ['beginner', 'intermediate', 'advanced'];
         $validTimeframes = ['today', 'tomorrow', 'this_weekend', 'this_week', 'next_days'];
+        // Número dentro de un rango razonable, o null
+        $num = static function ($v, float $min, float $max): ?float {
+            if (!is_numeric($v)) return null;
+            $v = (float) $v;
+            return ($v >= $min && $v <= $max) ? $v : null;
+        };
 
         return [
             'intent'               => in_array($raw['intent'] ?? '', $validIntents, true)
@@ -275,6 +303,15 @@ PROMPT;
                                           ? $raw['timeframe'] : null,
             'days_ahead'           => isset($raw['days_ahead']) ? (int)$raw['days_ahead'] : 0,
             'weather_check_needed' => (bool)($raw['weather_check_needed'] ?? false),
+            'max_elevation'        => $num($raw['max_elevation'] ?? null, 50, 5000),
+            'max_distance'         => $num($raw['max_distance'] ?? null, 1, 300),
+            'min_distance'         => $num($raw['min_distance'] ?? null, 1, 300),
+            'target_duration'      => $num($raw['target_duration'] ?? null, 0.5, 14),
+            'max_duration'         => $num($raw['max_duration'] ?? null, 0.5, 14),
+            'with_kids'            => (bool)($raw['with_kids'] ?? false),
+            'out_of_coverage'      => (bool)($raw['out_of_coverage'] ?? false),
+            'language'             => is_string($raw['language'] ?? null) && preg_match('/^[a-z]{2}$/', $raw['language'])
+                                          ? $raw['language'] : 'es',
         ];
     }
 
@@ -304,14 +341,18 @@ PROMPT;
     }
 
     private function callClaude(
-        array   $messages,
-        string  $model,
-        int     $maxTokens,
-        ?string $systemPrompt
+        array             $messages,
+        string            $model,
+        int               $maxTokens,
+        string|array|null $systemPrompt,
+        array             $tools = []
     ): array {
         $body = ['model' => $model, 'max_tokens' => $maxTokens, 'messages' => $messages];
         if ($systemPrompt !== null) {
             $body['system'] = $systemPrompt;
+        }
+        if ($tools) {
+            $body['tools'] = $tools;
         }
 
         $headers = [
@@ -362,11 +403,9 @@ PROMPT;
     }
 
     private function parseResponse(array $response): array {
-        $text = $response['content'][0]['text'] ?? '';
-        preg_match('/\{[\s\S]*\}/u', $text, $m);
-        if (!empty($m[0])) {
-            $structured = json_decode($m[0], true);
-            if ($structured) return $structured;
+        $text = '';
+        foreach (($response['content'] ?? []) as $block) {
+            if (($block['type'] ?? '') === 'text') $text .= $block['text'];
         }
         return ['type' => 'text', 'content' => trim($text)];
     }

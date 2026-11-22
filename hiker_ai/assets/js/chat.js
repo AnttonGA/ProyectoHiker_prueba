@@ -551,6 +551,8 @@ const ChatApp = {
         const zoneLabels = {
             'Aragon':           'Pirineo Aragonés',
             'Western_Pyrenees': 'Pirineo Occidental',
+            'Eastern_Pyrenees': 'Pirineo Oriental',
+            'Other':            '',
             'Central_Pyrenees': 'Pirineo Central',
             'Euskadi':          'Euskadi',
             'Cantabria':        'Cantabria / Picos',
@@ -571,7 +573,10 @@ const ChatApp = {
             .replace(/\s{2,}/g, ' ')
             .trim();
 
-        const locationLabel = zoneLabels[route.location] || route.location || '';
+        // La columna `ubicacion` de la BD no es fiable (70 % "Other", zonas mal asignadas):
+        // solo se muestra cuando es una zona conocida y la búsqueda no da ya la distancia al lugar
+        const hasDistanceReason = Array.isArray(route.reasons) && route.reasons.some(r => /km de|Sale desde/.test(r));
+        const locationLabel = hasDistanceReason ? '' : (zoneLabels[route.location] || '');
 
         // Formatear duración: 6.5 h → "6h 30min"
         const fmtDuration = (h) => {
@@ -583,7 +588,14 @@ const ChatApp = {
 
         const distance  = route.distance  != null ? parseFloat(route.distance).toFixed(1)  : '—';
         const elevation = route.elevation != null ? `+${Math.round(route.elevation)} m`     : '—';
-        const duration  = fmtDuration(route.duration);
+        // Horas MIDE (con desnivel) si las hay; si no, la duración guardada
+        const duration  = fmtDuration(route.horas_mide != null ? route.horas_mide : route.duration);
+
+        // Por qué se recomienda (motivos concretos del recomendador)
+        const reasons = Array.isArray(route.reasons) ? route.reasons.slice(0, 3) : [];
+        const reasonsHtml = reasons.length
+            ? `<ul class="route-card-reasons">${reasons.map(r => `<li><i class="bi bi-check2" aria-hidden="true"></i> ${this.chatEscapeHtml(r)}</li>`).join('')}</ul>`
+            : '';
 
         // Esfuerzo MIDE (1–5), solo si viene en los datos de la ruta
         const effortNum = Number(route.esfuerzo);
@@ -601,7 +613,7 @@ const ChatApp = {
 
         // Ruta relativa a la página del chat (index.php en la raíz del proyecto)
         const routeUrl = `paginasespecializadas/skitouring/ruta.html?id=${encodeURIComponent(route.id ?? '')}`;
-        const placeholder = 'hiker_ai/assets/img/route-placeholder.jpg';
+        const placeholder = 'hiker_ai/assets/img/route-placeholder.svg';
         const imageUrl = this.chatSafeUrl(route.image) || placeholder;
 
         return `
@@ -624,6 +636,7 @@ const ChatApp = {
                         <span class="k-chip"><i class="bi bi-clock" aria-hidden="true"></i> ${esc(duration)}</span>
                         ${effort ? `<span class="k-chip k-chip-moss" title="Esfuerzo MIDE"><i class="bi bi-activity" aria-hidden="true"></i> Esfuerzo ${esc(effort)}/5</span>` : ''}
                     </div>
+                    ${reasonsHtml}
                     <a href="${esc(routeUrl)}" class="route-card-btn" target="_blank" rel="noopener noreferrer">
                         Ver ruta <i class="bi bi-arrow-right" aria-hidden="true"></i>
                     </a>
