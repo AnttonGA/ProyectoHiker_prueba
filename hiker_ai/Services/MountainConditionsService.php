@@ -23,52 +23,7 @@ class MountainConditionsService {
     private const CACHE_SNOW  = 3600;   // 1 h  — estaciones nivométricas
     private const CACHE_TOKEN = 3500;   // ~58 min — token OAuth2 MF (válido 1 h)
 
-    // ── Zonas de montaña AEMET ────────────────────────────────────────────
-    // Mapeo coordenadas → zona para el endpoint de predicción de montaña de AEMET.
-    // Los IDs son los códigos de zona que usa AEMET en su API OpenData.
-    // Bounds generosos y solapados para evitar que coordenadas en el límite no caigan
-    // en ninguna zona (ej: Candanchú a lon -0.52 cae en pirineo_navarro_aragones).
-    private const AEMET_MOUNTAIN_ZONES = [
-        'pirineo_navarro_aragones' => [
-            'id' => '61',
-            'lat_min' => 42.2, 'lat_max' => 43.3,
-            'lon_min' => -2.0, 'lon_max' => -0.4,   // hasta -0.4 (cubre Candanchú -0.52)
-            'label'   => 'Pirineo Navarro-Aragonés',
-        ],
-        'pirineo_aragones' => [
-            'id' => '62',
-            'lat_min' => 42.2, 'lat_max' => 43.1,
-            'lon_min' => -0.6, 'lon_max' =>  0.75,  // hasta 0.75 para ceder la frontera a pirineo_catalan
-            'label'   => 'Pirineo Aragonés',
-        ],
-        'pirineo_catalan' => [
-            'id' => '63',
-            'lat_min' => 41.8, 'lat_max' => 43.1,
-            'lon_min' =>  0.70, 'lon_max' =>  3.5,  // desde 0.70 → cubre Aigüestortes (0.88°E) y Baqueira (0.93°E)
-            'label'   => 'Pirineo Catalán',
-        ],
-        'cantabrico' => [
-            'id' => '64',
-            'lat_min' => 42.0, 'lat_max' => 44.0,
-            'lon_min' => -8.0, 'lon_max' => -1.5,
-            'label'   => 'Cordillera Cantábrica y Galicia',
-        ],
-        'sistema_central' => [
-            'id' => '65',
-            'lat_min' => 39.5, 'lat_max' => 41.8,
-            'lon_min' => -7.0, 'lon_max' => -2.0,
-            'label'   => 'Sistema Central',
-        ],
-        'sierra_nevada' => [
-            'id' => '66',
-            'lat_min' => 36.5, 'lat_max' => 38.5,
-            'lon_min' => -5.5, 'lon_max' => -1.5,
-            'label'   => 'Sierras Béticas / Sierra Nevada',
-        ],
-    ];
-
-    // ── Macizos del Pirineo francés (Météo-France BRA) ────────────────────
-    // IDs 64–74, distribuidos de oeste a este por longitud
+    // ── Macizos de Météo-France (BRA) en la vertiente francesa del Pirineo ──
     private const MF_MASSIFS = [
         64 => ['name' => 'Pays-Basque',       'lon_min' => -1.80, 'lon_max' => -0.85],
         65 => ['name' => 'Aspe-Ossau',         'lon_min' => -0.85, 'lon_max' => -0.20],
@@ -110,8 +65,13 @@ class MountainConditionsService {
     ];
 
 
-    /** Segundos que se considera caída una fuente tras un error (corta-circuito). */
+    /** Segundos que se considera caído un servicio tras un error (corta-circuito). */
     private const HOST_DOWN_TTL = 900;
+    /** Tras un 429 (demasiadas peticiones) se espera menos. */
+    private const RATE_LIMIT_TTL = 120;
+
+    /** Código HTTP de la última petición (0 si no llegó a hacerse). */
+    private int $lastHttpCode = 0;
 
     public function __construct() {
         $this->logger = new LoggerService('mountain_conditions');
@@ -176,7 +136,7 @@ class MountainConditionsService {
             'sources_used'       => [],
         ];
 
-        $isFrenchSide   = ($lon > -1.8 && $lat >= 43.0 && $lat <= 44.5);
+        $isFrenchSide   = $this->isFrenchSide($lat, $lon);
         // Todas las zonas con relieve significativo donde AEMET emite BPA o alertas de montaña.
         // Canarias (Teide) y Baleares (Tramontana) incluidas a efectos de alertas generales.
         $isMountainZone = in_array($zone, [
@@ -188,9 +148,8 @@ class MountainConditionsService {
                           in_array($activity, ['ski_touring', 'snowshoeing'], true);
 
         // ── 1. Alertas ────────────────────────────────────────────────────
-        $alerts = $isFrenchSide
-            ? ($this->getMFAlerts($lat, $lon) ?? $this->getAemetAlerts($lat, $lon))
-            : ($this->getAemetAlerts($lat, $lon) ?? $this->getMFAlerts($lat, $lon));
+        // [] = consultado y sin avisos; null = no se ha podido consultar
+        $alerts = $isFrenchSide ? $this->getMFAlerts($lat, $lon) : $this->getAemetAlerts($lat, $lon);
 
         if ($alerts) {
             $report['alert_level']    = $alerts['level'];
@@ -202,10 +161,11 @@ class MountainConditionsService {
         // ── 2. Boletín de aludes (solo en zonas y temporada relevantes) ───
         if ($isMountainZone && $isSnowRelevant) {
             // Solo fuentes oficiales: boletín nivológico de AEMET y BRA de Météo-France
-            $bpa = $isFrenchSide
-                ? ($this->getMFBRA($lat, $lon)    ?? $this->getAemetNivo($lat, $lon))
-                : ($this->getAemetNivo($lat, $lon) ?? $this->getMFBRA($lat, $lon));
-            if (!$bpa && $this->isPyrenees($lat, $lon)) {
+            $bpa = $isFrenchSide ? $this->getMFBRA($lat, $lon) : $this->getAemetNivo($lat, $lon);
+            // Avisar de que falta el boletín solo cuando hace falta: actividades sobre nieve
+            // o rutas que suben a cotas donde suele haber manto
+            $needsBulletin = in_array($activity, ['ski_touring', 'snowshoeing'], true) || $cotaCritica >= 1800;
+            if (!$bpa && $needsBulletin && $this->isPyrenees($lat, $lon)) {
                 $report['avalanche_unavailable'] = true;
             }
 
@@ -329,13 +289,13 @@ class MountainConditionsService {
             // Filtrar solo las features que afectan a las coordenadas del usuario
             $relevant = $this->filterAlertsByLocation($data['features'], $lat, $lon);
             if (empty($relevant)) {
-                // Sin alertas para esta ubicación → cachear null explícitamente como array vacío
+                // Sin avisos para esta ubicación: consultado y vacío
                 $this->setCache($cacheKey, [], self::CACHE_ALERT);
-                return null;
+                return [];
             }
 
-            $result = $this->parseAemetAlerts($relevant);
-            $this->setCache($cacheKey, $result ?? [], self::CACHE_ALERT);
+            $result = $this->parseAemetAlerts($relevant) ?? [];
+            $this->setCache($cacheKey, $result, self::CACHE_ALERT);
             return $result;
 
         } catch (\Exception $e) {
@@ -489,11 +449,11 @@ class MountainConditionsService {
 
             $url  = METEOFRANCE_BASE_URL . '/DPVigilance/v1/vigimeteo/departements/forecast';
             $body = $this->httpGet($url, ['Authorization' => "Bearer $token"]);
-            if (!$body) return null;
+            if (!$body) { $this->dropMFTokenIfRejected(); return null; }
 
             $data   = json_decode($body, true);
-            $result = $this->parseMFAlerts($data ?? []);
-            if ($result) $this->setCache($cacheKey, $result, self::CACHE_ALERT);
+            $result = $this->parseMFAlerts($data ?? []) ?? [];
+            $this->setCache($cacheKey, $result, self::CACHE_ALERT);
             return $result;
 
         } catch (\Exception $e) {
@@ -549,11 +509,31 @@ class MountainConditionsService {
     }
 
     /**
+     * Vertiente francesa: al norte de la frontera hispano-francesa (aproximada por tramos)
+     * y hasta 44.5° N. Al oeste de Hendaya (-1.8°) es todo España.
+     */
+    private function isFrenchSide(float $lat, float $lon): bool {
+        if ($lon < -1.8 || $lon > 3.4 || $lat > 44.5) return false;
+        $border = [[-1.8, 43.36], [-1.4, 43.20], [-1.0, 43.03], [-0.6, 42.84], [-0.2, 42.76],
+                   [0.3, 42.72], [0.7, 42.80], [1.0, 42.75], [1.45, 42.62], [1.8, 42.50],
+                   [2.2, 42.42], [2.8, 42.43], [3.4, 42.45]];
+        for ($i = 1, $n = count($border); $i < $n; $i++) {
+            [$x0, $y0] = $border[$i - 1];
+            [$x1, $y1] = $border[$i];
+            if ($lon <= $x1) {
+                $limit = $y0 + ($y1 - $y0) * ($lon - $x0) / ($x1 - $x0);
+                return $lat > $limit;
+            }
+        }
+        return false;
+    }
+
+    /**
      * Boletín de peligro de aludes de AEMET (predicción nivológica).
      * Área 1: Pirineo navarro y aragonés · Área 0: Pirineo catalán.
      */
     private function getAemetNivo(float $lat, float $lon): ?array {
-        if (!$this->isPyrenees($lat, $lon) || empty(AEMET_API_KEY)) return null;
+        if (!$this->isPyrenees($lat, $lon) || $this->isFrenchSide($lat, $lon) || empty(AEMET_API_KEY)) return null;
         $area  = $lon < 0.75 ? '1' : '0';
         $label = $area === '1' ? 'Pirineo navarro y aragonés' : 'Pirineo catalán';
 
@@ -583,81 +563,37 @@ class MountainConditionsService {
         }
     }
 
-    private function getAemetBPA(float $lat, float $lon): ?array {
-        $zoneData = $this->coordsToAemetZone($lat, $lon);
-        if (!$zoneData) return null;
-
-        $cacheKey = 'aemet_bpa_' . $zoneData['id'];
-        $cached   = $this->getCache($cacheKey, self::CACHE_BPA);
-        if ($cached !== null) return $cached;
-
-        if (empty(AEMET_API_KEY)) return null;
-
-        try {
-            // AEMET: predicción específica de montaña para día 0 (hoy)
-            $url  = AEMET_BASE_URL . "/prediccion/especifica/montaña/{$zoneData['id']}/dia/0/";
-            $meta = $this->aemetRequest($url);
-            if (empty($meta['datos'])) return null;
-
-            $body = $this->httpGet($meta['datos']);
-            if (!$body) return null;
-
-            $data   = json_decode($body, true);
-            $result = $this->parseAemetBPA($data ?? [], $zoneData['label']);
-            if ($result) $this->setCache($cacheKey, $result, self::CACHE_BPA);
-            return $result;
-
-        } catch (\Exception $e) {
-            $this->logger->warning('AEMET BPA error', ['zone' => $zoneData['id'], 'error' => $e->getMessage()]);
-            return null;
-        }
-    }
-
     private function parseAemetBPA(array $data, string $zoneName): ?array {
         // La predicción de montaña AEMET viene como array de períodos/días.
         // Concatenamos todos los campos de texto para buscar el nivel de peligro.
         $texto = $this->extractAllText($data);
         if (empty($texto)) return null;
 
-        // ── Extracción del nivel de peligro (terminología EAWS estándar en español) ──
-        // Nivel 1: Débil / Limited / Low
-        // Nivel 2: Limitado / Considerable (en algunos países) / Moderate
-        // Nivel 3: Notable / Considerable
-        // Nivel 4: Fuerte / High
-        // Nivel 5: Muy fuerte / Very High / Extreme
-        $level = null;
-
-        // Primero intentar con la palabra clave de nivel numérico
-        if (preg_match('/nivel\s+de\s+peligro[^0-9]*([1-5])/iu', $texto, $m)) {
-            $level = (int)$m[1];
-        } elseif (preg_match('/peligro[^0-9]{0,20}([1-5])\b/iu', $texto, $m)) {
-            $level = (int)$m[1];
-        } elseif (preg_match('/nivel\s+([1-5])\b/iu', $texto, $m)) {
-            $level = (int)$m[1];
-        } elseif (preg_match('/\b([1-5])\s*\/\s*5/u', $texto, $m)) {
-            $level = (int)$m[1];
+        // ── Nivel de peligro (escala europea; términos oficiales de AEMET) ──
+        // 1 débil · 2 limitado · 3 notable · 4 fuerte · 5 muy fuerte
+        // Solo se acepta un número junto a su término ("3 (notable)", "notable (3)", "nivel de peligro 3")
+        // o el término junto a "peligro". Si hay varios (por cotas u orientaciones) se toma el más alto.
+        // Nunca se deduce de palabras sueltas ("Alto Aragón", "por debajo de", "2200 m: 3").
+        $levels = [];
+        $terms  = ['muy\s+fuerte' => 5, 'fuerte' => 4, 'notable' => 3, 'limitado' => 2, 'd[eé]bil' => 1];
+        $termRe = '(muy\s+fuerte|fuerte|notable|limitado|d[eé]bil)';
+        $termLevel = function (string $t) use ($terms): int {
+            foreach ($terms as $re => $lvl) if (preg_match('/^' . $re . '$/iu', trim($t))) return $lvl;
+            return 0;
+        };
+        if (preg_match_all('/(?<![\d.,])([1-5])\s*[\(\-–:]?\s*' . $termRe . '\b/iu', $texto, $mm, PREG_SET_ORDER)) {
+            foreach ($mm as $m) if ((int) $m[1] === $termLevel($m[2])) $levels[] = (int) $m[1];
         }
-
-        // Fallback con terminología textual EAWS en español
-        if (!$level) {
-            $keywords = [
-                5 => ['muy fuerte', 'muy alto', 'extremo', 'extrema'],
-                4 => ['fuerte', 'alto', 'high'],
-                3 => ['notable', 'considerable', 'marcado'],
-                2 => ['limitado', 'moderado', 'moderate'],
-                1 => ['débil', 'debil', 'bajo', 'escaso', 'low'],
-            ];
-            foreach ($keywords as $lvl => $terms) {
-                foreach ($terms as $t) {
-                    // Buscar cerca de "peligro" o "riesgo" o "aludes"
-                    if (preg_match('/(?:peligro|riesgo|aludes)[^.]{0,60}' . preg_quote($t, '/') . '/iu', $texto)
-                     || preg_match('/' . preg_quote($t, '/') . '[^.]{0,60}(?:peligro|riesgo|aludes)/iu', $texto)) {
-                        $level = $lvl;
-                        break 2;
-                    }
-                }
-            }
+        if (preg_match_all('/\b' . $termRe . '\s*[\(\-–:]?\s*([1-5])(?![\d.,])/iu', $texto, $mm, PREG_SET_ORDER)) {
+            foreach ($mm as $m) if ((int) $m[2] === $termLevel($m[1])) $levels[] = (int) $m[2];
         }
+        if (preg_match_all('/nivel\s+de\s+peligro\s*(?:de\s+aludes\s*)?[:=]?\s*([1-5])(?![\d.,])/iu', $texto, $mm)) {
+            foreach ($mm[1] as $v) $levels[] = (int) $v;
+        }
+        if (!$levels && preg_match_all('/peligro(?:\s+de\s+aludes)?\s+(?:es\s+|será\s+|sera\s+)?' . $termRe . '\b/iu', $texto, $mm)) {
+            foreach ($mm[1] as $t) if ($l = $termLevel($t)) $levels[] = $l;
+        }
+        $level = $levels ? max($levels) : null;
 
         // Si no encontramos nivel pero hay texto sobre aludes, devolver nivel null
         // (el texto narrativo puede ser útil de todas formas)
@@ -706,6 +642,7 @@ class MountainConditionsService {
             // Météo-France BRA en JSON (si el endpoint lo soporta; fallback a XML)
             $url  = METEOFRANCE_BASE_URL . "/DPBRA/v1/massif/BRA?id-massif={$massifId}&format=json";
             $body = $this->httpGet($url, ['Authorization' => "Bearer $token"]);
+            if (!$body && $this->dropMFTokenIfRejected()) return null;
 
             // Fallback a XML si JSON no disponible
             if (!$body) {
@@ -830,6 +767,13 @@ class MountainConditionsService {
     // OAUTH2 MÉTÉO-FRANCE
     // =========================================================================
 
+    /** Tras un 401 de Météo-France el token cacheado ya no vale: se descarta para pedir otro. */
+    private function dropMFTokenIfRejected(): bool {
+        if ($this->lastHttpCode !== 401) return false;
+        @unlink(sys_get_temp_dir() . '/kahir_mountain_' . md5('mf_oauth_token'));
+        return true;
+    }
+
     private function getMFToken(): ?string {
         $cached = $this->getCache('mf_oauth_token', self::CACHE_TOKEN);
         if ($cached !== null) return $cached;
@@ -937,20 +881,6 @@ class MountainConditionsService {
             $parts[] = "{$report['snow_depth_cm']} cm de manto en {$report['snow_station_name']} ({$srcLabel}).";
         }
 
-        // Cota de nieve estimada vs cota crítica de la ruta
-        if ($report['cota_nieve_est'] !== null) {
-            $isIsozeroBased = ($report['snow_depth_cm'] === null);
-            $disclaimer = $isIsozeroBased
-                ? ' (estimado por isocero; puede haber manto residual más bajo en primavera)'
-                : '';
-            $txt = "Cota de nieve estimada: ~{$report['cota_nieve_est']} m{$disclaimer}";
-            if ($cotaCritica > 0) {
-                $txt .= "; cota crítica de la ruta: ~{$cotaCritica} m";
-                $txt .= ($report['snow_at_route'] ? ' → nieve probable en ruta.' : ' → ruta probablemente sin nieve.');
-            }
-            $parts[] = $txt . ".";
-        }
-
         // Riesgo de barro por precipitación reciente
         if ($report['terrain_mud_risk']) {
             $mm      = round($report['precip_3d_mm'], 1);
@@ -963,16 +893,6 @@ class MountainConditionsService {
     // =========================================================================
     // MAPEO COORDENADAS → ZONAS
     // =========================================================================
-
-    private function coordsToAemetZone(float $lat, float $lon): ?array {
-        foreach (self::AEMET_MOUNTAIN_ZONES as $zone) {
-            if ($lat >= $zone['lat_min'] && $lat <= $zone['lat_max']
-             && $lon >= $zone['lon_min'] && $lon <= $zone['lon_max']) {
-                return $zone;
-            }
-        }
-        return null;
-    }
 
     private function coordsToMFMassif(float $lon): ?int {
         foreach (self::MF_MASSIFS as $id => $massif) {
@@ -1001,10 +921,23 @@ class MountainConditionsService {
         return is_array($data) ? $data : [];
     }
 
-    private function httpGet(string $url, array $headers = []): ?string {
+    /**
+     * Servicio al que pertenece una URL: servidor + primeros tramos de la ruta.
+     * Así un 429 en los avisos de AEMET no apaga el boletín de aludes, ni un 403 en la
+     * vigilancia de Météo-France apaga su BRA.
+     */
+    private function serviceKey(string $url): string {
         $host = parse_url($url, PHP_URL_HOST) ?: 'unknown';
-        if ($this->getCache('down_' . $host, self::HOST_DOWN_TTL) !== null) {
-            return null; // fuente caída o sin permiso hace poco: no esperar otra vez
+        $segs = array_slice(array_values(array_filter(explode('/', (string) parse_url($url, PHP_URL_PATH)))), 0, 4);
+        return $host . '/' . implode('/', $segs);
+    }
+
+    private function httpGet(string $url, array $headers = []): ?string {
+        $this->lastHttpCode = 0;
+        $host    = parse_url($url, PHP_URL_HOST) ?: 'unknown';
+        $service = $this->serviceKey($url);
+        if ($this->getCache('down_' . $service, self::HOST_DOWN_TTL) !== null) {
+            return null; // servicio caído o sin permiso hace poco: no esperar otra vez
         }
         $ch         = curl_init($url);
         $httpHeaders = ['User-Agent: KahirAI/1.0 (mountain-assistant)'];
@@ -1019,14 +952,20 @@ class MountainConditionsService {
             CURLOPT_HTTPHEADER     => $httpHeaders,
         ]);
         $body = curl_exec($ch);
-        $code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        $code = (int) curl_getinfo($ch, CURLINFO_HTTP_CODE);
         $err  = curl_error($ch);
         curl_close($ch);
+        $this->lastHttpCode = $code;
 
         if ($err || in_array($code, [401, 403, 429, 500, 502, 503, 504], true)) {
             // No se registra la URL completa: puede llevar la api_key en la query
             $this->logger->warning('Fuente externa no disponible', ['host' => $host, 'http' => $code, 'err' => $err ?: null]);
-            $this->setCache('down_' . $host, ['code' => $code], self::HOST_DOWN_TTL);
+            // Un 401 de Météo-France suele ser el token caducado: se reintenta con otro sin esperar
+            $isMfAuth = $code === 401 && str_contains($host, 'meteofrance');
+            if (!$isMfAuth) {
+                $ttl = $code === 429 ? self::RATE_LIMIT_TTL : self::HOST_DOWN_TTL;
+                $this->setCache('down_' . $service, ['code' => $code], $ttl);
+            }
             return null;
         }
         return ($code === 200 && $body) ? $body : null;
@@ -1036,6 +975,7 @@ class MountainConditionsService {
         $file = sys_get_temp_dir() . '/kahir_mountain_' . md5($key);
         if (!file_exists($file)) return null;
         $raw = json_decode(file_get_contents($file), true);
+        if (is_array($raw) && isset($raw['ttl'])) $ttl = min($ttl, (int) $raw['ttl']);
         if (!$raw || (time() - ($raw['t'] ?? 0)) > $ttl) {
             @unlink($file);
             return null;

@@ -220,7 +220,9 @@ const ChatApp = {
                 // Claude ya da una explicación completa; el widget es complementario
                 this.addMessage('system', response.message);
                 if (response.weather) {
-                    this.showWeatherCard(response.weather);
+                    this.showWeatherCard(response.weather, response.location);
+                } else if (Array.isArray(response.forecast) && response.forecast.length) {
+                    this.showForecastCard(response.forecast, response.location);
                 }
                 break;
 
@@ -384,17 +386,86 @@ const ChatApp = {
         this.addMessage('system', wrapper);
     },
 
+    /** Icono de Bootstrap Icons para un código meteorológico WMO. */
+    weatherIcon(code) {
+        const c = Number(code);
+        if (c === 0) return 'bi-sun';
+        if (c <= 2) return 'bi-cloud-sun';
+        if (c === 3) return 'bi-clouds';
+        if (c === 45 || c === 48) return 'bi-cloud-fog2';
+        if ((c >= 51 && c <= 57)) return 'bi-cloud-drizzle';
+        if ((c >= 61 && c <= 67) || (c >= 80 && c <= 82)) return 'bi-cloud-rain';
+        if ((c >= 71 && c <= 77) || c === 85 || c === 86) return 'bi-cloud-snow';
+        if (c >= 95) return 'bi-cloud-lightning-rain';
+        return 'bi-cloud';
+    },
+
+    /** Previsión por días (Open-Meteo): una fila por día, como mucho 7. */
+    showForecastCard(forecast, location) {
+        const esc = (v) => this.chatEscapeHtml(v);
+        const num = (v) => v != null && v !== '' && !isNaN(v);
+        const n0  = (v) => Math.round(+v).toLocaleString('es-ES');
+        const n1  = (v) => (+v).toLocaleString('es-ES', { maximumFractionDigits: 1 });
+        const today = new Date(); today.setHours(12, 0, 0, 0);
+        const dayName = (ymd) => {
+            const d = new Date(`${ymd}T12:00:00`);
+            if (isNaN(d)) return { main: ymd, sub: '' };
+            const diff = Math.round((d - today) / 86400000);
+            const wd = d.toLocaleDateString('es-ES', { weekday: 'long' });
+            const main = diff === 0 ? 'Hoy' : diff === 1 ? 'Mañana' : wd.charAt(0).toUpperCase() + wd.slice(1);
+            const sub = (diff <= 1 ? wd + ' ' : '') + d.toLocaleDateString('es-ES', { day: 'numeric', month: 'short' });
+            return { main, sub };
+        };
+        const rows = forecast.slice(0, 7).filter(d => d && d.date).map(d => {
+            const name = dayName(d.date);
+            const snow = num(d.snowfall) && +d.snowfall > 0 ? +d.snowfall : 0;
+            const precip = num(d.precipitation) ? +d.precipitation : 0;
+            const prob = num(d.precip_probability) ? +d.precip_probability : null;
+            // Precipitación: nieve en cm si nieva; si no, lluvia en mm; "seco" si no hay nada relevante
+            let wet = '';
+            if (snow >= 0.5)        wet = `<i class="bi bi-snow2" aria-hidden="true"></i> ${esc(n1(snow))} cm`;
+            else if (precip >= 0.1) wet = `<i class="bi bi-droplet" aria-hidden="true"></i> ${esc(n1(precip))} mm`;
+            else                    wet = '<span class="fc-dry">Seco</span>';
+            const probTxt = prob !== null && (snow >= 0.5 || precip >= 0.1) ? `<small>${esc(n0(prob))} %</small>` : '';
+            const gust = num(d.windgusts_max) ? +d.windgusts_max : null;
+            const windy = gust !== null && gust >= 50;
+            return `
+                <li class="fc-row">
+                    <span class="fc-day"><strong>${esc(name.main)}</strong><small>${esc(name.sub)}</small></span>
+                    <span class="fc-sky" title="${esc(d.description || '')}">
+                        <i class="bi ${this.weatherIcon(d.weathercode)}" aria-hidden="true"></i>
+                        <span class="fc-desc">${esc(d.description || '')}</span>
+                    </span>
+                    <span class="fc-temp">${num(d.temp_min) && num(d.temp_max)
+                        ? `<span class="fc-min">${esc(n0(d.temp_min))}°</span> <span class="fc-max">${esc(n0(d.temp_max))}°</span>` : '—'}</span>
+                    <span class="fc-wet">${wet} ${probTxt}</span>
+                    <span class="fc-wind${windy ? ' fc-wind-strong' : ''}" title="Rachas máximas">${gust !== null
+                        ? `<i class="bi bi-wind" aria-hidden="true"></i> ${esc(n0(gust))} km/h` : ''}</span>
+                </li>`;
+        }).join('');
+        if (!rows) return;
+        const card = document.createElement('div');
+        card.classList.add('weather-card', 'forecast-card');
+        card.innerHTML = `
+            <div class="weather-info">
+                <p class="weather-eyebrow"><i class="bi bi-calendar3" aria-hidden="true"></i> Previsión${location ? ` · ${esc(location)}` : ''}</p>
+                <ul class="fc-list">${rows}</ul>
+                <p class="fc-legend">Mínima y máxima · precipitación del día · rachas de viento. Fuente: Open-Meteo.</p>
+            </div>`;
+        this.addMessage('system', card);
+    },
+
     // Alias mantenido por compatibilidad con código antiguo
     showRouteCards(routes) {
         this.showRouteCarousel(routes);
     },
 
-    showWeatherCard(weather) {
+    showWeatherCard(weather, location) {
         // No mostrar el widget si no hay datos reales (evita "null°C")
         if (!weather || weather.temperature === null || weather.temperature === undefined) return;
         const card = document.createElement('div');
         card.classList.add('weather-card');
-        card.innerHTML = this.createWeatherCardHTML(weather);
+        card.innerHTML = this.createWeatherCardHTML(weather, location);
         this.addMessage('system', card);
     },
 
@@ -536,7 +607,8 @@ const ChatApp = {
     },
 
     createRouteCardHTML(route) {
-        const diffLabels = { beginner: 'Principiante', intermediate: 'Intermedio', advanced: 'Avanzado' };
+        // Mismas palabras que usan el texto del asistente y los motivos ("dificultad fácil")
+        const diffLabels = { beginner: 'Fácil', intermediate: 'Intermedia', advanced: 'Difícil' };
         const diff      = route.difficulty || 'intermediate';
         const diffLabel = diffLabels[diff] || diff;
         // Clase de color (definida en chat.css); valores desconocidos → neutro
@@ -544,28 +616,9 @@ const ChatApp = {
 
         const actIcons = {
             hiking: 'fa-hiking', ski_touring: 'fa-skiing', climbing: 'fa-mountain',
-            cycle_touring: 'fa-bicycle', snowshoeing: 'fa-snowflake',
+            cycle_touring: 'fa-bicycle', btt: 'fa-bicycle', snowshoeing: 'fa-snowflake',
         };
         const actIcon = actIcons[route.tipo_ruta] || 'fa-route';
-
-        const zoneLabels = {
-            'Aragon':           'Pirineo Aragonés',
-            'Western_Pyrenees': 'Pirineo Occidental',
-            'Eastern_Pyrenees': 'Pirineo Oriental',
-            'Other':            '',
-            'Central_Pyrenees': 'Pirineo Central',
-            'Euskadi':          'Euskadi',
-            'Cantabria':        'Cantabria / Picos',
-            'Galicia':          'Galicia',
-            'Sistema_Central':  'Sistema Central',
-            'Sistema_Iberico':  'Sistema Ibérico',
-            'Sierra_Nevada':    'Sierra Nevada',
-            'Andalucia':        'Andalucía',
-            'Levante':          'Levante',
-            'Canarias':         'Canarias',
-            'Baleares':         'Baleares',
-            'Francia_Sur':      'Sur de Francia',
-        };
 
         // Limpiar título: guiones bajos → espacios, colapsar espacios múltiples
         const cleanTitle = (route.title || 'Ruta')
@@ -573,10 +626,8 @@ const ChatApp = {
             .replace(/\s{2,}/g, ' ')
             .trim();
 
-        // La columna `ubicacion` de la BD no es fiable (70 % "Other", zonas mal asignadas):
-        // solo se muestra cuando es una zona conocida y la búsqueda no da ya la distancia al lugar
-        const hasDistanceReason = Array.isArray(route.reasons) && route.reasons.some(r => /km de|Sale desde/.test(r));
-        const locationLabel = hasDistanceReason ? '' : (zoneLabels[route.location] || '');
+        // No se muestra la columna `ubicacion` de la BD: no es fiable (70 % "Other", zonas mal asignadas).
+        // Dónde está la ruta lo dicen los motivos ("Empieza a 4 km de Jaca", "Está en Bizkaia").
 
         // Formatear duración: 6.5 h → "6h 30min"
         const fmtDuration = (h) => {
@@ -586,10 +637,14 @@ const ChatApp = {
             return mins > 0 ? `${hours}h ${mins}min` : `${hours}h`;
         };
 
-        const distance  = route.distance  != null ? parseFloat(route.distance).toFixed(1)  : '—';
+        const distance  = route.distance  != null ? parseFloat(route.distance).toLocaleString('es-ES', { maximumFractionDigits: 1 }) : '—';
         const elevation = route.elevation != null ? `+${Math.round(route.elevation)} m`     : '—';
-        // Horas MIDE (con desnivel) si las hay; si no, la duración guardada
+        // Horas MIDE (con desnivel) si las hay; si no, la duración guardada.
+        // Se dice explícitamente que es lo que dura la ruta, para no confundirlo con el trayecto hasta ella.
         const duration  = fmtDuration(route.horas_mide != null ? route.horas_mide : route.duration);
+        const isBike    = route.tipo_ruta === 'btt' || route.tipo_ruta === 'cycle_touring';
+        const durationLabel = duration === '—' ? duration : `${duration} ${isBike ? 'en bici' : 'a pie'}`;
+        const durationTitle = isBike ? 'Duración estimada del recorrido en bici' : 'Duración de la ruta a pie (método MIDE)';
 
         // Por qué se recomienda (motivos concretos del recomendador)
         const reasons = Array.isArray(route.reasons) ? route.reasons.slice(0, 3) : [];
@@ -606,7 +661,7 @@ const ChatApp = {
 
         // Badge de tiempo en coche — sobre la imagen (esquina inferior izquierda)
         const driveBadge = route.drive_time_text
-            ? `<span class="route-drive-badge">
+            ? `<span class="route-drive-badge" title="Tiempo en coche desde el lugar buscado hasta el inicio">
                    <i class="bi bi-car-front" aria-hidden="true"></i> ${esc(route.drive_time_text)}
                </span>`
             : '';
@@ -628,12 +683,11 @@ const ChatApp = {
                     ${driveBadge}
                 </div>
                 <div class="route-card-body">
-                    ${locationLabel ? `<p class="route-card-location">${esc(locationLabel)}</p>` : ''}
                     <h3 class="route-card-title">${esc(cleanTitle)}</h3>
                     <div class="route-card-stats">
-                        <span class="k-chip"><i class="bi bi-arrow-left-right" aria-hidden="true"></i> ${esc(distance)} km</span>
+                        <span class="k-chip" title="Longitud de la ruta"><i class="bi bi-arrow-left-right" aria-hidden="true"></i> ${esc(distance)} km</span>
                         <span class="k-chip"><i class="bi bi-graph-up-arrow" aria-hidden="true"></i> ${esc(elevation)}</span>
-                        <span class="k-chip"><i class="bi bi-clock" aria-hidden="true"></i> ${esc(duration)}</span>
+                        <span class="k-chip" title="${esc(durationTitle)}"><i class="bi bi-clock" aria-hidden="true"></i> ${esc(durationLabel)}</span>
                         ${effort ? `<span class="k-chip k-chip-moss" title="Esfuerzo MIDE"><i class="bi bi-activity" aria-hidden="true"></i> Esfuerzo ${esc(effort)}/5</span>` : ''}
                     </div>
                     ${reasonsHtml}
@@ -645,7 +699,7 @@ const ChatApp = {
         `;
     },
 
-    createWeatherCardHTML(weather) {
+    createWeatherCardHTML(weather, location) {
         // Solo renderizar un campo si tiene valor real (evita "nullm", "undefined%", etc.)
         const val = (v) => v != null && v !== '' && !isNaN(v);
         const esc = (v) => this.chatEscapeHtml(v);
@@ -657,8 +711,10 @@ const ChatApp = {
                 <span class="weather-detail-value">${value}</span>
             </div>`;
 
+        const n0 = (v) => Math.round(+v).toLocaleString('es-ES');
+        const n1 = (v) => (+v).toLocaleString('es-ES', { maximumFractionDigits: 1 });
         const wind = val(weather.wind_speed)
-            ? `${esc(weather.wind_speed)} km/h${val(weather.wind_gusts) ? ` <small>rachas ${esc(weather.wind_gusts)}</small>` : ''}`
+            ? `${esc(n0(weather.wind_speed))} km/h${val(weather.wind_gusts) ? ` <small>rachas ${esc(n0(weather.wind_gusts))} km/h</small>` : ''}`
             : '';
 
         const detailItems = [
@@ -667,16 +723,16 @@ const ChatApp = {
             val(weather.humidity)       ? item('bi-clouds', 'Nubosidad', `${esc(weather.humidity)}%`) : '',
             val(weather.visibility)     ? item('bi-eye', 'Visibilidad', `${esc(weather.visibility)} m`) : '',
             // cota_nieve_est = transición real del manto (multi-punto Open-Meteo o AEMET)
-            val(weather.cota_nieve_est) ? item('bi-snow', 'Cota de nieve', `~${esc(weather.cota_nieve_est)} m`) : '',
+            val(weather.cota_nieve_est) ? item('bi-snow', 'Cota de nieve', `~${esc(n0(weather.cota_nieve_est))} m`) : '',
             // snow_level = isocero (isoterma 0°C), no cota de nieve del manto
-            val(weather.snow_level)     ? item('bi-thermometer-snow', 'Isocero', `${esc(weather.snow_level)} m`) : '',
+            val(weather.snow_level)     ? item('bi-thermometer-snow', 'Isocero', `${esc(n0(weather.snow_level))} m`) : '',
         ].filter(Boolean).join('');
 
         return `
             <div class="weather-info">
-                <p class="weather-eyebrow"><i class="bi bi-cloud-sun" aria-hidden="true"></i> Parte meteorológico</p>
+                <p class="weather-eyebrow"><i class="bi bi-cloud-sun" aria-hidden="true"></i> Ahora${location ? ` · ${esc(location)}` : ''}</p>
                 <div class="current-weather">
-                    <span class="temperature">${esc(weather.temperature)}<span class="temperature-unit">°C</span></span>
+                    <span class="temperature">${esc(n1(weather.temperature))}<span class="temperature-unit">°C</span></span>
                     <span class="conditions">${esc(weather.conditions || '')}</span>
                 </div>
                 ${detailItems ? `<div class="weather-details">${detailItems}</div>` : ''}

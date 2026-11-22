@@ -32,7 +32,7 @@ ini_set('display_errors', '0');
 require_once $project_root . '/vendor/autoload.php'; // PSR-4: KahirAI\ → hiker_ai/
 require_once $project_root . '/includes/security.php'; // sesión segura + CSRF
 
-use KahirAI\Core\{AICore, ChatManager};
+use KahirAI\Core\{AICore, ChatManager, RouteRecommender};
 use KahirAI\Database\DBConnection;
 use KahirAI\Services\LoggerService;
 
@@ -364,7 +364,7 @@ switch ($responseType) {
             if ($driveMin !== null) {
                 $h = intdiv($driveMin, 60);
                 $m = $driveMin % 60;
-                $driveText = $h > 0 ? "{$h}h {$m}min" : "{$m}min";
+                $driveText = ($h > 0 ? "{$h} h " . ($m ? "{$m} min" : '') : "{$m} min") . ' en coche';
             }
 
             return [
@@ -379,7 +379,8 @@ switch ($responseType) {
                 'tipo_ruta'          => $route['tipo_ruta']   ?? '',
                 // Esfuerzo MIDE (Fase 1): columnas generadas en `rutas`
                 'esfuerzo'           => isset($route['esfuerzo'])   ? (int) $route['esfuerzo']     : null,
-                'horas_mide'         => isset($route['horas_mide']) ? (float) $route['horas_mide'] : null,
+                // Horas MIDE a pie; en BTT/cicloturismo, estimadas por distancia (misma regla que el recomendador)
+                'horas_mide'         => (RouteRecommender::routeHours($route) ?: null),
                 'location'           => $route['ubicacion']   ?? ($route['location']  ?? ''),
                 'drive_time_minutes' => $driveMin,
                 'drive_km'           => $route['drive_km']    ?? null,
@@ -463,7 +464,7 @@ switch ($responseType) {
                 'difficulty' => $r['dificultad']   ?? ($r['difficulty'] ?? ''),
                 'tipo_ruta'  => $r['tipo_ruta']    ?? '',
                 'esfuerzo'   => isset($r['esfuerzo'])   ? (int) $r['esfuerzo']     : null,
-                'horas_mide' => isset($r['horas_mide']) ? (float) $r['horas_mide'] : null,
+                'horas_mide' => (RouteRecommender::routeHours($r) ?: null),
                 'location'   => $r['ubicacion']    ?? ($r['location']   ?? ''),
                 'image'      => !empty($r['image_url'])
                                     ? $r['image_url']

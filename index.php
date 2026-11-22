@@ -58,22 +58,23 @@ if ($isLoggedIn) {
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Work+Sans:wght@400;500;600&display=swap" rel="stylesheet">
     <?php if ($isLoggedIn): ?>
         <!-- Estilos para la interfaz de chat -->
-        <link href="hiker_ai/assets/css/chat.css?v=20261122b" rel="stylesheet">
-        <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
-        <link rel="preconnect" href="https://fonts.googleapis.com">
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-        <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Work+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+        <link href="hiker_ai/assets/css/chat.css?v=20261122d" rel="stylesheet">
         <link href="assets/css/kahir.css?v=20261122" rel="stylesheet">
     <?php else: ?>
-        <!-- Estilos para la página de inicio -->
-        <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-        <link href="landing/landing.css" rel="stylesheet">
+        <!-- Portada para visitantes -->
+        <link href="assets/css/kahir.css?v=20261122" rel="stylesheet">
+        <link href="landing/landing.css?v=20261122" rel="stylesheet">
+        <link rel="preload" as="image" href="imagenes/GR_route.jpg">
     <?php endif; ?>
 </head>
 
-<body class="<?php echo $isLoggedIn ? 'd-flex flex-column min-vh-100' : 'bg-white'; ?>">
+<body class="d-flex flex-column min-vh-100">
     <!-- Menú de navegación -->
     <div id="menu"></div>
 
@@ -122,8 +123,8 @@ if ($isLoggedIn) {
             </div>
         </main>
     <?php else: ?>
-        <!-- Página de inicio -->
-        <div id="landing-root"></div>
+        <!-- Portada (HTML del servidor: se ve sin JavaScript y la indexan los buscadores) -->
+        <?php require __DIR__ . '/landing/landing_content.php'; ?>
     <?php endif; ?>
 
     <!-- Pie de página -->
@@ -152,7 +153,7 @@ if ($isLoggedIn) {
                 }
             };
         </script>
-        <script src="hiker_ai/assets/js/chat.js?v=20261122d"></script>
+        <script src="hiker_ai/assets/js/chat.js?v=20261122h"></script>
         <script src="hiker_ai/assets/js/chatcard.js?v=20261122"></script>
         <script src="hiker_ai/assets/js/weather_card.js?v=20261122"></script>
         <script>
@@ -162,33 +163,6 @@ if ($isLoggedIn) {
                 } else {
                     console.error('ChatApp or configuration not available');
                 }
-            });
-        </script>
-    <?php else: ?>
-        <!-- Scripts para la página de inicio -->
-        <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-        <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-        <script src="landing/landing.js"></script>
-        <script>
-            document.addEventListener('DOMContentLoaded', () => {
-                const root = ReactDOM.createRoot(document.getElementById('landing-root'));
-                root.render(React.createElement(LandingPage));
-
-                // Observador de intersección para animaciones
-                const observer = new IntersectionObserver((entries) => {
-                    entries.forEach(entry => {
-                        if (entry.isIntersecting) {
-                            entry.target.classList.add('visible');
-                        }
-                    });
-                }, {
-                    threshold: 0.1
-                });
-
-                // Observar todas las secciones
-                document.querySelectorAll('section').forEach(section => {
-                    observer.observe(section);
-                });
             });
         </script>
     <?php endif; ?>

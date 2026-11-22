@@ -129,13 +129,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if (!$errores) {
             try {
                 $stmt = $conn->prepare(
+                    // Si la descripción cambia, ya la ha escrito una persona: deja de ser automática.
+                    // (MySQL aplica las asignaciones en orden: descripcion_auto se compara con la antigua)
                     "UPDATE rutas
-                        SET titulo = ?, descripcion = ?, tipo_ruta = ?, ubicacion = ?, dificultad = ?,
+                        SET descripcion_auto = IF(descripcion <=> ?, descripcion_auto, 0),
+                            titulo = ?, descripcion = ?, tipo_ruta = ?, ubicacion = ?, dificultad = ?,
                             distancia_km = ?, elevacion_ganada = ?, duracion_horas = ?, estado = ?
                       WHERE id = ?"
                 );
                 $stmt->bind_param(
-                    "sssssdidsi",
+                    "ssssssdidsi",
+                    $descripcion,
                     $titulo, $descripcion, $tipoRuta, $ubicacion, $dificultad,
                     $distancia, $elevacion, $duracion, $estado, $id
                 );

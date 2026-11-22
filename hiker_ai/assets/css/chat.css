@@ -756,6 +756,50 @@
 }
 .weather-card .weather-warnings { margin-top: .9rem; }
 
+/* Previsión por días: una fila por día (día · cielo · temperaturas · precipitación · viento) */
+.weather-card.forecast-card { max-width: 640px; width: 100%; }
+.fc-list { list-style: none; margin: .75rem 0 0; padding: 0; }
+.fc-row {
+    display: grid;
+    grid-template-columns: 6.5rem minmax(6rem, 1fr) 4.25rem 7.25rem 5.5rem;
+    align-items: center;
+    gap: .75rem;
+    padding: .6rem 0;
+    border-top: 1px solid var(--k-stone-100);
+    font-size: .92rem;
+}
+.fc-row:first-child { border-top: 0; }
+.fc-day { display: flex; flex-direction: column; line-height: 1.2; }
+.fc-day strong { font-weight: 600; color: var(--k-ink); }
+.fc-day small { color: var(--k-stone-500); font-size: .78rem; }
+.fc-sky { display: flex; align-items: center; gap: .5rem; min-width: 0; color: var(--k-ink-2); }
+.fc-sky i { font-size: 1.25rem; color: var(--k-lake); flex: none; }
+.fc-desc { line-height: 1.25; }
+.fc-desc::first-letter { text-transform: uppercase; }
+.fc-temp { white-space: nowrap; text-align: right; font-variant-numeric: tabular-nums; }
+.fc-min { color: var(--k-lake); }
+.fc-max { color: var(--k-ink); font-weight: 600; }
+.fc-wet { white-space: nowrap; color: var(--k-ink-2); font-variant-numeric: tabular-nums; }
+.fc-wet i { color: var(--k-lake); }
+.fc-wet small { color: var(--k-stone-500); margin-left: .15rem; }
+.fc-dry { color: var(--k-stone-500); }
+.fc-wind { white-space: nowrap; color: var(--k-ink-2); font-variant-numeric: tabular-nums; }
+.fc-wind-strong { color: var(--k-rust); font-weight: 600; }
+.fc-legend { margin: .6rem 0 0; font-size: .75rem; color: var(--k-stone-500); }
+@media (max-width: 575.98px) {
+    /* Móvil: día y cielo arriba; cifras debajo */
+    .fc-row {
+        grid-template-columns: minmax(0, 1fr) auto;
+        grid-template-areas: "day temp" "sky sky" "wet wind";
+        row-gap: .25rem;
+    }
+    .fc-day { grid-area: day; flex-direction: row; align-items: baseline; gap: .4rem; }
+    .fc-temp { grid-area: temp; }
+    .fc-sky { grid-area: sky; }
+    .fc-wet { grid-area: wet; }
+    .fc-wind { grid-area: wind; text-align: right; }
+}
+
 /* ── Error ────────────────────────────────────────────────────────────── */
 .error-message {
     display: flex;

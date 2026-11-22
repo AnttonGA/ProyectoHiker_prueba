@@ -272,21 +272,25 @@ class WeatherService implements IWeatherProvider {
             }
             return array_keys($all);
         }
-        if (array_key_exists('windspeed_max', $weatherData)) {
-            $weatherData['windspeed'] = $weatherData['windspeed_max'];
-            $weatherData['temp']      = $weatherData['temp_min'] ?? ($weatherData['temp'] ?? 10);
-        }
-        $recs  = [];
-        $wind  = $weatherData['windspeed']    ?? 0;
-        $temp  = $weatherData['temp']          ?? 10;
-        $precip = $weatherData['precipitation'] ?? 0;
-        $code  = $weatherData['weathercode']   ?? 0;
+        // Mismas magnitudes y umbrales que isSafeForActivity(): cada motivo de "no es seguro" tiene su aviso
+        $isDay  = array_key_exists('windspeed_max', $weatherData);
+        $wind   = (float) ($isDay ? ($weatherData['windspeed_max'] ?? 0) : ($weatherData['windspeed'] ?? 0));
+        $gusts  = (float) ($isDay ? ($weatherData['windgusts_max'] ?? 0) : ($weatherData['windgusts'] ?? 0));
+        $tMin   = $isDay ? ($weatherData['temp_min'] ?? null) : ($weatherData['temp'] ?? null);
+        $tMax   = $isDay ? ($weatherData['temp_max'] ?? null) : ($weatherData['temp'] ?? null);
+        $precip = (float) ($weatherData['precipitation'] ?? 0);
+        $code   = (int) ($weatherData['weathercode'] ?? 0);
+        $recs   = [];
 
-        if ($wind > 30)   $recs[] = 'Vientos fuertes: lleva ropa cortavientos.';
-        if ($temp < 0)    $recs[] = 'Temperatura bajo cero: equipo térmico imprescindible.';
-        elseif ($temp < 5) $recs[] = 'Temperatura baja: lleva capas de abrigo.';
-        elseif ($temp > 28) $recs[] = 'Calor intenso: hidratación y protección solar.';
-        if ($precip > 0)  $recs[] = 'Precipitación prevista: lleva ropa impermeable.';
+        if ($gusts > 80)       $recs[] = 'Rachas de viento muy fuertes (' . round($gusts) . ' km/h): evita crestas y zonas expuestas.';
+        elseif ($wind > self::THRESHOLDS['wind_kmh']) $recs[] = 'Viento muy fuerte: evita crestas y zonas expuestas.';
+        elseif ($wind > 30 || $gusts > 50) $recs[] = 'Viento fuerte: lleva ropa cortavientos.';
+        if ($tMin !== null && $tMin < self::THRESHOLDS['temp_min']) $recs[] = 'Frío extremo (' . round((float) $tMin) . ' °C): equipo térmico imprescindible.';
+        elseif ($tMin !== null && $tMin < 0) $recs[] = 'Temperaturas bajo cero: equipo térmico imprescindible.';
+        elseif ($tMin !== null && $tMin < 5) $recs[] = 'Temperatura baja: lleva capas de abrigo.';
+        if ($tMax !== null && $tMax > self::THRESHOLDS['temp_max']) $recs[] = 'Calor extremo (' . round((float) $tMax) . ' °C): evita las horas centrales, mucha agua y protección solar.';
+        elseif ($tMax !== null && $tMax > 28) $recs[] = 'Calor intenso: hidratación y protección solar.';
+        if ($precip > 0)       $recs[] = 'Precipitación prevista: lleva ropa impermeable.';
         if (in_array($code, [45, 48], true)) $recs[] = 'Niebla prevista: usa brújula o GPS.';
         if (in_array($code, self::DANGEROUS_CODES, true)) {
             $recs[] = 'ALERTA: Tormenta eléctrica prevista. No salgas a zonas expuestas.';
@@ -294,17 +298,22 @@ class WeatherService implements IWeatherProvider {
 
         switch ($activityType) {
             case 'ski_touring':
+            case 'snowshoeing':
                 $isoZero = $weatherData['iso_zero'] ?? null;
-                $avRisk  = $weatherData['mountain']['avalanche_risk'] ?? 1;
                 if ($isoZero && $isoZero < 1500) $recs[] = "Cota de nieve baja ({$isoZero} m): verifica el acceso.";
-                if ($avRisk >= 3) $recs[] = "Riesgo de aludes nivel {$avRisk}/5: extrema precauciones.";
+                if ($precip > 15) $recs[] = 'Nevada o lluvia abundante: consulta el boletín de aludes antes de salir.';
                 break;
-
+            case 'climbing':
+                if ($precip > 0.5) $recs[] = 'Roca mojada: no es día de escalada.';
+                break;
             case 'hiking':
                 if (($weatherData['visibility_status'] ?? '') === 'poor') {
                     $recs[] = 'Visibilidad reducida: lleva GPS y mapa físico.';
                 }
+                if ($precip > ($isDay ? 10 : 5)) $recs[] = 'Lluvia abundante: barro y arroyos crecidos; valora aplazar.';
                 break;
+            default:
+                if ($precip > ($isDay ? 10 : 5)) $recs[] = 'Lluvia abundante: barro y arroyos crecidos; valora aplazar.';
         }
 
         return $recs;
@@ -541,6 +550,62 @@ class WeatherService implements IWeatherProvider {
             'points_n'       => [],
             'points_s'       => [],
         ];
+    }
+
+    /**
+     * Nieve reciente en un punto: nevada acumulada de los últimos 7 días (Open-Meteo, snowfall_sum),
+     * fecha de la última nevada y espesor de manto que da el modelo ahora mismo en ese punto.
+     * El modelo trabaja a la altitud de su celda (devuelta en 'elevation'), no a la de cada cumbre.
+     *
+     * @return array{snowfall_7d_cm: float, last_snow_date: ?string, depth_cm: ?int, elevation: ?int}|null
+     */
+    public function getRecentSnow(float $latitude, float $longitude): ?array {
+        $cacheKey = "recentsnow_{$latitude}_{$longitude}";
+        $cached   = $this->getCache($cacheKey);
+        if ($cached !== null) return $cached ?: null;
+
+        try {
+            $raw = $this->request([
+                'latitude'      => $latitude,
+                'longitude'     => $longitude,
+                'past_days'     => 7,
+                'forecast_days' => 1,
+                'daily'         => 'snowfall_sum',
+                'hourly'        => 'snow_depth',
+                'timezone'      => 'Europe/Madrid',
+            ]);
+            $dates = $raw['daily']['time'] ?? [];
+            $snow  = $raw['daily']['snowfall_sum'] ?? [];
+            $today = (new \DateTimeImmutable('today', new \DateTimeZone('Europe/Madrid')))->format('Y-m-d');
+            $total = 0.0;
+            $last  = null;
+            foreach ($dates as $i => $d) {
+                if ($d >= $today) break;                 // solo días ya pasados
+                $v = (float) ($snow[$i] ?? 0);
+                $total += $v;
+                if ($v >= 1.0) $last = $d;
+            }
+            // Espesor de manto a la hora actual
+            $depth = null;
+            $times = $raw['hourly']['time'] ?? [];
+            $now   = time();
+            foreach ($times as $i => $t) {
+                if (strtotime($t) > $now) break;
+                $v = $raw['hourly']['snow_depth'][$i] ?? null;
+                if ($v !== null) $depth = (int) round((float) $v * 100);
+            }
+            $result = [
+                'snowfall_7d_cm' => round($total, 1),
+                'last_snow_date' => $last,
+                'depth_cm'       => $depth,
+                'elevation'      => isset($raw['elevation']) ? (int) $raw['elevation'] : null,
+            ];
+            $this->setCache($cacheKey, $result);
+            return $result;
+        } catch (\Exception $e) {
+            $this->logger->warning('getRecentSnow error', ['error' => $e->getMessage()]);
+            return null;
+        }
     }
 
     public function getPrecip3d(float $latitude, float $longitude): float {
