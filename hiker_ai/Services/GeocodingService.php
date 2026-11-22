@@ -44,7 +44,7 @@ class GeocodingService {
      * @return array|null Coordenadas [lat, lon] o null si no se encuentra
      */
     public function getCoordinates(string $location, bool $strictBounds = true): ?array {
-        $cacheKey = "geocode_" . md5($location . $strictBounds);
+        $cacheKey = "geocode_v2_" . md5($location . $strictBounds);
         
         // Verificar caché
         $cached = $this->getFromCache($cacheKey);
@@ -55,7 +55,7 @@ class GeocodingService {
         try {
             $url = $this->buildNominatimUrl('search', [
                 'q' => $location,
-                'format' => 'json',
+                'format' => 'jsonv2',
                 'limit' => 1,
                 'viewbox' => $this->getPyreneesViewbox(),
                 'bounded' => $strictBounds ? 1 : 0
@@ -70,7 +70,12 @@ class GeocodingService {
             $result = $response[0];
             $coordinates = [
                 'lat' => (float)$result['lat'],
-                'lon' => (float)$result['lon']
+                'lon' => (float)$result['lon'],
+                // Caja [sur, norte, oeste, este] y tipo de lugar: permiten distinguir un pueblo
+                // (búsqueda por radio) de una región (búsqueda dentro de su caja)
+                'bbox' => isset($result['boundingbox']) && count($result['boundingbox']) === 4
+                    ? array_map('floatval', $result['boundingbox']) : null,
+                'kind' => $result['addresstype'] ?? ($result['type'] ?? null),
             ];
 
             if ($strictBounds && !$this->isInCoveredArea($coordinates['lat'], $coordinates['lon'])) {

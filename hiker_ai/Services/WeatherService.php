@@ -207,38 +207,57 @@ class WeatherService implements IWeatherProvider {
     }
 
     /**
-     * Devuelve true si las condiciones son seguras para la actividad indicada.
+     * Previsión diaria para unas fechas concretas (Y-m-d). Devuelve solo esos días, en orden.
+     * Las fechas fuera del horizonte de Open-Meteo (16 días) no aparecen.
+     */
+    public function getForecastForDates(float $latitude, float $longitude, array $dates, array $options = []): array {
+        if (!$dates) return [];
+        $today = new \DateTimeImmutable('today', new \DateTimeZone('Europe/Madrid'));
+        $last  = new \DateTimeImmutable(max($dates), new \DateTimeZone('Europe/Madrid'));
+        $days  = (int) $today->diff($last)->days + 1;
+        if ($days > 16) $days = 16;
+        $all = $this->getForecast($latitude, $longitude, $days, $options);
+        return array_values(array_filter($all, fn($d) => in_array($d['date'] ?? '', $dates, true)));
+    }
+
+    /**
+     * Devuelve true si las condiciones son seguras para la actividad.
+     * Acepta el tiempo actual (getCurrentWeather), un día de getForecast() o una lista de días
+     * (en ese caso, todos deben ser seguros).
      */
     public function isSafeForActivity(array $weatherData, string $activityType): bool {
-        $wind   = $weatherData['windspeed']    ?? 0;
-        $precip = $weatherData['precipitation'] ?? 0;
-        $temp   = $weatherData['temp']          ?? 10;
-        $code   = $weatherData['weathercode']   ?? 0;
+        if (isset($weatherData[0]) && is_array($weatherData[0])) {
+            foreach ($weatherData as $day) {
+                if (!$this->isSafeForActivity($day, $activityType)) return false;
+            }
+            return true;
+        }
+        // Día de previsión: claves *_max / precipitation (suma diaria)
+        $isDay  = array_key_exists('windspeed_max', $weatherData);
+        $wind   = (float) ($isDay ? ($weatherData['windspeed_max'] ?? 0) : ($weatherData['windspeed'] ?? 0));
+        $gusts  = (float) ($isDay ? ($weatherData['windgusts_max'] ?? 0) : ($weatherData['windgusts'] ?? 0));
+        $precip = (float) ($weatherData['precipitation'] ?? 0);
+        $tMin   = $isDay ? ($weatherData['temp_min'] ?? null) : ($weatherData['temp'] ?? null);
+        $tMax   = $isDay ? ($weatherData['temp_max'] ?? null) : ($weatherData['temp'] ?? null);
+        $code   = (int) ($weatherData['weathercode'] ?? 0);
 
-        if ($wind  > self::THRESHOLDS['wind_kmh'])  return false;
-        if ($temp  < self::THRESHOLDS['temp_min'])   return false;
-        if ($temp  > self::THRESHOLDS['temp_max'])   return false;
+        if ($wind > self::THRESHOLDS['wind_kmh'] || $gusts > 80) return false;
+        if ($tMin !== null && $tMin < self::THRESHOLDS['temp_min']) return false;
+        if ($tMax !== null && $tMax > self::THRESHOLDS['temp_max']) return false;
         if (in_array($code, self::DANGEROUS_CODES, true)) return false;
 
         switch ($activityType) {
             case 'ski_touring':
-                // Nieve suficiente y riesgo de aludes aceptable
-                $snowLevel    = $weatherData['snow_level'] ?? 0;
-                $avalancheRisk = $weatherData['mountain']['avalanche_risk'] ?? 1;
-                if ($snowLevel < 1200)  return false;
-                if ($avalancheRisk > 3) return false;
+            case 'snowshoeing':
+                // La nieve y los aludes se valoran con el boletín oficial, no con el tiempo
+                if ($precip > 15) return false;
                 break;
-
-            case 'hiking':
-                if ($precip > 5) return false;
-                break;
-
             case 'climbing':
-                if ($precip > 0)  return false;
-                if ($wind  > 30)  return false;
+                if ($precip > 0.5 || $wind > 30) return false;
                 break;
+            default: // hiking, btt, cycle_touring
+                if ($precip > ($isDay ? 10 : 5)) return false;
         }
-
         return true;
     }
 
@@ -246,6 +265,17 @@ class WeatherService implements IWeatherProvider {
      * Recomendaciones de equipamiento según condiciones y actividad.
      */
     public function getWeatherRecommendations(array $weatherData, string $activityType): array {
+        if (isset($weatherData[0]) && is_array($weatherData[0])) {
+            $all = [];
+            foreach ($weatherData as $day) {
+                foreach ($this->getWeatherRecommendations($day, $activityType) as $r) $all[$r] = true;
+            }
+            return array_keys($all);
+        }
+        if (array_key_exists('windspeed_max', $weatherData)) {
+            $weatherData['windspeed'] = $weatherData['windspeed_max'];
+            $weatherData['temp']      = $weatherData['temp_min'] ?? ($weatherData['temp'] ?? 10);
+        }
         $recs  = [];
         $wind  = $weatherData['windspeed']    ?? 0;
         $temp  = $weatherData['temp']          ?? 10;

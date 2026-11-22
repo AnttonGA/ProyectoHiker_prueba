@@ -60,7 +60,7 @@ if ($isLoggedIn) {
     
     <?php if ($isLoggedIn): ?>
         <!-- Estilos para la interfaz de chat -->
-        <link href="hiker_ai/assets/css/chat.css?v=20261122" rel="stylesheet">
+        <link href="hiker_ai/assets/css/chat.css?v=20261122b" rel="stylesheet">
         <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
         <link rel="preconnect" href="https://fonts.googleapis.com">
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -152,7 +152,7 @@ if ($isLoggedIn) {
                 }
             };
         </script>
-        <script src="hiker_ai/assets/js/chat.js?v=20261122"></script>
+        <script src="hiker_ai/assets/js/chat.js?v=20261122d"></script>
         <script src="hiker_ai/assets/js/chatcard.js?v=20261122"></script>
         <script src="hiker_ai/assets/js/weather_card.js?v=20261122"></script>
         <script>

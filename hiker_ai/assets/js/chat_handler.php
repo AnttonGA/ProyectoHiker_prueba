@@ -353,8 +353,11 @@ switch ($responseType) {
     case 'route_suggestions':
         $payload['routes']  = $aiResponse['routes'] ?? [];
 
+        // Motivos concretos de cada ruta (mismo orden que las rutas)
+        $routeReasons = array_values($aiResponse['reasons'] ?? []);
+
         // Adaptar campos al formato que usa createRouteCardHTML()
-        $payload['routes'] = array_map(function (array $route) {
+        $payload['routes'] = array_map(function (array $route, int $i) use ($routeReasons) {
             // Tiempo en coche formateado para el frontend
             $driveMin = isset($route['drive_time_minutes']) ? (int)$route['drive_time_minutes'] : null;
             $driveText = null;
@@ -383,9 +386,10 @@ switch ($responseType) {
                 'drive_time_text'    => $driveText,
                 'image'              => !empty($route['image_url'])
                                             ? $route['image_url']
-                                            : 'hiker_ai/assets/img/route-placeholder.jpg',
+                                            : 'hiker_ai/assets/img/route-placeholder.svg',
+                'reasons'            => array_slice(array_map('strval', (array) ($routeReasons[$i] ?? [])), 0, 3),
             ];
-        }, $payload['routes']);
+        }, $payload['routes'], array_keys($payload['routes']));
 
         if (!empty($aiResponse['weather_warning'])) {
             $payload['weather_warning'] = $aiResponse['weather_warning'];
@@ -463,7 +467,7 @@ switch ($responseType) {
                 'location'   => $r['ubicacion']    ?? ($r['location']   ?? ''),
                 'image'      => !empty($r['image_url'])
                                     ? $r['image_url']
-                                    : 'hiker_ai/assets/img/route-placeholder.jpg',
+                                    : 'hiker_ai/assets/img/route-placeholder.svg',
             ];
         }
         $payload['suggestions'] = [

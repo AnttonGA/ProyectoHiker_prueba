@@ -1,0 +1,103 @@
+<?php
+/**
+ * Casos de la batería de evaluación. Cada caso es una conversación (varios turnos).
+ * Coordenadas de referencia: Jaca 42.57,-0.55 · Sallent/Valle de Tena 42.76,-0.33 ·
+ * Bilbao 43.26,-2.93 · Pamplona 42.81,-1.64 · Benasque 42.60,0.52 · Ordesa 42.65,-0.06
+ */
+$GENERIC_BAD = ['razonamiento', 'json', 'intent', '{"', 'como modelo de lenguaje'];
+$BIZKAIA = [43.0, 43.46, -3.46, -2.40, 'Bizkaia'];
+
+return [
+    'jaca' => ['turns' => [
+        ['q' => 'Quiero hacer una ruta de senderismo cerca de Jaca este sábado', 'checks' => [
+            'has_routes' => 3, 'near' => [42.57, -0.55, 40], 'activity' => 'hiking', 'min_km' => 2,
+            'no_invented_numbers' => true, 'text_none' => $GENERIC_BAD]],
+        ['q' => '¿Y algo más corto?', 'checks' => [
+            'has_routes' => 1, 'near' => [42.57, -0.55, 40], 'shorter_than_prev' => true]],
+        ['q' => '¿Qué tiempo va a hacer allí?', 'checks' => [
+            'text_any' => ['sábado', 'temperatura', 'ºc', '°c', 'grados'], 'text_none' => $GENERIC_BAD]],
+    ]],
+    'tena' => ['turns' => [
+        ['q' => 'Busco una ruta de esquí de travesía en el Valle de Tena de nivel intermedio', 'checks' => [
+            'has_routes' => 1, 'near' => [42.76, -0.33, 30], 'activity' => 'ski_touring',
+            'text_any' => ['alud', 'aludes', 'boletín', 'nieve']]],
+    ]],
+    'aludes' => ['turns' => [
+        ['q' => '¿Cómo está el riesgo de aludes en el Pirineo aragonés?', 'checks' => [
+            'text_any' => ['boletín', 'aemet', 'no tengo', 'no dispongo', 'nivel', 'riesgo'],
+            'text_none' => array_merge($GENERIC_BAD, ['eaws'])]],
+    ]],
+    'nivel' => ['turns' => [
+        ['q' => 'Recomiéndame una ruta para mi nivel', 'checks' => [
+            'has_routes' => 1, 'min_km' => 2, 'no_invented_numbers' => true, 'text_none' => $GENERIC_BAD]],
+    ]],
+    'bizkaia' => ['turns' => [
+        ['q' => 'Rutas en Bizkaia con menos de 500 metros de desnivel', 'checks' => [
+            'has_routes' => 3, 'bbox' => $BIZKAIA, 'max_elevation' => 500, 'min_km' => 2]],
+        ['q' => 'Compara las dos primeras rutas que me diste', 'checks' => [
+            'compares' => true, 'text_none' => $GENERIC_BAD]],
+    ]],
+    'material' => ['turns' => [
+        ['q' => '¿Qué material necesito para una ruta invernal con nieve?', 'checks' => [
+            'text_any' => ['crampones', 'piolet', 'arva', 'raquetas'], 'text_none' => $GENERIC_BAD]],
+    ]],
+    'alpes' => ['turns' => [
+        ['q' => 'Rutas de senderismo en los Alpes suizos', 'checks' => [
+            'no_routes' => true, 'text_any' => ['pirineo', 'no tengo', 'no dispongo', 'fuera', 'cobertura', 'euskadi', 'país vasco']]],
+    ]],
+    'ninos' => ['turns' => [
+        ['q' => 'Una ruta fácil para ir con niños cerca de Bilbao', 'checks' => [
+            'has_routes' => 2, 'near' => [43.26, -2.93, 35], 'difficulty_in' => ['beginner', 'easy'], 'min_km' => 1]],
+    ]],
+    'hola' => ['turns' => [
+        ['q' => 'hola', 'checks' => ['no_routes' => true, 'text_none' => $GENERIC_BAD]],
+    ]],
+    'benasque' => ['turns' => [
+        ['q' => 'Ruta exigente de montaña desde Benasque, unas 6 horas', 'checks' => [
+            'has_routes' => 2, 'near' => [42.60, 0.52, 30], 'activity' => 'hiking', 'no_invented_numbers' => true]],
+    ]],
+    'ordesa' => ['turns' => [
+        ['q' => 'Rutas por Ordesa', 'checks' => [
+            'has_routes' => 2, 'near' => [42.65, -0.06, 25], 'min_km' => 2]],
+        ['q' => 'Cuéntame más de la primera', 'checks' => [
+            'has_routes' => 1, 'no_invented_numbers' => true, 'text_none' => $GENERIC_BAD]],
+    ]],
+    'btt' => ['turns' => [
+        ['q' => 'Una ruta en BTT cerca de Pamplona', 'checks' => [
+            'has_routes' => 1, 'near' => [42.81, -1.64, 40], 'activity' => 'btt']],
+    ]],
+    'english' => ['turns' => [
+        ['q' => 'Can you suggest an easy hike near San Sebastian?', 'checks' => [
+            'has_routes' => 1, 'near' => [43.32, -1.98, 35], 'text_any' => ['route', 'hike', 'trail', 'walk']]],
+    ]],
+    'gorbea' => ['turns' => [
+        ['q' => 'Quiero subir al Gorbea', 'checks' => [
+            'has_routes' => 1, 'near' => [43.03, -2.78, 20], 'no_invented_numbers' => true]],
+    ]],
+    'manana' => ['turns' => [
+        // Debe hablar del día de mañana por su nombre (lunes, martes…)
+        ['q' => '¿Qué tiempo hará mañana en Benasque?', 'checks' => [
+            'type_in' => ['weather_info'],
+            'text_any' => ['mañana', ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado'][(int) date('w', strtotime('+1 day'))]],
+            'text_none' => $GENERIC_BAD]],
+    ]],
+    'lejano' => ['turns' => [
+        // Fuera del horizonte de previsión: debe decirlo, no inventar
+        ['q' => '¿Qué tiempo hará en Jaca el ' . (int) date('j', strtotime('+40 days')) . ' de '
+              . ['', 'enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'][(int) date('n', strtotime('+40 days'))] . '?',
+         'checks' => ['text_any' => ['todavía no hay previsión', 'no hay previsión', 'días vista', 'demasiado lejos'], 'text_none' => ['°c']]],
+    ]],
+    'plan' => ['turns' => [
+        ['q' => 'Busco una ruta por Panticosa para el sábado', 'checks' => [
+            'has_routes' => 2, 'near' => [42.72, -0.28, 25], 'text_any' => ['sábado']]],
+        ['q' => '¿Cuál me conviene si no quiero pasar de 3 horas?', 'checks' => [
+            'text_none' => $GENERIC_BAD, 'no_invented_numbers' => true]],
+        ['q' => 'Vale, apúntame la primera para el sábado', 'checks' => [
+            'text_any' => ['guardad', 'apuntad', 'lista', 'anotad', 'listas']]],
+    ]],
+    'finde' => ['turns' => [
+        ['q' => '¿Qué ruta me recomiendas para este fin de semana en el Pirineo navarro?', 'checks' => [
+            'has_routes' => 2, 'bbox' => [42.75, 43.1, -1.6, -0.7, 'Pirineo navarro'],
+            'text_any' => ['sábado', 'domingo', 'fin de semana', 'previsión', 'tiempo']]],
+    ]],
+];
