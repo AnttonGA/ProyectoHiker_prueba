@@ -8,47 +8,47 @@ document.addEventListener('DOMContentLoaded', function () {
   let map, routeMarkers, shelterMarkers, allRoutes = [], shelterLayer;
 
   // ── Activity colours & icons ──────────────────────────────────
+  // Paleta terrosa (misma en carrusel.js / lista.js y en los puntos de los filtros)
   const ACTIVITY_STYLE = {
-    hiking:        { color: '#28a745', icon: 'bi-person-walking' },
-    ski_touring:   { color: '#0d6efd', icon: 'bi-snow3' },
-    btt:           { color: '#fd7e14', icon: 'bi-bicycle' },
-    cycle_touring: { color: '#6f42c1', icon: 'bi-bicycle' },
-    snowshoeing:   { color: '#17a2b8', icon: 'bi-snow' },
-    climbing:      { color: '#dc3545', icon: 'bi-activity' },
-    via_ferrata:   { color: '#e83e8c', icon: 'bi-lightning-charge' },
-    kayaking:      { color: '#20c997', icon: 'bi-water' },
+    hiking:        { color: '#5F7444', icon: 'bi-person-walking' },
+    ski_touring:   { color: '#3F6B7A', icon: 'bi-snow3' },
+    btt:           { color: '#B5653A', icon: 'bi-bicycle' },
+    cycle_touring: { color: '#7A5C7E', icon: 'bi-bicycle' },
+    snowshoeing:   { color: '#5E8F9E', icon: 'bi-snow' },
+    climbing:      { color: '#A6402C', icon: 'bi-activity' },
+    via_ferrata:   { color: '#B8862B', icon: 'bi-lightning-charge' },
+    kayaking:      { color: '#3E7F74', icon: 'bi-water' },
   };
 
   const ACTIVITY_LABEL = {
-    hiking: 'Hiking', ski_touring: 'Ski Touring', btt: 'MTB',
-    cycle_touring: 'Cycle Touring', snowshoeing: 'Snowshoeing',
-    climbing: 'Climbing', via_ferrata: 'Via Ferrata', kayaking: 'Kayaking',
+    hiking: 'Senderismo', ski_touring: 'Esquí de travesía', btt: 'BTT',
+    cycle_touring: 'Cicloturismo', snowshoeing: 'Raquetas',
+    climbing: 'Escalada', via_ferrata: 'Vía ferrata', kayaking: 'Kayak',
+  };
+
+  const LOCATION_LABEL = {
+    Western_Pyrenees: 'Pirineo occidental',
+    Central_Pyrenees: 'Pirineo central',
+    Eastern_Pyrenees: 'Pirineo oriental',
+    Other: 'Otras zonas',
   };
 
   const DIFFICULTY_LABEL = {
-    beginner: 'Easy', intermediate: 'Moderate', advanced: 'Hard',
+    beginner: 'Fácil', intermediate: 'Moderada', advanced: 'Difícil',
   };
 
-  const DIFFICULTY_COLOR = {
-    beginner: '#28a745', intermediate: '#fd7e14', advanced: '#dc3545',
+  const DIFFICULTY_CLASS = {
+    beginner: 'diff--easy', intermediate: 'diff--moderate', advanced: 'diff--hard',
   };
 
   // ── Icon factory ──────────────────────────────────────────────
   function createActivityIcon(tipo) {
-    const style = ACTIVITY_STYLE[tipo] || { color: '#6c757d', icon: 'bi-map' };
+    const style = ACTIVITY_STYLE[tipo] || { color: '#7A7466', icon: 'bi-map' };
     return L.divIcon({
-      className: '',
-      html: `<div style="
-        background:${style.color};
-        border:2px solid #fff;
-        border-radius:50%;
-        width:28px; height:28px;
-        display:flex; align-items:center; justify-content:center;
-        box-shadow:0 2px 6px rgba(0,0,0,.35);">
-        <i class="bi ${style.icon}" style="font-size:13px;color:#fff;"></i>
-      </div>`,
-      iconSize: [28, 28],
-      iconAnchor: [14, 14],
+      className: 'k-marker-wrap',
+      html: `<div class="k-marker" style="--act:${style.color};"><i class="bi ${style.icon}" aria-hidden="true"></i></div>`,
+      iconSize: [30, 30],
+      iconAnchor: [15, 15],
       popupAnchor: [0, -16],
     });
   }
@@ -56,7 +56,7 @@ document.addEventListener('DOMContentLoaded', function () {
   function createBootstrapIcon(iconClass) {
     return L.divIcon({
       className: 'leaflet-bootstrap-icon',
-      html: `<i class="bi ${iconClass}" style="font-size:24px;"></i>`,
+      html: `<i class="bi ${iconClass}" aria-hidden="true"></i>`,
       iconSize: [24, 24],
       iconAnchor: [12, 12],
       popupAnchor: [0, -12],
@@ -82,8 +82,8 @@ document.addEventListener('DOMContentLoaded', function () {
         const count = cluster.getChildCount();
         const size = count < 10 ? 32 : count < 50 ? 38 : 44;
         return L.divIcon({
-          html: `<div style="background:#0d6efd;color:#fff;border-radius:50%;width:${size}px;height:${size}px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.8rem;border:2px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,.3);">${count}</div>`,
-          className: '', iconSize: [size, size],
+          html: `<div class="k-cluster" style="width:${size}px;height:${size}px;">${count}</div>`,
+          className: 'k-cluster-wrap', iconSize: [size, size],
         });
       }
     });
@@ -130,33 +130,33 @@ document.addEventListener('DOMContentLoaded', function () {
 
   // ── Popup builder ─────────────────────────────────────────────
   function buildPopup(ruta) {
-    const actStyle = ACTIVITY_STYLE[ruta.tipo_ruta] || { color: '#6c757d' };
-    const actLabel = ACTIVITY_LABEL[ruta.tipo_ruta] || ruta.tipo_ruta;
-    const diffLabel = DIFFICULTY_LABEL[ruta.dificultad?.toLowerCase()] || ruta.dificultad || '—';
-    const diffColor = DIFFICULTY_COLOR[ruta.dificultad?.toLowerCase()] || '#6c757d';
+    const actStyle = ACTIVITY_STYLE[ruta.tipo_ruta] || { color: '#7A7466', icon: 'bi-map' };
+    const actLabel = ACTIVITY_LABEL[ruta.tipo_ruta] || ruta.tipo_ruta || 'Ruta';
+    const diffKey  = ruta.dificultad?.toLowerCase();
+    const diffLabel = DIFFICULTY_LABEL[diffKey] || ruta.dificultad || '';
+    const diffCls   = DIFFICULTY_CLASS[diffKey] || '';
 
-    const elev = ruta.elevacion_ganada ? `+${parseFloat(ruta.elevacion_ganada).toLocaleString('es-ES', {maximumFractionDigits:0})} m` : '—';
-    const dist = ruta.distancia_km    ? `${parseFloat(ruta.distancia_km).toFixed(1)} km` : '—';
-    const dur  = ruta.duracion_horas  ? `${parseFloat(ruta.duracion_horas).toFixed(1)} h`  : '—';
+    const elev = ruta.elevacion_ganada ? `+${parseFloat(ruta.elevacion_ganada).toLocaleString('es-ES', {maximumFractionDigits:0})} m` : '';
+    const dist = ruta.distancia_km    ? `${parseFloat(ruta.distancia_km).toLocaleString('es-ES', {minimumFractionDigits:1, maximumFractionDigits:1})} km` : '';
+    const dur  = ruta.duracion_horas  ? `${parseFloat(ruta.duracion_horas).toLocaleString('es-ES', {minimumFractionDigits:1, maximumFractionDigits:1})} h`  : '';
+    const effort = (ruta.esfuerzo && ruta.horas_mide) ? parseInt(ruta.esfuerzo, 10) : NaN;
+    const place = ruta.ubicacion ? (LOCATION_LABEL[ruta.ubicacion] || String(ruta.ubicacion).replace(/_/g, ' ')) : '';
+
+    const chips = [
+      dist ? `<li class="k-chip"><i class="bi bi-arrows-expand" aria-hidden="true"></i>${dist}</li>` : '',
+      elev ? `<li class="k-chip"><i class="bi bi-arrow-up-right" aria-hidden="true"></i>${elev}</li>` : '',
+      dur  ? `<li class="k-chip"><i class="bi bi-clock" aria-hidden="true"></i>${dur}</li>` : '',
+      diffLabel ? `<li class="k-chip k-chip-diff ${diffCls}"><span class="k-dot" aria-hidden="true"></span>${escapeHtml(diffLabel)}</li>` : '',
+      !isNaN(effort) ? `<li class="k-chip k-chip-moss">Esfuerzo ${effort}/5</li>` : '',
+    ].join('');
 
     return `
-      <div style="min-width:220px;font-family:inherit;">
-        <div style="background:${actStyle.color};color:#fff;padding:8px 12px;margin:-1px -1px 0;border-radius:4px 4px 0 0;">
-          <strong style="font-size:.9rem;">${escapeHtml(ruta.titulo || 'Sin título')}</strong>
-        </div>
-        <div style="padding:10px 12px 12px;line-height:1.5;">
-          <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px;">
-            <span style="background:${diffColor};color:#fff;border-radius:20px;padding:2px 8px;font-size:.7rem;font-weight:600;">${escapeHtml(diffLabel)}</span>
-            <span style="background:${actStyle.color};color:#fff;border-radius:20px;padding:2px 8px;font-size:.7rem;font-weight:600;">${escapeHtml(actLabel)}</span>
-          </div>
-          <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px;">
-            <span style="background:#f0f4f8;border-radius:20px;padding:2px 9px;font-size:.72rem;font-weight:600;">↑ ${elev}</span>
-            <span style="background:#f0f4f8;border-radius:20px;padding:2px 9px;font-size:.72rem;font-weight:600;">⟷ ${dist}</span>
-            <span style="background:#f0f4f8;border-radius:20px;padding:2px 9px;font-size:.72rem;font-weight:600;">⏱ ${dur}</span>
-          </div>
-          ${ruta.ubicacion ? `<div style="font-size:.75rem;color:#6c757d;margin-bottom:10px;">📍 ${escapeHtml(ruta.ubicacion)}</div>` : ''}
-          <a href="ruta.html?id=${encodeURIComponent(ruta.id)}" style="display:block;text-align:center;background:#0d6efd;color:#fff;border-radius:8px;padding:6px 0;font-size:.8rem;font-weight:600;text-decoration:none;">Ver ruta →</a>
-        </div>
+      <div class="k-popup">
+        <p class="k-popup__eyebrow"><span class="k-dot" style="--act:${actStyle.color};" aria-hidden="true"></span>${escapeHtml(actLabel)}</p>
+        <h3 class="k-popup__title">${escapeHtml(ruta.titulo || 'Ruta sin nombre')}</h3>
+        ${place ? `<p class="k-popup__place"><i class="bi bi-geo-alt" aria-hidden="true"></i>${escapeHtml(place)}</p>` : ''}
+        ${chips ? `<ul class="k-popup__chips">${chips}</ul>` : ''}
+        <a href="ruta.html?id=${encodeURIComponent(ruta.id)}" class="btn btn-primary btn-sm w-100 k-popup__cta">Ver ruta <i class="bi bi-arrow-right" aria-hidden="true"></i></a>
       </div>`;
   }
 
@@ -191,7 +191,7 @@ document.addEventListener('DOMContentLoaded', function () {
       if (!ruta.marker) {
         const icon = createActivityIcon(ruta.tipo_ruta);
         const marker = L.marker([lat, lng], { icon });
-        marker.bindPopup(buildPopup(ruta), { maxWidth: 260 });
+        marker.bindPopup(buildPopup(ruta), { maxWidth: 280, minWidth: 220 });
 
         marker.on('popupopen', () => {
           if (!ruta.loadedLayer) ruta.loadedLayer = cargarGPX(ruta);
@@ -211,7 +211,7 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 
   function cargarGPX(ruta) {
-    const actStyle = ACTIVITY_STYLE[ruta.tipo_ruta] || { color: '#0d6efd' };
+    const actStyle = ACTIVITY_STYLE[ruta.tipo_ruta] || { color: '#5F7444' };
     return new L.GPX(`rutas_st/${ruta.ruta_carpeta}/${ruta.gpx_path}`, {
       async: true,
       polyline_options: {
@@ -275,34 +275,35 @@ document.addEventListener('DOMContentLoaded', function () {
   });
 
   // ── Shelter filter ────────────────────────────────────────────
+  // Misma paleta que huts.js y la leyenda (.color-example en estilos2.css)
   function getShelterColor(type) {
     const map = {
-      'cabane ouverte':                                            '#337DFF',
-      'cabane fermee':                                             '#FF5733',
-      'cabane ouverte mais ocupee par le berger l ete':            '#FFA500',
-      'orri toue abri en pierre':                                  '#FFFF00',
-      'refuge garde l ete partie hivernal':                        '#00FF00',
-      'refuge garde toute l annee':                                '#FF1493',
-      'ruine':                                                     '#8C8C8C',
+      'cabane ouverte':                                            '#3F6B7A',
+      'cabane fermee':                                             '#B5653A',
+      'cabane ouverte mais ocupee par le berger l ete':            '#D49A3A',
+      'orri toue abri en pierre':                                  '#C9B27C',
+      'refuge garde l ete partie hivernal':                        '#7E9A55',
+      'refuge garde toute l annee':                                '#7A4E6E',
+      'ruine':                                                     '#9A968C',
     };
-    return map[type] || '#198754';
+    return map[type] || '#5F7444';
   }
 
   function createShelterPopup(props) {
     props = props || {};
     const url = props.url ? safeHttpUrl(props.url) : '';
+    const facts = [
+      props.altitude  ? `<dt>Altitud</dt><dd>${escapeHtml(isNaN(Number(props.altitude)) ? props.altitude : Number(props.altitude).toLocaleString('es-ES'))} m</dd>` : '',
+      props.cap_ete   ? `<dt>Plazas en verano</dt><dd>${escapeHtml(props.cap_ete)}</dd>` : '',
+      props.cap_hiver ? `<dt>Plazas en invierno</dt><dd>${escapeHtml(props.cap_hiver)}</dd>` : '',
+    ].join('');
     return `
-      <div style="min-width:200px;">
-        <div style="background:#0d6efd;color:#fff;padding:8px 12px;margin:-1px -1px 0;border-radius:4px 4px 0 0;">
-          <strong>${escapeHtml(props.name || 'Shelter')}</strong>
-        </div>
-        <div style="padding:10px 12px;line-height:1.6;font-size:.82rem;">
-          ${props.region   ? `<div>📍 ${escapeHtml(props.region)}</div>` : ''}
-          ${props.altitude ? `<div>⛰️ Alt: ${escapeHtml(props.altitude)} m</div>` : ''}
-          ${props.cap_ete  ? `<div>☀️ Summer capacity: ${escapeHtml(props.cap_ete)}</div>` : ''}
-          ${props.cap_hiver? `<div>❄️ Winter capacity: ${escapeHtml(props.cap_hiver)}</div>` : ''}
-          ${url            ? `<div style="margin-top:8px;"><a href="${escapeHtml(url)}" target="_blank" rel="noopener noreferrer" style="color:#0d6efd;font-weight:600;">More info →</a></div>` : ''}
-        </div>
+      <div class="k-popup">
+        <p class="k-popup__eyebrow"><i class="bi bi-house-door" aria-hidden="true"></i>Refugio</p>
+        <h3 class="k-popup__title">${escapeHtml(props.name || 'Refugio')}</h3>
+        ${props.region ? `<p class="k-popup__place"><i class="bi bi-geo-alt" aria-hidden="true"></i>${escapeHtml(props.region)}</p>` : ''}
+        ${facts ? `<dl class="k-popup__facts">${facts}</dl>` : ''}
+        ${url ? `<a href="${escapeHtml(url)}" class="k-popup__link" target="_blank" rel="noopener noreferrer">Más información <i class="bi bi-box-arrow-up-right" aria-hidden="true"></i></a>` : ''}
       </div>`;
   }
 
@@ -320,8 +321,8 @@ document.addEventListener('DOMContentLoaded', function () {
           pointToLayer: (feature, latlng) => {
             const fillColor = getShelterColor(feature.properties.type_hebergement?.toLowerCase());
             return L.circleMarker(latlng, {
-              radius: 8, fillColor, color: '#000',
-              weight: 1, opacity: 1, fillOpacity: 0.85,
+              radius: 7, fillColor, color: '#FFFDF8',
+              weight: 2, opacity: 1, fillOpacity: 0.95,
             }).bindPopup(createShelterPopup(feature.properties));
           }
         });

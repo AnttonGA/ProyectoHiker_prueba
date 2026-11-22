@@ -17,26 +17,26 @@ if (!$id || $id < 1) {
 
 // Listas blancas = valores de los ENUM de la tabla rutas (valor => etiqueta)
 $tiposValidos = [
-    'ski_touring'   => 'Ski Touring',
-    'hiking'        => 'Hiking',
-    'cycle_touring' => 'Cycle Touring',
-    'climbing'      => 'Climbing',
-    'snowshoeing'   => 'Snowshoeing',
+    'ski_touring'   => 'Esquí de travesía',
+    'hiking'        => 'Senderismo',
+    'cycle_touring' => 'Cicloturismo',
+    'climbing'      => 'Escalada',
+    'snowshoeing'   => 'Raquetas',
     'via_ferrata'   => 'Vía ferrata',
     'btt'           => 'BTT',
-    'kayaking'      => 'Kayaking',
+    'kayaking'      => 'Kayak',
 ];
 $ubicacionesValidas = [
-    'Western_Pyrenees' => 'Pirineo Occidental',
-    'Central_Pyrenees' => 'Pirineo Central',
-    'Eastern_Pyrenees' => 'Pirineo Oriental',
-    'Other'            => 'Otra',
+    'Western_Pyrenees' => 'Pirineo occidental',
+    'Central_Pyrenees' => 'Pirineo central',
+    'Eastern_Pyrenees' => 'Pirineo oriental',
+    'Other'            => 'Otras zonas',
 ];
 $dificultadesValidas = [
-    'beginner'     => 'Principiante',
-    'intermediate' => 'Intermedio',
-    'advanced'     => 'Avanzado',
-    'expert'       => 'Experto',
+    'beginner'     => 'Fácil',
+    'intermediate' => 'Moderada',
+    'advanced'     => 'Difícil',
+    'expert'       => 'Experta',
 ];
 $estadosValidos = [
     'publicada' => 'Publicada',
@@ -77,12 +77,12 @@ try {
 } catch (Throwable $ex) {
     error_log('editar_ruta.php (select): ' . $ex->getMessage());
     http_response_code(500);
-    exit('Error al cargar la ruta.');
+    exit('No se pudo cargar la ruta. Inténtalo de nuevo.');
 }
 
 if ($ruta === null) {
     http_response_code(404);
-    exit('Ruta no encontrada.');
+    exit('No existe ninguna ruta con ese identificador.');
 }
 
 $errores = [];
@@ -114,7 +114,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             || !array_key_exists($ubicacion, $ubicacionesValidas)
             || !array_key_exists($dificultad, $dificultadesValidas)
             || !array_key_exists($estado, $estadosValidos)) {
-            $errores[] = 'Datos no válidos.';
+            $errores[] = 'Algún valor de las listas no es válido. Revisa el formulario.';
         }
         if (!$okDist) {
             $errores[] = 'La distancia debe ser un número entre 0 y 9999,99.';
@@ -141,12 +141,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 );
                 $stmt->execute();
                 $stmt->close();
-                $_SESSION['message'] = 'Ruta actualizada correctamente.';
+                $_SESSION['message'] = 'Ruta guardada.';
                 header("Location: routes_management.php");
                 exit();
             } catch (Throwable $ex) {
                 error_log('editar_ruta.php (update): ' . $ex->getMessage());
-                $errores[] = 'Error al actualizar la ruta.';
+                $errores[] = 'No se pudo guardar la ruta. Inténtalo de nuevo.';
             }
         }
 
@@ -239,14 +239,20 @@ try {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Editar Ruta</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <title>Editar ruta · Admin · Kahir.ai</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Sistema de diseño Kahir (después del CSS de la página) -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Work+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <link href="../../assets/css/kahir.css?v=20261122" rel="stylesheet">
 </head>
 <body>
 
 <?php include('navbar.php'); ?>
     <div class="container mt-5">
-        <h1>Editar Ruta #<?php echo (int) $id; ?></h1>
+        <h1>Editar ruta #<?php echo (int) $id; ?></h1>
         <?php if ($errores): ?>
             <div class="alert alert-danger">
                 <ul class="mb-0">
@@ -272,7 +278,7 @@ try {
                     <input type="number" class="form-control" id="distancia_km" name="distancia_km" value="<?php echo e($ruta['distancia_km'] ?? ''); ?>" step="0.01" min="0" max="9999.99">
                 </div>
                 <div class="col-md-4 mb-3">
-                    <label for="elevacion_ganada" class="form-label">Desnivel positivo (m)</label>
+                    <label for="elevacion_ganada" class="form-label">Desnivel (m)</label>
                     <input type="number" class="form-control" id="elevacion_ganada" name="elevacion_ganada" value="<?php echo e($ruta['elevacion_ganada'] ?? ''); ?>" step="1" min="0">
                 </div>
                 <div class="col-md-4 mb-3">
@@ -282,7 +288,7 @@ try {
             </div>
             <div class="row">
                 <div class="col-md-3 mb-3">
-                    <label for="tipo_ruta" class="form-label">Tipo de Ruta</label>
+                    <label for="tipo_ruta" class="form-label">Actividad</label>
                     <select class="form-select" id="tipo_ruta" name="tipo_ruta" required>
                         <?php foreach ($tiposValidos as $valor => $etiqueta): ?>
                             <option value="<?php echo e($valor); ?>" <?php if ($ruta['tipo_ruta'] === $valor) echo 'selected'; ?>><?php echo e($etiqueta); ?></option>
@@ -290,7 +296,7 @@ try {
                     </select>
                 </div>
                 <div class="col-md-3 mb-3">
-                    <label for="ubicacion" class="form-label">Ubicación</label>
+                    <label for="ubicacion" class="form-label">Zona</label>
                     <select class="form-select" id="ubicacion" name="ubicacion" required>
                         <?php foreach ($ubicacionesValidas as $valor => $etiqueta): ?>
                             <option value="<?php echo e($valor); ?>" <?php if ($ruta['ubicacion'] === $valor) echo 'selected'; ?>><?php echo e($etiqueta); ?></option>
@@ -314,31 +320,31 @@ try {
                     </select>
                 </div>
             </div>
-            <button type="submit" name="update_route" value="1" class="btn btn-success">Actualizar Ruta</button>
+            <button type="submit" name="update_route" value="1" class="btn btn-success">Guardar</button>
             <a href="routes_management.php" class="btn btn-secondary">Cancelar</a>
             <a href="../skitouring/ruta.html?id=<?php echo (int) $id; ?>" class="btn btn-outline-info" target="_blank" rel="noopener">Ver ruta</a>
         </form>
 
         <hr>
-        <h2>Imágenes Subidas</h2>
+        <h2>Imágenes</h2>
         <?php if (!$imagenes): ?>
             <p class="text-muted">Esta ruta no tiene imágenes.</p>
         <?php endif; ?>
         <div class="row">
             <?php foreach ($imagenes as $imagen) : ?>
                 <div class="col-md-4 mb-3">
-                    <img src="../skitouring/<?php echo e($imagen['imagen_path']); ?>" class="img-thumbnail" alt="Imagen de Ruta">
+                    <img src="../skitouring/<?php echo e($imagen['imagen_path']); ?>" class="img-thumbnail" alt="Imagen de la ruta">
                     <form method="POST" action="editar_ruta.php?id=<?php echo (int) $id; ?>" class="mt-2" onsubmit="return confirm('¿Eliminar esta imagen? Se borrará el archivo.');">
                         <?= csrf_field() ?>
                         <input type="hidden" name="image_id" value="<?php echo (int) $imagen['id']; ?>">
-                        <button type="submit" name="delete_image" value="1" class="btn btn-danger btn-sm">Eliminar Imagen</button>
+                        <button type="submit" name="delete_image" value="1" class="btn btn-danger btn-sm">Eliminar imagen</button>
                     </form>
                 </div>
             <?php endforeach; ?>
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
 </body>
 </html>

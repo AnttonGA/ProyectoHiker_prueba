@@ -13,26 +13,31 @@ function loadFavoriteRoutes(page = 1) {
     .then(data => {
       const el = document.getElementById('favoriteRoutes');
       if (!data.success) {
-        el.innerHTML = `<div class="col-12 acct-empty">
-          <i class="bi bi-exclamation-triangle"></i>
-          <p>${escHtml(data.error ?? 'Error loading favourites.')}</p>
-        </div>`;
+        el.innerHTML = acctState({
+          icon: 'bi-exclamation-circle', tone: 'error',
+          title: 'No se pudieron cargar tus favoritas',
+          text: data.error ?? 'Recarga la página dentro de un momento.',
+        });
         return;
       }
       if (data.message || !data.routes?.length) {
-        el.innerHTML = `<div class="col-12 acct-empty">
-          <i class="bi bi-heart"></i>
-          <p>${escHtml(data.message ?? 'No favourite routes yet. Star a route to see it here!')}</p>
-        </div>`;
+        el.innerHTML = acctState({
+          icon: 'bi-heart',
+          title: 'Guarda las rutas que te llaman',
+          text: 'Toca el corazón en cualquier ruta y te esperará aquí.',
+          ctaHtml: '<a href="../skitouring/skitouring.html" class="btn btn-primary"><i class="bi bi-compass me-1" aria-hidden="true"></i>Explorar rutas</a>',
+        });
         return;
       }
       el.innerHTML = data.routes.map(r => buildRouteCard(r)).join('');
       renderPagination('favoriteRoutes-pagination', page, data.total, FAVS_PER_PAGE, loadFavoriteRoutes);
     })
     .catch(() => {
-      document.getElementById('favoriteRoutes').innerHTML = `<div class="col-12 acct-empty">
-        <i class="bi bi-wifi-off"></i><p>Network error. Please try again.</p>
-      </div>`;
+      document.getElementById('favoriteRoutes').innerHTML = acctState({
+        icon: 'bi-wifi-off', tone: 'error',
+        title: 'Sin conexión',
+        text: 'Comprueba tu conexión y recarga la página.',
+      });
     });
 }
 

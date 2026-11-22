@@ -22,7 +22,7 @@ header('Content-Type: application/json');
 
 if (!isset($_SESSION['usuario'])) {
     writeLog("Intento de acceso sin sesión de usuario", 'ERROR');
-    echo json_encode(['success' => false, 'error' => 'User not logged in']);
+    echo json_encode(['success' => false, 'error' => 'Entra en tu cuenta para continuar.']);
     exit;
 }
 
@@ -35,7 +35,7 @@ if ($userId === 0) {
     $row = $stmt->get_result()->fetch_assoc();
     $stmt->close();
     if (!$row) {
-        echo json_encode(['success' => false, 'error' => 'User not found in database']);
+        echo json_encode(['success' => false, 'error' => 'No encontramos tu cuenta. Vuelve a entrar.']);
         exit;
     }
     $userId = (int)$row['id'];

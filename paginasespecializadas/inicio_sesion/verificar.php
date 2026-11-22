@@ -11,8 +11,15 @@ require_once 'conexion.php';
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Verificación de Usuario</title>
-    <link rel="stylesheet" href="styles.css"> <!-- Enlace a tu archivo CSS si lo tienes -->
+    <title>Verificar correo · Kahir.ai</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="../estilos2.css?v=20261122" rel="stylesheet">
+  <!-- Sistema de diseño Kahir (después del CSS de la página) -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Work+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <link href="../../assets/css/kahir.css?v=20261122" rel="stylesheet">
 </head>
 <body>
 
@@ -49,23 +56,23 @@ require_once 'conexion.php';
 
         if ($tokenValido) {
             echo '<div class="alert alert-success" role="alert">';
-            echo "<h4 class='alert-heading'>Verificación Exitosa</h4>";
-            echo "<p>Tu correo ha sido verificado exitosamente. Ahora puedes acceder a tu cuenta.</p>";
+            echo "<h4 class='alert-heading'>Correo verificado</h4>";
+            echo "<p>Tu correo ya está verificado. Ya puedes entrar en tu cuenta.</p>";
             echo '</div>';
             // Incluir el formulario de inicio de sesión
             include 'login.php';
         } elseif ($tokenProporcionado) {
             echo '<div class="alert alert-warning" role="alert">';
-            echo "<h4 class='alert-heading'>Token Inválido</h4>";
-            echo "<p>El token de verificación no es válido. Por favor, revisa tu correo e inténtalo de nuevo.</p>";
+            echo "<h4 class='alert-heading'>Enlace no válido</h4>";
+            echo "<p>El enlace de verificación no es válido o ya se ha usado. Revisa tu correo o vuelve a crear la cuenta.</p>";
             echo '</div>';
 
             // Incluir el formulario de registro en caso de token inválido
             include 'registro_ia.php';
         } else {
             echo '<div class="alert alert-info" role="alert">';
-            echo "<h4 class='alert-heading'>Token No Proporcionado</h4>";
-            echo "<p>No se ha proporcionado ningún token para verificar tu correo. Por favor, revisa tu correo y sigue el enlace de verificación.</p>";
+            echo "<h4 class='alert-heading'>Falta el enlace de verificación</h4>";
+            echo "<p>Para verificar tu correo, abre el enlace que te hemos enviado al registrarte.</p>";
             echo '</div>';
 
             // Incluir un enlace para reenviar el token
@@ -81,5 +88,6 @@ require_once 'conexion.php';
 </body>
 </html>
 
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script src="../../include.js"></script>
 

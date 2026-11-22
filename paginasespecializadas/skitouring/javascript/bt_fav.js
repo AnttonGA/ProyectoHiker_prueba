@@ -9,10 +9,16 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function updateFavoriteStatus(isFavorite) {
-        btnFavorite.textContent = isFavorite ? 'Favorited' : 'Add to Favorites';
-        btnFavorite.classList.toggle('btn-primary', isFavorite);
-        btnFavorite.classList.toggle('btn-outline-primary', !isFavorite);
+        // Conserva el icono: corazón relleno (óxido, ver ruta.css) cuando es favorito
+        const icon = document.createElement('i');
+        icon.className = isFavorite ? 'bi bi-heart-fill' : 'bi bi-heart';
+        icon.setAttribute('aria-hidden', 'true');
+        const label = document.createElement('span');
+        label.className = 'k-act__label';
+        label.textContent = isFavorite ? 'En favoritas' : 'Favorita';
+        btnFavorite.replaceChildren(icon, label);
         btnFavorite.classList.toggle('favorited', isFavorite);
+        btnFavorite.setAttribute('aria-pressed', isFavorite ? 'true' : 'false');
     }
 
     function animateButton() {
@@ -30,7 +36,7 @@ document.addEventListener('DOMContentLoaded', function() {
             credentials: 'include'
         })
         .then(response => {
-            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+            if (!response.ok) throw new Error('No se pudo guardar en favoritas. Inténtalo de nuevo.');
             return response.json();
         })
         .then(data => {
@@ -38,18 +44,18 @@ document.addEventListener('DOMContentLoaded', function() {
                 const newFavoriteStatus = !btnFavorite.classList.contains('favorited');
                 updateFavoriteStatus(newFavoriteStatus);
                 animateButton();
-                showFeedback(btnFavorite, newFavoriteStatus ? 'Added to favorites' : 'Removed from favorites', true);
+                showFeedback(btnFavorite, newFavoriteStatus ? 'Añadida a favoritas' : 'Quitada de favoritas', true);
             } else {
-                throw new Error(data.error || 'Unknown error occurred');
+                throw new Error(data.error || 'No se pudo guardar en favoritas. Inténtalo de nuevo.');
             }
         })
         .catch(error => {
             console.error('Error:', error);
-            if (error.message.includes('User not logged in')) {
-                alert('Please log in to manage favorites.');
+            if (error.message.includes('Entra en tu cuenta')) {
+                alert('Entra en tu cuenta para guardar favoritas.');
                 window.location.href = '/paginasespecializadas/inicio_sesion/gestion.php';
             } else {
-                showFeedback(btnFavorite, 'Error managing favorite: ' + error.message, false);
+                showFeedback(btnFavorite, error.message || 'No se pudo guardar en favoritas. Inténtalo de nuevo.', false);
             }
         })
         .finally(() => {

@@ -1,531 +1,799 @@
-/* Estilos principales para el chat de Kahir.AI */
+/* ==========================================================================
+   Kahir.ai — chat (index.php, sesión iniciada)
+   Usa los tokens --k-* de assets/css/kahir.css (se carga DESPUÉS de este
+   archivo: aquí solo hay estilos propios del chat, sin redefinir .btn, etc.)
+   ========================================================================== */
 
-/* Variables globales */
-:root {
-    /* Colores principales */
-    --primary-color: #3B82F6;
-    --primary-dark: #1D4ED8;
-    --primary-light: #60A5FA;
-    --secondary-color: #10B981;
-    --accent-color: #8B5CF6;
-    
-    /* Colores de estado */
-    --success-color: #34D399;
-    --warning-color: #FBBF24;
-    --danger-color: #EF4444;
-    --info-color: #60A5FA;
-    
-    /* Colores de fondo */
-    --bg-primary: #FFFFFF;
-    --bg-secondary: #F3F4F6;
-    --bg-tertiary: #E5E7EB;
-    
-    /* Colores de texto */
-    --text-primary: #111827;
-    --text-secondary: #4B5563;
-    --text-light: #9CA3AF;
-    
-    /* Espaciado */
-    --spacing-xs: 0.25rem;
-    --spacing-sm: 0.5rem;
-    --spacing-md: 1rem;
-    --spacing-lg: 1.5rem;
-    --spacing-xl: 2rem;
-    
-    /* Radios de borde */
-    --border-radius-sm: 0.25rem;
-    --border-radius-md: 0.5rem;
-    --border-radius-lg: 1rem;
-    
-    /* Sombras */
-    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
-    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+/* ── Estructura: columna de lectura + compositor fijo ─────────────────── */
+.kchat {
+    background: var(--k-cream);
 }
 
-/* Contenedor principal del chat */
+.kchat-column {
+    width: 100%;
+    max-width: 760px;
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: 16px;
+    padding-right: 16px;
+}
+
+/* ── Estado vacío: bienvenida + ejemplos ──────────────────────────────── */
+.kchat-welcome {
+    text-align: center;
+    padding: 3rem 0 1.75rem;
+}
+.kchat-welcome .kchat-welcome-mark {
+    display: block;
+    width: 52px;
+    height: 52px;
+    margin: 0 auto 1rem;
+}
+.kchat-welcome h1 {
+    margin-left: auto;
+    margin-right: auto;
+}
+.kchat-welcome p.lead {
+    margin: 0 auto;
+}
+
+.prompt-groups {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1rem;
+    padding-bottom: 1.5rem;
+}
+@media (min-width: 640px) {
+    .prompt-groups { grid-template-columns: repeat(2, 1fr); }
+}
+
+.prompt-group {
+    background: var(--k-paper);
+    border: 1px solid var(--k-stone-200);
+    border-radius: var(--k-radius);
+    padding: 1.1rem 1.1rem 1rem;
+}
+
+.prompt-group-head {
+    display: flex;
+    align-items: flex-start;
+    gap: .75rem;
+    margin-bottom: .85rem;
+}
+.prompt-group-icon {
+    flex: none;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: var(--k-moss-50);
+    color: var(--k-moss);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.05rem;
+}
+.prompt-group-title {
+    font-size: 1.08rem;
+    line-height: 1.25;
+    margin: .1rem 0 .15rem;
+}
+.prompt-group-desc {
+    font-size: .85rem;
+    color: var(--k-ink-2);
+    margin: 0;
+    line-height: 1.4;
+}
+
+.prompt-examples {
+    display: flex;
+    flex-direction: column;
+    gap: .4rem;
+}
+.prompt-example {
+    display: block;
+    width: 100%;
+    text-align: left;
+    font: inherit;
+    font-size: .9rem;
+    line-height: 1.35;
+    color: var(--k-ink);
+    background: var(--k-stone-50);
+    border: 1px solid var(--k-stone-200);
+    border-radius: var(--k-radius-sm);
+    padding: .5rem .8rem;
+    cursor: pointer;
+    transition: background-color .15s var(--k-ease), border-color .15s var(--k-ease), color .15s var(--k-ease);
+}
+.prompt-example:hover {
+    background: var(--k-moss-50);
+    border-color: var(--k-moss-100);
+    color: var(--k-moss-hover);
+}
+/* El clic se detecta sobre e.target: los hijos no deben capturarlo */
+.prompt-example * { pointer-events: none; }
+
+/* ── Conversación ─────────────────────────────────────────────────────── */
+.chat-area {
+    padding-top: 1.5rem;
+}
+
 .chat-container {
     display: flex;
     flex-direction: column;
-    height: 100%;
-    background-color: var(--bg-primary);
-    border-radius: var(--border-radius-lg);
-    box-shadow: var(--shadow-lg);
+    gap: 1.1rem;
+    padding-bottom: .5rem;
 }
 
-/* Área de mensajes */
-.chat-area {
-    flex-grow: 1;
-    overflow-y: auto;
-    padding: var(--spacing-md);
-    scroll-behavior: smooth;
-}
-
-/* Mensajes */
 .message {
-    max-width: 80%;
-    margin-bottom: var(--spacing-md);
-    padding: var(--spacing-md);
-    border-radius: var(--border-radius-md);
-    box-shadow: var(--shadow-sm);
+    display: flex;
+    align-items: flex-start;
+    gap: .75rem;
+    min-width: 0;
+    /* scrollIntoView deja el mensaje por encima del compositor fijo */
+    scroll-margin-bottom: 8rem;
+    animation: kchatIn .3s var(--k-ease);
 }
 
+.message-avatar {
+    flex: none;
+    width: 32px;
+    height: 32px;
+    padding: 4px;
+    border-radius: 50%;
+    background: var(--k-paper);
+    border: 1px solid var(--k-stone-200);
+}
+
+.message-body {
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+
+/* Asistente: tarjeta de papel a la izquierda */
+.system-message .message-body {
+    flex: 0 1 auto;
+    max-width: calc(100% - 44px);
+    background: var(--k-paper);
+    border: 1px solid var(--k-stone-200);
+    border-radius: 4px var(--k-radius-lg) var(--k-radius-lg) var(--k-radius-lg);
+    padding: .8rem 1.1rem;
+    color: var(--k-ink);
+    box-shadow: 0 1px 2px rgba(46, 58, 47, .04);
+}
+
+/* Mensajes seguidos del asistente: un solo avatar y menos separación */
+.system-message + .system-message { margin-top: -.45rem; }
+.system-message + .system-message > .message-avatar { visibility: hidden; }
+
+/* Contenido enriquecido (tarjetas, carrusel, avisos): sin burbuja */
+.message-rich .message-body,
+.system-message.message-rich .message-body {
+    flex: 1 1 auto;
+    background: transparent;
+    border: 0;
+    padding: 0;
+    box-shadow: none;
+}
+
+/* Usuario: musgo claro a la derecha */
 .user-message {
-    background-color: var(--primary-color);
-    color: white;
-    margin-left: auto;
-    border-radius: var(--border-radius-md) var(--border-radius-md) 0 var(--border-radius-md);
+    justify-content: flex-end;
 }
+.user-message .message-body {
+    max-width: 80%;
+    background: var(--k-moss-50);
+    border: 1px solid var(--k-moss-100);
+    border-radius: var(--k-radius-lg) var(--k-radius-lg) 4px var(--k-radius-lg);
+    padding: .65rem 1rem;
+    color: var(--k-ink);
+}
+.user-message .message-body p { margin: 0; }
 
-.system-message {
-    background-color: var(--bg-secondary);
-    color: var(--text-primary);
-    margin-right: auto;
-    border-radius: var(--border-radius-md) var(--border-radius-md) var(--border-radius-md) 0;
-}
+/* ── Markdown dentro de las respuestas ────────────────────────────────── */
+.system-message .message-body > :first-child { margin-top: 0; }
+.system-message .message-body > :last-child  { margin-bottom: 0; }
 
-/* ── Markdown renderizado dentro de mensajes del asistente ─────────────── */
-.system-message h1, .system-message h2 {
-    font-size: 1.1rem;
-    font-weight: 700;
-    margin: 0.6rem 0 0.3rem;
+.system-message .message-body p { margin: 0 0 .65rem; }
+
+.system-message .message-body h1,
+.system-message .message-body h2,
+.system-message .message-body h3 {
+    font-family: var(--k-font-display);
+    font-weight: 500;
+    line-height: 1.25;
+    color: var(--k-ink);
+    margin: 1rem 0 .4rem;
 }
-.system-message h3, .system-message h4 {
-    font-size: 1rem;
+.system-message .message-body h1 { font-size: 1.3rem; }
+.system-message .message-body h2 { font-size: 1.17rem; }
+.system-message .message-body h3 { font-size: 1.05rem; }
+.system-message .message-body h4,
+.system-message .message-body h5,
+.system-message .message-body h6 {
+    font-family: var(--k-font-body);
+    font-size: .8rem;
     font-weight: 600;
-    margin: 0.5rem 0 0.2rem;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    color: var(--k-ink-2);
+    margin: .9rem 0 .35rem;
 }
-.system-message p      { margin: 0.3rem 0; }
-.system-message ul,
-.system-message ol     { padding-left: 1.4rem; margin: 0.3rem 0; }
-.system-message li     { margin: 0.15rem 0; }
-.system-message hr     { border: none; border-top: 1px solid var(--bg-tertiary); margin: 0.6rem 0; }
-.system-message strong { font-weight: 600; }
-.system-message em     { font-style: italic; }
-.system-message code   {
-    background: rgba(0,0,0,0.07);
-    border-radius: 3px;
-    padding: 0 4px;
-    font-size: 0.88em;
+
+.system-message .message-body ul,
+.system-message .message-body ol {
+    padding-left: 1.25rem;
+    margin: 0 0 .65rem;
 }
-.system-message pre    {
-    background: rgba(0,0,0,0.07);
-    border-radius: 6px;
-    padding: 0.5rem 0.75rem;
+.system-message .message-body li { margin: .2rem 0; }
+.system-message .message-body li::marker { color: var(--k-moss); }
+.system-message .message-body li > p { margin: 0; }
+
+.system-message .message-body a {
+    color: var(--k-lake);
+    text-decoration: underline;
+    text-decoration-color: rgba(63, 107, 122, .35);
+    text-underline-offset: 3px;
+}
+.system-message .message-body a:hover {
+    color: var(--k-ink);
+    text-decoration-color: currentColor;
+}
+
+.system-message .message-body strong { font-weight: 600; color: var(--k-ink); }
+.system-message .message-body hr {
+    border: 0;
+    border-top: 1px solid var(--k-stone-200);
+    margin: .9rem 0;
+}
+.system-message .message-body blockquote {
+    margin: .5rem 0 .75rem;
+    padding: .15rem 0 .15rem .9rem;
+    border-left: 3px solid var(--k-moss-100);
+    color: var(--k-ink-2);
+}
+.system-message .message-body code {
+    background: var(--k-stone-100);
+    border-radius: 4px;
+    padding: .05rem .3rem;
+    font-size: .88em;
+    color: var(--k-ink);
+}
+.system-message .message-body pre {
+    background: var(--k-stone-50);
+    border: 1px solid var(--k-stone-200);
+    border-radius: var(--k-radius-sm);
+    padding: .6rem .8rem;
     overflow-x: auto;
-    font-size: 0.85em;
+    font-size: .85em;
 }
-/* ───────────────────────────────────────────────────────────────────────── */
-
-/* ── Aviso meteorológico (Caso B) ────────────────────────────────────────── */
-
-.weather-warning-box {
-    background: #FEF3C7;
-    border: 1px solid #F59E0B;
-    border-left: 4px solid #F59E0B;
-    border-radius: var(--border-radius-md);
-    padding: 0.6rem 0.875rem;
-    margin: var(--spacing-xs) 0;
-    max-width: 420px;
+.system-message .message-body pre code { background: none; padding: 0; }
+.system-message .message-body table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: .9rem;
+    margin: .5rem 0 .75rem;
+    display: block;
+    overflow-x: auto;
+}
+.system-message .message-body th,
+.system-message .message-body td {
+    border-bottom: 1px solid var(--k-stone-200);
+    padding: .35rem .6rem;
+    text-align: left;
+}
+.system-message .message-body th {
+    font-size: .78rem;
+    text-transform: uppercase;
+    letter-spacing: .05em;
+    color: var(--k-ink-2);
+    font-weight: 600;
+}
+.system-message .message-body img {
+    max-width: 100%;
+    height: auto;
+    border-radius: var(--k-radius-sm);
 }
 
-.weather-warning-item {
-    font-size: 0.83rem;
-    color: #92400E;
+/* ── Indicador de escritura ───────────────────────────────────────────── */
+.typing-indicator {
+    display: flex;
+    align-items: center;
+    gap: .75rem;
+    padding: 1.1rem 0 .5rem;
+}
+.typing-bubble {
+    display: inline-flex;
+    align-items: center;
+    gap: .3rem;
+    background: var(--k-paper);
+    border: 1px solid var(--k-stone-200);
+    border-radius: var(--k-pill);
+    padding: .5rem .95rem;
+}
+.typing-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--k-moss);
+    opacity: .25;
+    animation: kchatBreathe 1.4s infinite ease-in-out;
+}
+.typing-dot:nth-child(2) { animation-delay: .2s; }
+.typing-dot:nth-child(3) { animation-delay: .4s; }
+.typing-label {
+    margin-left: .4rem;
+    font-size: .85rem;
+    color: var(--k-ink-2);
+}
+
+@keyframes kchatBreathe {
+    0%, 100% { opacity: .25; }
+    50%      { opacity: .9; }
+}
+@keyframes kchatIn {
+    from { opacity: 0; transform: translateY(6px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Sugerencias (pastillas) ──────────────────────────────────────────── */
+.suggestions-panel {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .5rem;
+    padding: .75rem 0 1rem 44px;
+}
+
+.clarification-prompts {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .5rem;
+}
+
+.suggestion-btn {
+    font: inherit;
+    font-size: .88rem;
+    line-height: 1.3;
+    color: var(--k-moss-hover);
+    background: var(--k-paper);
+    border: 1px solid var(--k-stone-300);
+    border-radius: var(--k-pill);
+    padding: .42rem .95rem;
+    cursor: pointer;
+    text-align: left;
+    transition: background-color .15s var(--k-ease), border-color .15s var(--k-ease), color .15s var(--k-ease);
+}
+.suggestion-btn:hover {
+    background: var(--k-moss-50);
+    border-color: var(--k-moss);
+}
+
+/* ── Compositor ───────────────────────────────────────────────────────── */
+.kchat-composer {
+    position: sticky;
+    bottom: 0;
+    z-index: 20;
+    padding: 1.25rem 0 calc(.85rem + env(safe-area-inset-bottom, 0px));
+    background: linear-gradient(to bottom, rgba(244, 241, 234, 0), var(--k-cream) 1.25rem);
+}
+
+.composer-box {
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+    background: var(--k-paper);
+    border: 1px solid var(--k-stone-300);
+    border-radius: var(--k-pill);
+    padding: .3rem .3rem .3rem 1.15rem;
+    box-shadow: var(--k-shadow);
+    transition: border-color .15s var(--k-ease), box-shadow .15s var(--k-ease);
+}
+.composer-box:focus-within {
+    border-color: var(--k-moss);
+    box-shadow: var(--k-focus), var(--k-shadow);
+}
+
+.composer-box .composer-input,
+.composer-box .composer-input:focus {
+    flex: 1 1 auto;
+    min-width: 0;
+    border: 0;
+    background: transparent;
+    box-shadow: none;
+    padding: .55rem 0;
+    font-size: 1rem; /* 16px: evita el zoom automático en iOS */
+    color: var(--k-ink);
+}
+
+.composer-box .composer-send {
+    flex: none;
+    width: 42px;
+    height: 42px;
+    padding: 0;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.15rem;
+}
+
+.composer-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    padding: .4rem 1.15rem 0;
+    font-size: .76rem;
+    color: var(--k-stone-500);
+}
+.composer-hint {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.char-counter {
+    flex: none;
+    margin-left: auto;
+    font-variant-numeric: tabular-nums;
+}
+
+/* ── Aviso meteorológico (junto a sugerencias de rutas) ───────────────── */
+.weather-warning-box,
+.weather-warnings {
+    display: flex;
+    flex-direction: column;
+    gap: .4rem;
+}
+.weather-warning-box { max-width: 460px; }
+
+.weather-warning-item,
+.weather-warnings .warning {
+    display: flex;
+    align-items: flex-start;
+    gap: .55rem;
+    background: var(--k-rust-50);
+    border: 1px solid #EBCDB8;
+    border-left: 3px solid var(--k-rust);
+    border-radius: var(--k-radius-sm);
+    padding: .55rem .8rem;
+    font-size: .88rem;
     line-height: 1.45;
-    padding: 0.1rem 0;
+    color: #7A3F1F;
+}
+.weather-warning-item i,
+.weather-warnings .warning i {
+    color: var(--k-rust);
+    margin-top: .1rem;
 }
 
-.weather-warning-item + .weather-warning-item {
-    border-top: 1px solid #FDE68A;
-    margin-top: 0.25rem;
-    padding-top: 0.25rem;
-}
-
-/* ── Carousel de rutas ───────────────────────────────────────────────────── */
-
+/* ── Carrusel de rutas ────────────────────────────────────────────────── */
 .route-carousel {
     width: 100%;
     max-width: 420px;
-    margin: var(--spacing-xs) 0;
 }
 
-.carousel-track {
-    position: relative;
-}
-
-.carousel-slide {
-    display: none;
-}
-
+.carousel-track { position: relative; }
+.carousel-slide { display: none; }
 .carousel-slide.active {
     display: block;
-    animation: slideIn 0.25s ease-out;
+    animation: kchatIn .25s var(--k-ease);
 }
-
-/* ── Tarjeta de ruta (nueva) ─────────────────────────────────────────────── */
-
-.route-card-inner {
-    background: var(--bg-primary);
-    border-radius: var(--border-radius-md);
-    box-shadow: var(--shadow-md);
-    overflow: hidden;
-    border: 1px solid var(--bg-tertiary);
-}
-
-.route-card-img-wrap {
-    position: relative;
-    height: 195px;
-    overflow: hidden;
-    background: var(--bg-tertiary);
-}
-
-.route-card-img-wrap img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    transition: transform 0.3s ease;
-}
-
-.route-card-inner:hover .route-card-img-wrap img {
-    transform: scale(1.03);
-}
-
-.route-diff-badge {
-    position: absolute;
-    top: 8px;
-    right: 8px;
-    padding: 3px 10px;
-    border-radius: 999px;
-    color: white;
-    font-size: 0.72rem;
-    font-weight: 700;
-    letter-spacing: 0.02em;
-    box-shadow: 0 1px 4px rgba(0,0,0,0.3);
-}
-
-.route-act-badge {
-    position: absolute;
-    top: 8px;
-    left: 8px;
-    background: rgba(0,0,0,0.55);
-    color: white;
-    padding: 4px 8px;
-    border-radius: var(--border-radius-sm);
-    font-size: 0.78rem;
-}
-
-/* Badge de tiempo en coche — esquina inferior izquierda de la foto */
-.route-drive-badge {
-    position: absolute;
-    bottom: 8px;
-    left: 8px;
-    background: rgba(0,0,0,0.72);
-    color: #fff;
-    padding: 3px 10px;
-    border-radius: 999px;
-    font-size: 0.75rem;
-    font-weight: 600;
-    letter-spacing: 0.01em;
-    display: inline-flex;
-    align-items: center;
-    gap: 5px;
-}
-
-.route-card-body {
-    padding: 0.75rem 1rem 0.875rem;
-}
-
-/* Etiqueta de zona (Pirineo Aragonés, Euskadi…) */
-.route-card-location {
-    font-size: 0.7rem;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
-    color: var(--primary-color);
-    margin: 0 0 0.2rem;
-}
-
-.route-card-title {
-    font-size: 0.95rem;
-    font-weight: 700;
-    margin: 0 0 0.5rem;
-    color: var(--text-primary);
-    line-height: 1.3;
-}
-
-.route-card-stats {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.25rem 0.65rem;
-    font-size: 0.8rem;
-    color: var(--text-secondary);
-    margin-bottom: 0.65rem;
-}
-
-.route-card-stats span {
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-}
-
-.route-card-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 5px;
-    font-size: 0.82rem;
-    padding: 0.3rem 0.75rem;
-}
-
-/* ── Navegación del carousel ─────────────────────────────────────────────── */
 
 .carousel-counter {
     text-align: center;
-    font-size: 0.75rem;
-    color: var(--text-light);
-    margin-top: 0.35rem;
+    font-size: .75rem;
+    color: var(--k-stone-500);
+    margin-top: .5rem;
+    font-variant-numeric: tabular-nums;
 }
+.carousel-counter:empty { display: none; }
 
 .carousel-nav {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 0.5rem;
-    margin-top: 0.5rem;
+    gap: .75rem;
+    margin-top: .35rem;
 }
-
 .carousel-btn {
-    background: var(--bg-secondary);
-    border: 1px solid var(--bg-tertiary);
+    width: 34px;
+    height: 34px;
     border-radius: 50%;
-    width: 30px;
-    height: 30px;
-    font-size: 1.1rem;
-    cursor: pointer;
-    line-height: 1;
-    transition: all 0.2s ease;
-    display: flex;
+    border: 1px solid var(--k-stone-200);
+    background: var(--k-paper);
+    color: var(--k-ink);
+    display: inline-flex;
     align-items: center;
     justify-content: center;
-    color: var(--text-secondary);
+    font-size: .95rem;
+    cursor: pointer;
+    transition: background-color .15s var(--k-ease), border-color .15s var(--k-ease), color .15s var(--k-ease);
 }
-
 .carousel-btn:hover {
-    background: var(--primary-color);
-    color: white;
-    border-color: var(--primary-color);
+    background: var(--k-moss-50);
+    border-color: var(--k-moss);
+    color: var(--k-moss-hover);
 }
-
 .carousel-dots {
     display: flex;
+    align-items: center;
     gap: 6px;
 }
-
 .carousel-dot {
-    width: 7px;
-    height: 7px;
-    border-radius: 50%;
-    background: var(--bg-tertiary);
+    width: 6px;
+    height: 6px;
+    border-radius: var(--k-pill);
+    background: var(--k-stone-300);
     cursor: pointer;
-    transition: background 0.2s ease, transform 0.2s ease;
+    transition: width .2s var(--k-ease), background-color .2s var(--k-ease);
 }
-
 .carousel-dot.active {
-    background: var(--primary-color);
-    transform: scale(1.3);
+    width: 18px;
+    background: var(--k-moss);
 }
 
-/* ── Tarjetas legacy (chat-card) — mantenidas por si se usan en otro sitio ─ */
-
-.chat-card {
-    background-color: var(--bg-primary);
-    border-radius: var(--border-radius-md);
-    box-shadow: var(--shadow-md);
-    margin: var(--spacing-md) 0;
+/* ── Tarjeta de ruta ──────────────────────────────────────────────────── */
+.route-card-inner {
+    background: var(--k-paper);
+    border: 1px solid var(--k-stone-200);
+    border-radius: var(--k-radius-lg);
     overflow: hidden;
-    transition: transform 0.3s ease;
+    box-shadow: var(--k-shadow);
+    transition: box-shadow .2s var(--k-ease);
 }
+.route-card-inner:hover { box-shadow: var(--k-shadow-lg); }
 
-.chat-card:hover {
-    transform: translateY(-2px);
-}
-
-/* Tarjeta de ruta (legacy) */
-.route-card {
-    display: grid;
-    grid-template-columns: 1fr 2fr;
-    gap: var(--spacing-md);
-}
-
-.route-image {
+.route-card-img-wrap {
     position: relative;
-    height: 200px;
+    aspect-ratio: 16 / 9;
     overflow: hidden;
+    background: var(--k-stone-100);
 }
-
-.route-image img {
+.route-card-img-wrap img {
+    display: block;
     width: 100%;
     height: 100%;
     object-fit: cover;
+    transition: transform .4s var(--k-ease);
 }
+.route-card-inner:hover .route-card-img-wrap img { transform: scale(1.03); }
 
-.difficulty-badge {
+/* Dificultad: etiqueta de papel con punto de color */
+.route-diff-badge {
     position: absolute;
-    top: var(--spacing-sm);
-    right: var(--spacing-sm);
-    padding: var(--spacing-xs) var(--spacing-sm);
-    border-radius: var(--border-radius-sm);
-    color: white;
-    font-weight: bold;
+    top: 10px;
+    right: 10px;
+    display: inline-flex;
+    align-items: center;
+    gap: .4rem;
+    padding: .2rem .65rem;
+    border-radius: var(--k-pill);
+    background: rgba(255, 253, 248, .94);
+    color: var(--k-ink);
+    font-size: .75rem;
+    font-weight: 600;
+    box-shadow: 0 1px 3px rgba(46, 58, 47, .18);
+}
+.route-diff-badge::before {
+    content: "";
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--k-stone-500);
+}
+.route-diff-beginner::before     { background: var(--k-moss); }
+.route-diff-intermediate::before { background: var(--k-warning); }
+.route-diff-advanced::before     { background: var(--k-rust); }
+
+.route-act-badge {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: rgba(255, 253, 248, .94);
+    color: var(--k-ink);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: .8rem;
+    box-shadow: 0 1px 3px rgba(46, 58, 47, .18);
 }
 
-/* Tarjeta meteorológica */
+/* Tiempo en coche — esquina inferior izquierda de la foto */
+.route-drive-badge {
+    position: absolute;
+    bottom: 10px;
+    left: 10px;
+    display: inline-flex;
+    align-items: center;
+    gap: .35rem;
+    padding: .2rem .65rem;
+    border-radius: var(--k-pill);
+    background: rgba(46, 58, 47, .78);
+    color: var(--k-cream);
+    font-size: .75rem;
+    font-weight: 500;
+}
+
+.route-card-body {
+    padding: .95rem 1.1rem 1.05rem;
+}
+.route-card-location {
+    font-size: .72rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    color: var(--k-moss);
+    margin: 0 0 .25rem;
+}
+.route-card-title {
+    font-family: var(--k-font-display);
+    font-size: 1.2rem;
+    font-weight: 500;
+    line-height: 1.25;
+    color: var(--k-ink);
+    margin: 0 0 .7rem;
+}
+.route-card-stats {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .4rem;
+    margin-bottom: .9rem;
+}
+.route-card-stats .k-chip { font-size: .8rem; }
+
+.route-card-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: .35rem;
+    font-weight: 600;
+    font-size: .9rem;
+    color: var(--k-moss-hover);
+    text-decoration: none;
+}
+.route-card-btn i { transition: transform .15s var(--k-ease); }
+.route-card-btn:hover { color: var(--k-ink); text-decoration: underline; }
+.route-card-btn:hover i { transform: translateX(3px); }
+
+/* ── Tarjeta meteorológica ────────────────────────────────────────────── */
 .weather-card {
-    padding: var(--spacing-md);
+    max-width: 460px;
+    background: var(--k-paper);
+    border: 1px solid var(--k-stone-200);
+    border-radius: var(--k-radius-lg);
+    padding: 1.05rem 1.2rem 1.15rem;
+    box-shadow: var(--k-shadow);
 }
-
-.current-conditions {
+.weather-eyebrow {
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    margin-bottom: var(--spacing-md);
+    gap: .4rem;
+    margin: 0 0 .4rem;
+    font-size: .72rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    color: var(--k-moss);
 }
+.current-weather {
+    display: flex;
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: .3rem .9rem;
+}
+.current-weather .temperature {
+    font-family: var(--k-font-display);
+    font-size: 3rem;
+    font-weight: 500;
+    line-height: 1;
+    color: var(--k-ink);
+    letter-spacing: -.02em;
+}
+.current-weather .temperature-unit {
+    font-size: 1.2rem;
+    color: var(--k-ink-2);
+    margin-left: .15rem;
+    vertical-align: top;
+}
+.current-weather .conditions {
+    display: inline-block;
+    font-size: 1rem;
+    color: var(--k-ink-2);
+}
+.current-weather .conditions::first-letter { text-transform: uppercase; }
 
 .weather-details {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: var(--spacing-md);
-    margin-bottom: var(--spacing-md);
+    grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+    gap: .5rem;
+    margin-top: 1rem;
 }
-
-/* Formulario de chat */
-.chat-form {
-    padding: var(--spacing-md);
-    background-color: var(--bg-secondary);
-    border-top: 1px solid var(--bg-tertiary);
+.weather-detail {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    column-gap: .55rem;
+    align-items: center;
+    background: var(--k-stone-50);
+    border: 1px solid var(--k-stone-100);
+    border-radius: var(--k-radius-sm);
+    padding: .55rem .7rem;
 }
+.weather-detail i {
+    grid-row: span 2;
+    color: var(--k-moss);
+    font-size: 1.05rem;
+}
+.weather-detail-label {
+    font-size: .7rem;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    color: var(--k-stone-500);
+    line-height: 1.2;
+}
+.weather-detail-value {
+    font-size: .95rem;
+    font-weight: 600;
+    color: var(--k-ink);
+    line-height: 1.3;
+}
+.weather-detail-value small {
+    font-weight: 400;
+    color: var(--k-ink-2);
+}
+.weather-card .weather-warnings { margin-top: .9rem; }
 
-.input-group {
+/* ── Error ────────────────────────────────────────────────────────────── */
+.error-message {
     display: flex;
-    gap: var(--spacing-sm);
+    align-items: flex-start;
+    gap: .55rem;
+    max-width: 520px;
+    background: var(--k-danger-50);
+    border: 1px solid #E8C1B6;
+    border-radius: var(--k-radius);
+    padding: .7rem .95rem;
+    font-size: .92rem;
+    color: #7E2F20;
+}
+.error-message i { color: var(--k-danger); margin-top: .15rem; }
+
+/* ── Tarjetas legacy (ChatCard en chatcard.js; no las usa ChatApp) ───── */
+.chat-card {
+    background: var(--k-paper);
+    border: 1px solid var(--k-stone-200);
+    border-radius: var(--k-radius);
+    margin: 1rem 0;
+    overflow: hidden;
+}
+.route-image { position: relative; height: 200px; overflow: hidden; }
+.route-image img { width: 100%; height: 100%; object-fit: cover; }
+.difficulty-badge {
+    position: absolute;
+    top: .5rem;
+    right: .5rem;
+    padding: .2rem .6rem;
+    border-radius: var(--k-pill);
+    background: rgba(255, 253, 248, .94);
+    color: var(--k-ink);
+    font-size: .75rem;
+    font-weight: 600;
 }
 
-.user-input {
-    flex-grow: 1;
-    padding: var(--spacing-md);
-    border: 1px solid var(--bg-tertiary);
-    border-radius: var(--border-radius-lg);
-    background-color: var(--bg-primary);
-    transition: border-color 0.3s ease;
-}
+/* ── Responsivo ───────────────────────────────────────────────────────── */
+@media (max-width: 575.98px) {
+    .kchat-welcome { padding: 2rem 0 1.25rem; }
+    .kchat-welcome .kchat-welcome-mark { width: 44px; height: 44px; margin-bottom: .75rem; }
 
-.user-input:focus {
-    outline: none;
-    border-color: var(--primary-color);
-}
+    .message { gap: .55rem; }
+    .message-avatar { width: 28px; height: 28px; padding: 3px; }
+    .system-message .message-body { max-width: calc(100% - 36px); padding: .75rem .95rem; }
+    .user-message .message-body { max-width: 88%; }
 
-/* Botones */
-.btn {
-    padding: var(--spacing-sm) var(--spacing-md);
-    border: none;
-    border-radius: var(--border-radius-md);
-    cursor: pointer;
-    transition: all 0.3s ease;
-}
+    .suggestions-panel { padding-left: 0; }
+    .route-carousel, .weather-card { max-width: 100%; }
 
-.btn-primary {
-    background-color: var(--primary-color);
-    color: white;
-}
-
-.btn-primary:hover {
-    background-color: var(--primary-dark);
-}
-
-/* Indicador de escritura */
-.typing-indicator {
-    display: flex;
-    padding: var(--spacing-sm);
-    gap: var(--spacing-xs);
-}
-
-.typing-dot {
-    width: 8px;
-    height: 8px;
-    background-color: var(--text-light);
-    border-radius: 50%;
-    animation: typing 1s infinite ease-in-out;
-}
-
-.typing-dot:nth-child(2) { animation-delay: 0.2s; }
-.typing-dot:nth-child(3) { animation-delay: 0.4s; }
-
-@keyframes typing {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-5px); }
-}
-
-/* Sugerencias */
-.suggestions-panel {
-    display: flex;
-    flex-wrap: wrap;
-    gap: var(--spacing-sm);
-    padding: var(--spacing-sm);
-    background-color: var(--bg-secondary);
-}
-
-.suggestion-btn {
-    padding: var(--spacing-xs) var(--spacing-sm);
-    background-color: var(--bg-primary);
-    border: 1px solid var(--primary-color);
-    border-radius: var(--border-radius-sm);
-    color: var(--primary-color);
-    cursor: pointer;
-    transition: all 0.2s ease;
-}
-
-.suggestion-btn:hover {
-    background-color: var(--primary-color);
-    color: white;
-}
-
-/* Animaciones */
-@keyframes slideIn {
-    from {
-        opacity: 0;
-        transform: translateY(20px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-.message, .chat-card {
-    animation: slideIn 0.3s ease-out;
-}
-
-/* Responsividad */
-@media (max-width: 768px) {
-    .route-card {
-        grid-template-columns: 1fr;
-    }
-
-    .message {
-        max-width: 90%;
-    }
-
-    .weather-details {
-        grid-template-columns: repeat(2, 1fr);
-    }
-}
-
-@media (max-width: 480px) {
-    .weather-details {
-        grid-template-columns: 1fr;
-    }
-
-    .suggestions-panel {
-        display: none;
-    }
+    .composer-meta { padding-left: .9rem; padding-right: .9rem; }
+    .current-weather .temperature { font-size: 2.6rem; }
 }

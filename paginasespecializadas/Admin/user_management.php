@@ -32,8 +32,8 @@ try {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gestión de Usuarios</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <title>Usuarios · Admin · Kahir.ai</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
         .search-box {
             margin-bottom: 20px;
@@ -48,11 +48,17 @@ try {
             opacity: 1 !important;
         }
     </style>
+  <!-- Sistema de diseño Kahir (después del CSS de la página) -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Work+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <link href="../../assets/css/kahir.css?v=20261122" rel="stylesheet">
 </head>
 <?php include('navbar.php'); ?>
 <body>
     <div class="container mt-5">
-        <h1>Gestión de Usuarios</h1>
+        <h1>Gestión de usuarios</h1>
         <?php if (!empty($_SESSION['message'])): ?>
             <div class="alert alert-info"><?php echo e($_SESSION['message']); ?></div>
             <?php unset($_SESSION['message']); ?>
@@ -61,7 +67,7 @@ try {
             <div class="alert alert-danger"><?php echo e($errorMsg); ?></div>
         <?php endif; ?>
 
-        <input type="text" id="search" class="form-control search-box" placeholder="Buscar usuarios...">
+        <input type="text" id="search" class="form-control search-box" placeholder="Buscar usuarios" aria-label="Buscar usuarios">
 
         <div class="table-responsive">
         <table class="table table-bordered table-striped mt-3" id="userTable" data-order="">
@@ -69,10 +75,10 @@ try {
                 <tr>
                     <th onclick="sortTable(0, this, event)" aria-sort="none">ID</th>
                     <th onclick="sortTable(1, this, event)" aria-sort="none">Usuario</th>
-                    <th onclick="sortTable(2, this, event)" aria-sort="none">Email</th>
+                    <th onclick="sortTable(2, this, event)" aria-sort="none">Correo</th>
                     <th onclick="sortTable(3, this, event)" aria-sort="none">Rol</th>
                     <th onclick="sortTable(4, this, event)" aria-sort="none">Activo</th>
-                    <th onclick="sortTable(5, this, event)" aria-sort="none">Email verificado</th>
+                    <th onclick="sortTable(5, this, event)" aria-sort="none">Correo verificado</th>
                     <th onclick="sortTable(6, this, event)" aria-sort="none">Registro</th>
                     <th onclick="sortTable(7, this, event)" aria-sort="none">Último acceso</th>
                     <th>Acciones</th>
@@ -106,7 +112,7 @@ try {
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         // Guardamos el orden original de las filas
         let originalOrder;

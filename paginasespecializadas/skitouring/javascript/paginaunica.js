@@ -17,40 +17,43 @@ document.addEventListener('DOMContentLoaded', function() {
         .catch(err => {
             console.error('Error loading route:', err);
             const title = document.getElementById('ruta-title');
-            if (title) title.textContent = 'Route not found';
+            if (title) title.textContent = 'No encontramos esta ruta';
         });
 
     const ACTIVITY_LABEL = {
-        hiking: 'Hiking', ski_touring: 'Ski Touring', btt: 'MTB',
-        cycle_touring: 'Cycle Touring', snowshoeing: 'Snowshoeing',
-        climbing: 'Climbing', via_ferrata: 'Via Ferrata', kayaking: 'Kayaking',
-    };
-    const ACTIVITY_COLOR = {
-        hiking: '#28a745', ski_touring: '#0d6efd', btt: '#fd7e14',
-        cycle_touring: '#6f42c1', snowshoeing: '#17a2b8',
-        climbing: '#dc3545', via_ferrata: '#e83e8c', kayaking: '#20c997',
+        hiking: 'Senderismo', ski_touring: 'Esquí de travesía', btt: 'BTT',
+        cycle_touring: 'Cicloturismo', snowshoeing: 'Raquetas',
+        climbing: 'Escalada', via_ferrata: 'Vía ferrata', kayaking: 'Kayak',
     };
     const DIFFICULTY_LABEL = {
-        beginner: 'Easy', intermediate: 'Moderate', advanced: 'Hard',
+        beginner: 'Fácil', intermediate: 'Moderada', advanced: 'Difícil',
     };
+    // Punto de color por dificultad (ver css/ruta.css -> .k-diff--*)
     const DIFFICULTY_CLASS = {
-        beginner: 'diff--easy', intermediate: 'diff--moderate', advanced: 'diff--hard',
+        beginner: 'k-diff--easy', intermediate: 'k-diff--moderate', advanced: 'k-diff--hard',
     };
+    // Etiquetas de pregunta1..4 (mismo orden que en Usuario/subir_ruta.html)
+    const QA_FIELDS = [
+        { icon: 'bi-car-front',            label: 'Cómo llegar' },
+        { icon: 'bi-backpack',             label: 'Material' },
+        { icon: 'bi-exclamation-triangle', label: 'Peligros y notas técnicas' },
+        { icon: 'bi-sun',                  label: 'Mejor época' },
+    ];
     const LOCATION_LABEL = {
-        Western_Pyrenees:  'Western Pyrenees',
-        Central_Pyrenees:  'Central Pyrenees',
-        Eastern_Pyrenees:  'Eastern Pyrenees',
-        Pirineo_Occidental:'Western Pyrenees',
-        Pirineo_Central:   'Central Pyrenees',
-        Pirineo_Oriental:  'Eastern Pyrenees',
+        Western_Pyrenees:  'Pirineo occidental',
+        Central_Pyrenees:  'Pirineo central',
+        Eastern_Pyrenees:  'Pirineo oriental',
+        Pirineo_Occidental:'Pirineo occidental',
+        Pirineo_Central:   'Pirineo central',
+        Pirineo_Oriental:  'Pirineo oriental',
         navarra:   'Navarra',     euskadi:    'Euskadi',
         la_rioja:  'La Rioja',    aragon:     'Aragón',
         cataluna:  'Cataluña',    galicia:    'Galicia',
         cantabria: 'Cantabria',   asturias:   'Asturias',
         castilla:  'Castilla',    madrid:     'Madrid',
         andalucia: 'Andalucía',   valencia:   'Valencia',
-        murcia:    'Murcia',      baleares:   'Balearic Is.',
-        canarias:  'Canary Is.',  Other:      null,
+        murcia:    'Murcia',      baleares:   'Baleares',
+        canarias:  'Canarias',  Other:      null,
     };
 
     function setText(id, text) {
@@ -60,15 +63,15 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function actualizarInformacionRuta(ruta) {
         // Title
-        const titulo = ruta.titulo || 'Route';
+        const titulo = ruta.titulo || 'Ruta';
         setText('ruta-title', titulo);
         setText('breadcrumb-title', titulo);
-        document.title = `${titulo} — Hiker`;
+        document.title = `${titulo} — Kahir`;
 
         // Stats
         const elev = ruta.elevacion_ganada ? `+${Math.round(ruta.elevacion_ganada).toLocaleString('es-ES')} m` : '—';
-        const dist = ruta.distancia_km     ? `${parseFloat(ruta.distancia_km).toFixed(1)} km`                  : '—';
-        const dur  = ruta.duracion_horas   ? `${parseFloat(ruta.duracion_horas).toFixed(1)} h`                  : '—';
+        const dist = ruta.distancia_km     ? `${parseFloat(ruta.distancia_km).toLocaleString('es-ES', { maximumFractionDigits: 1 })} km`                  : '—';
+        const dur  = ruta.duracion_horas   ? `${parseFloat(ruta.duracion_horas).toLocaleString('es-ES', { maximumFractionDigits: 1 })} h`                  : '—';
 
         ['ruta-elevation', 'ruta-elevation-2'].forEach(id => setText(id, elev));
         ['ruta-distance',  'ruta-distance-2' ].forEach(id => setText(id, dist));
@@ -77,64 +80,79 @@ document.addEventListener('DOMContentLoaded', function() {
         // Esfuerzo tipo MIDE (columna calculada en la BD: 1–5 + horas estimadas)
         const esf = Number(ruta.esfuerzo);
         const hm  = parseFloat(ruta.horas_mide);
-        const effort = (esf >= 1 && esf <= 5)
-            ? `${esf}/5` + (Number.isFinite(hm) ? ` · ~${hm < 10 ? hm.toFixed(1) : Math.round(hm)} h` : '')
-            : '—';
-        ['ruta-effort', 'ruta-effort-2'].forEach(id => setText(id, effort));
+        const validEsf = esf >= 1 && esf <= 5;
+        const hmText   = Number.isFinite(hm) ? `~${hm < 10 ? hm.toLocaleString('es-ES', { maximumFractionDigits: 1 }) : Math.round(hm).toLocaleString('es-ES')} h` : '';
+        const effort   = validEsf ? `${esf}/5` + (hmText ? ` · ${hmText}` : '') : '—';
+        setText('ruta-effort-2', effort);
+
+        // Tile de datos: "2/5" grande + "~2.4 h" pequeño
+        const effortEl = document.getElementById('ruta-effort');
+        if (effortEl) {
+            effortEl.textContent = '';
+            if (validEsf) {
+                const big = document.createElement('span');
+                big.className = 'k-stat__main';
+                big.textContent = `${esf}/5`;
+                effortEl.appendChild(big);
+                if (hmText) {
+                    const sub = document.createElement('span');
+                    sub.className = 'k-stat__sub';
+                    sub.textContent = hmText;
+                    effortEl.appendChild(sub);
+                }
+            } else {
+                effortEl.textContent = '—';
+            }
+        }
 
         // Difficulty
         const diffKey   = (ruta.dificultad || '').toLowerCase();
         const diffLabel = DIFFICULTY_LABEL[diffKey] || ruta.dificultad || '—';
         const diffCls   = DIFFICULTY_CLASS[diffKey] || '';
 
-        // Stats bar: coloured text (no pill)
+        // Tile de datos: texto + punto de color (sin texto coloreado)
         const diffStatEl = document.getElementById('ruta-difficulty');
         if (diffStatEl) {
             diffStatEl.textContent = diffLabel;
-            const colorMap = { 'diff--easy': '#28a745', 'diff--moderate': '#fd7e14', 'diff--hard': '#dc3545' };
-            diffStatEl.style.color  = colorMap[diffCls] || '#495057';
-            diffStatEl.style.fontWeight = '700';
-            diffStatEl.className = '';
+            diffStatEl.className = `k-stat__value k-diff ${diffCls}`.trim();
         }
 
-        // Sidebar badge
+        // Ficha lateral
         const diffBadge = document.getElementById('ruta-difficulty-2');
         if (diffBadge) {
             diffBadge.textContent = diffLabel;
-            diffBadge.className   = `difficulty-badge ${diffCls}`;
+            diffBadge.className   = `k-diff ${diffCls}`.trim();
         }
 
-        // Hero badge
+        // Chip de la cabecera
         const heroDiff = document.getElementById('hero-difficulty-badge');
         if (heroDiff) {
             heroDiff.textContent = diffLabel;
-            heroDiff.className   = `ruta-badge ${diffCls}`;
+            heroDiff.className   = `k-chip k-diff ${diffCls}`.trim();
+            heroDiff.hidden      = diffLabel === '—';
         }
 
         // Activity
         const actLabel = ACTIVITY_LABEL[ruta.tipo_ruta] || ruta.tipo_ruta || '—';
-        const actColor = ACTIVITY_COLOR[ruta.tipo_ruta] || '#6c757d';
         ['ruta-activity', 'ruta-activity-2'].forEach(id => setText(id, actLabel));
 
         const heroAct = document.getElementById('hero-activity-badge');
         if (heroAct) {
             heroAct.textContent = actLabel;
-            heroAct.style.background = actColor;
-            heroAct.classList.remove('d-none');
         }
 
         // Location — formatted
         const locRaw   = ruta.ubicacion || '';
         const locLabel = LOCATION_LABEL.hasOwnProperty(locRaw)
             ? (LOCATION_LABEL[locRaw] ?? locRaw)
-            : locRaw.replace(/_/g, ' ') || 'N/A';
-        ['ruta-location', 'ruta-location-2'].forEach(id => setText(id, locLabel));
+            : locRaw.replace(/_/g, ' ') || '—';
+        ['ruta-location', 'ruta-location-2', 'hero-location'].forEach(id => setText(id, locLabel));
 
         // Author
         const authorEl = document.getElementById('ruta-author');
         if (authorEl) {
             const span = authorEl.querySelector('span');
-            if (span) span.textContent = ruta.username || 'Unknown';
+            if (span) span.textContent = ruta.username || 'alguien de Kahir';
         }
 
         // Description
@@ -150,13 +168,20 @@ document.addEventListener('DOMContentLoaded', function() {
             for (let i = 1; i <= 4; i++) {
                 if (ruta[`pregunta${i}`]) {
                     hasExtra = true;
-                    const p = document.createElement('p');
-                    p.className = 'mb-2';
-                    const strong = document.createElement('strong');
-                    strong.textContent = `Q${i}:`;
-                    p.appendChild(strong);
-                    p.appendChild(document.createTextNode(' ' + String(ruta[`pregunta${i}`])));
-                    preguntasDiv.appendChild(p);
+                    const field = QA_FIELDS[i - 1];
+                    const item = document.createElement('div');
+                    item.className = 'k-qa__item';
+                    const dt = document.createElement('dt');
+                    const icon = document.createElement('i');
+                    icon.className = `bi ${field.icon}`;
+                    icon.setAttribute('aria-hidden', 'true');
+                    dt.appendChild(icon);
+                    dt.appendChild(document.createTextNode(field.label));
+                    const dd = document.createElement('dd');
+                    dd.textContent = String(ruta[`pregunta${i}`]);
+                    item.appendChild(dt);
+                    item.appendChild(dd);
+                    preguntasDiv.appendChild(item);
                 }
             }
             if (preguntasWrap) preguntasWrap.style.display = hasExtra ? '' : 'none';
@@ -274,7 +299,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 endIcon: createBootstrapIcon('bi-flag-fill')
             }
         }).on('loaded', function(e) {
-            map.fitBounds(e.target.getBounds());
+            // El mapa vive en una columna lateral: recalcular su tamaño antes de encuadrar la traza
+            map.invalidateSize();
+            map.fitBounds(e.target.getBounds(), { padding: [24, 24], maxZoom: 15 });
             controlElevation.load(`rutas_st/${ruta.ruta_carpeta}/${ruta.gpx_path}`);
         }).addTo(map);
         // Ya no se envía 'map_interaction': el ENUM de user_interactions no lo admite
@@ -312,11 +339,13 @@ document.addEventListener('DOMContentLoaded', function() {
         const fallback = getDefaultImage(ruta.tipo_ruta);
         imagenes.forEach((imagen, index) => {
             const src = safeUrl(fixImgPath(imagen), fallback);
-            const item = document.createElement('div');
+            const item = document.createElement('button');
+            item.type = 'button';
             item.className = 'gallery-item';
+            item.setAttribute('aria-label', `Abrir foto ${index + 1}`);
             const img = document.createElement('img');
             img.src = src;
-            img.alt = `Photo ${index + 1}`;
+            img.alt = `Foto ${index + 1}`;
             img.loading = 'lazy';
             img.addEventListener('error', function onErr() {
                 img.removeEventListener('error', onErr);
@@ -324,7 +353,7 @@ document.addEventListener('DOMContentLoaded', function() {
             });
             const zoom = document.createElement('div');
             zoom.className = 'gallery-item__zoom';
-            zoom.innerHTML = '<i class="bi bi-zoom-in"></i>';
+            zoom.innerHTML = '<i class="bi bi-arrows-angle-expand" aria-hidden="true"></i>';
             item.appendChild(img);
             item.appendChild(zoom);
             item.addEventListener('click', () => openLightbox(src));
@@ -369,8 +398,8 @@ document.addEventListener('DOMContentLoaded', function() {
         if (!downloadDiv) return;
         const downloadLink = document.createElement('a');
         downloadLink.href = `rutas_st/${encodeURIComponent(ruta.ruta_carpeta || '')}/${encodeURIComponent(ruta.gpx_path || '')}`;
-        downloadLink.innerHTML = '<i class="bi bi-download me-1"></i>GPX';
-        downloadLink.classList.add('btn', 'btn-success', 'btn-sm');
+        downloadLink.innerHTML = '<i class="bi bi-download" aria-hidden="true"></i><span class="k-act__label">Descargar GPX</span>';
+        downloadLink.classList.add('btn', 'btn-outline-secondary', 'k-act', 'k-act--gpx');
         downloadLink.setAttribute('download', '');
         downloadLink.addEventListener('click', function(e) {
             e.preventDefault();
@@ -405,7 +434,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         var enlargedImg = document.createElement('img');
         enlargedImg.src = imageUrl.replace(/paginasespecializadas\\\/skitouring\\\/rutas_st\\\//g, 'paginasespecializadas/skitouring/rutas_st/');
-        enlargedImg.alt = 'Enlarged Image';
+        enlargedImg.alt = 'Foto ampliada';
 
         enlargeDiv.appendChild(enlargedImg);
         document.body.appendChild(enlargeDiv);

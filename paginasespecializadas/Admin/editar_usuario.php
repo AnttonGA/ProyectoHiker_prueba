@@ -36,12 +36,12 @@ try {
 } catch (Throwable $ex) {
     error_log('editar_usuario.php (select): ' . $ex->getMessage());
     http_response_code(500);
-    exit('Error al cargar el usuario.');
+    exit('No se pudo cargar el usuario. Inténtalo de nuevo.');
 }
 
 if (!$usuario) {
     http_response_code(404);
-    exit('Usuario no encontrado.');
+    exit('No existe ningún usuario con ese identificador.');
 }
 
 $errores = [];
@@ -60,13 +60,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $errores[] = 'El nombre de usuario debe tener entre 3 y 50 caracteres válidos.';
     }
     if (strlen($email) > 100 || filter_var($email, FILTER_VALIDATE_EMAIL) === false) {
-        $errores[] = 'El email no es válido.';
+        $errores[] = 'El correo no es válido.';
     }
     if (!array_key_exists($rol, $rolesValidos)) {
-        $errores[] = 'Rol no válido.';
+        $errores[] = 'Elige un rol de la lista.';
     }
     if (!in_array($activo, ['0', '1'], true) || !in_array($emailVerificado, ['0', '1'], true)) {
-        $errores[] = 'Datos no válidos.';
+        $errores[] = 'Algún valor del formulario no es válido. Revísalo.';
     }
     // Un administrador no puede quitarse su propio rol de admin ni desactivarse
     if ($esYoMismo && ($rol !== 'admin' || $activo !== '1')) {
@@ -92,7 +92,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $_SESSION['email'] = $email;
             }
 
-            $_SESSION['message'] = "Usuario actualizado exitosamente";
+            $_SESSION['message'] = "Usuario guardado.";
             $conn->close();
             header("Location: user_management.php");
             exit();
@@ -100,13 +100,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             error_log('editar_usuario.php (update): ' . $ex->getMessage());
             if ((int) $ex->getCode() === 1062) {
                 // Clave única duplicada (username o email); mensaje genérico
-                $errores[] = 'El nombre de usuario o el email ya están en uso.';
+                $errores[] = 'Ese nombre de usuario o ese correo ya están en uso.';
             } else {
-                $errores[] = 'Error al actualizar el usuario.';
+                $errores[] = 'No se pudo guardar el usuario. Inténtalo de nuevo.';
             }
         } catch (Throwable $ex) {
             error_log('editar_usuario.php (update): ' . $ex->getMessage());
-            $errores[] = 'Error al actualizar el usuario.';
+            $errores[] = 'No se pudo guardar el usuario. Inténtalo de nuevo.';
         }
     }
 
@@ -130,13 +130,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Editar Usuario</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <title>Editar usuario · Admin · Kahir.ai</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Sistema de diseño Kahir (después del CSS de la página) -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Work+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <link href="../../assets/css/kahir.css?v=20261122" rel="stylesheet">
 </head>
 <body>
 <?php include('navbar.php'); ?>
     <div class="container mt-5">
-        <h1>Editar Usuario</h1>
+        <h1>Editar usuario</h1>
         <?php if ($errores): ?>
             <div class="alert alert-danger">
                 <ul class="mb-0">
@@ -156,7 +162,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <input type="text" class="form-control" id="username" name="username" maxlength="50" minlength="3" value="<?php echo e($usuario['username']); ?>" required>
             </div>
             <div class="mb-3">
-                <label for="email" class="form-label">Email</label>
+                <label for="email" class="form-label">Correo electrónico</label>
                 <input type="email" class="form-control" id="email" name="email" maxlength="100" value="<?php echo e($usuario['email']); ?>" required>
             </div>
             <div class="mb-3">
@@ -175,16 +181,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 </select>
             </div>
             <div class="mb-3">
-                <label for="email_verificado" class="form-label">Email verificado</label>
+                <label for="email_verificado" class="form-label">Correo verificado</label>
                 <select class="form-select" id="email_verificado" name="email_verificado" required>
                     <option value="1" <?php if ((int) $usuario['email_verificado'] === 1) echo 'selected'; ?>>Sí</option>
                     <option value="0" <?php if ((int) $usuario['email_verificado'] !== 1) echo 'selected'; ?>>No</option>
                 </select>
             </div>
-            <button type="submit" class="btn btn-primary">Guardar cambios</button>
+            <button type="submit" class="btn btn-primary">Guardar</button>
             <a href="user_management.php" class="btn btn-secondary">Cancelar</a>
         </form>
     </div>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

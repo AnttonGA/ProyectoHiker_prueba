@@ -83,7 +83,7 @@ try {
 
         if ($result->num_rows === 0) {
             http_response_code(404);
-            echo json_encode(['error' => 'Route not found']);
+            echo json_encode(['error' => 'No encontramos esta ruta. Puede que ya no esté publicada.']);
             exit;
         }
 

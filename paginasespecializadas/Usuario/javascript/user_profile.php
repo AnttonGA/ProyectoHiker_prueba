@@ -20,7 +20,7 @@ function jsonError(string $msg, int $code = 500): void {
 require_once __DIR__ . '/../../inicio_sesion/conexion.php';
 
 if (!isset($_SESSION['usuario'])) {
-    jsonError('No autenticado', 401);
+    jsonError('Tu sesión ha caducado. Vuelve a entrar.', 401);
 }
 
 function safeQuery(mysqli $conn, string $sql, string $types = '', array $params = [], $default = []) {
@@ -45,7 +45,7 @@ $user = safeQueryOne($conn,
     "SELECT id, username, rol, ultimo_acceso FROM usuarios WHERE username = ? LIMIT 1",
     "s", [$_SESSION['usuario']]
 );
-if (!$user) jsonError('Usuario no encontrado', 403);
+if (!$user) jsonError('No se encontró tu cuenta. Sal y vuelve a entrar.', 403);
 $userId = (int)$user['id'];
 
 // ─── 2. Preferencias ─────────────────────────────────────────────────────────

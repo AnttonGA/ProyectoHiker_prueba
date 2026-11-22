@@ -374,6 +374,9 @@ switch ($responseType) {
                 'distance'           => (float)($route['distancia_km']     ?? $route['length']    ?? ($route['distance'] ?? 0)),
                 'difficulty'         => $route['dificultad']  ?? ($route['difficulty'] ?? ''),
                 'tipo_ruta'          => $route['tipo_ruta']   ?? '',
+                // Esfuerzo MIDE (Fase 1): columnas generadas en `rutas`
+                'esfuerzo'           => isset($route['esfuerzo'])   ? (int) $route['esfuerzo']     : null,
+                'horas_mide'         => isset($route['horas_mide']) ? (float) $route['horas_mide'] : null,
                 'location'           => $route['ubicacion']   ?? ($route['location']  ?? ''),
                 'drive_time_minutes' => $driveMin,
                 'drive_km'           => $route['drive_km']    ?? null,
@@ -455,6 +458,8 @@ switch ($responseType) {
                 'distance'   => (float)($r['distancia_km']     ?? $r['distance']  ?? 0),
                 'difficulty' => $r['dificultad']   ?? ($r['difficulty'] ?? ''),
                 'tipo_ruta'  => $r['tipo_ruta']    ?? '',
+                'esfuerzo'   => isset($r['esfuerzo'])   ? (int) $r['esfuerzo']     : null,
+                'horas_mide' => isset($r['horas_mide']) ? (float) $r['horas_mide'] : null,
                 'location'   => $r['ubicacion']    ?? ($r['location']   ?? ''),
                 'image'      => !empty($r['image_url'])
                                     ? $r['image_url']

@@ -10,34 +10,34 @@
 const STEPS = [
   {
     key:    'routes',
-    icon:   'bi-map-fill',
+    icon:   'bi-signpost-split',
     bg:     'rgba(13,110,253,.1)',
     color:  '#0d6efd',
-    title:  'Upload a Route',
-    desc:   'Share your adventures with the Kahir community.',
-    cta:    'Upload',
-    href:   'upload_route.php',
+    title:  'Subir ruta',
+    desc:   'Comparte tus salidas con la comunidad de Kahir.',
+    cta:    'Subir',
+    href:   'subir_ruta.html',
     action: null,
   },
   {
     key:    'favorites',
-    icon:   'bi-heart-fill',
+    icon:   'bi-heart',
     bg:     'rgba(220,53,69,.1)',
     color:  '#dc3545',
-    title:  'Save a Favourite',
-    desc:   'Heart a route to keep it in your collection.',
-    cta:    'Browse',
+    title:  'Guardar una favorita',
+    desc:   'Toca el corazón de una ruta para guardarla en tu colección.',
+    cta:    'Explorar',
     href:   '../skitouring/skitouring.html',
     action: null,
   },
   {
     key:    'lists',
-    icon:   'bi-bookmark-fill',
+    icon:   'bi-bookmarks',
     bg:     'rgba(111,66,193,.1)',
     color:  '#6f42c1',
-    title:  'Create a List',
-    desc:   'Organise routes into custom collections.',
-    cta:    'New List',
+    title:  'Crear una lista',
+    desc:   'Organiza las rutas en tus propias colecciones.',
+    cta:    'Nueva lista',
     href:   null,
     action: () => {
       document.getElementById('lists-tab')?.click();
@@ -46,24 +46,24 @@ const STEPS = [
   },
   {
     key:     'ai',
-    icon:    'bi-graph-up-arrow',
+    icon:    'bi-person-badge',
     bg:      'rgba(13,202,240,.1)',
     color:   '#0dcaf0',
-    title:   'Explore AI Profile',
-    desc:    'See your personalised hiking stats and preferences.',
-    cta:     'View Profile',
+    title:   'Ver tu perfil IA',
+    desc:    'Consulta tus estadísticas y preferencias de montaña.',
+    cta:     'Ver perfil',
     href:    null,
     action:  () => document.getElementById('perfil-ia-tab')?.click(),
     localKey: 'kahir_onb_ai',
   },
   {
     key:    'downloads',
-    icon:   'bi-cloud-arrow-down-fill',
+    icon:   'bi-download',
     bg:     'rgba(25,135,84,.1)',
     color:  '#198754',
-    title:  'Download a GPX',
-    desc:   'Take a route offline for your next adventure.',
-    cta:    'Find Route',
+    title:  'Descargar un GPX',
+    desc:   'Llévate una ruta sin conexión para tu próxima salida.',
+    cta:    'Buscar ruta',
     href:   '../skitouring/skitouring.html',
     action: null,
   },
@@ -74,12 +74,12 @@ const AI_STEP = {
   key:   'chat',
   color: '#6f42c1',
   prompts: [
-    { icon: 'bi-signpost-2',       text: 'Recommend a ski touring route for intermediate level' },
-    { icon: 'bi-person-walking',   text: 'Best beginner hiking routes in the Pyrenees?' },
-    { icon: 'bi-calendar3',        text: 'Plan a 3-day hiking weekend near Barcelona' },
-    { icon: 'bi-shield-check',     text: 'What safety gear do I need for ski touring?' },
-    { icon: 'bi-cloud-snow',       text: 'How do I read an avalanche forecast?' },
-    { icon: 'bi-trophy',           text: 'How can I improve my mountain fitness?' },
+    { icon: 'bi-signpost-2',       text: 'Recomiéndame una ruta de esquí de travesía de nivel moderado' },
+    { icon: 'bi-person-walking',   text: '¿Qué rutas fáciles de senderismo hay en el Pirineo?' },
+    { icon: 'bi-calendar3',        text: 'Planifica un fin de semana de 3 días de senderismo cerca de Barcelona' },
+    { icon: 'bi-shield-check',     text: '¿Qué material de seguridad necesito para el esquí de travesía?' },
+    { icon: 'bi-cloud-snow',       text: '¿Cómo se lee un boletín de aludes?' },
+    { icon: 'bi-trophy',           text: '¿Cómo puedo mejorar mi forma física para la montaña?' },
   ],
 };
 
@@ -93,73 +93,65 @@ const LS_PREFILL   = 'kahir_chat_prefill';
 let _completed = new Set();
 
 /* ── Regular step card ────────────────────────────────── */
-function buildCard(step, done) {
+/* step.bg / step.color are kept in STEPS for reference but the cards now
+   use the shared moss palette from css/my_account.css. */
+function buildCard(step, done, index) {
   const cls = done ? 'onb-card onb-card--done' : 'onb-card';
 
   const ctaHtml = done
-    ? `<span class="onb-done-badge"><i class="bi bi-check-circle-fill"></i> Done</span>`
+    ? `<span class="onb-done-badge"><i class="bi bi-check2" aria-hidden="true"></i> Hecho</span>`
     : step.href
-      ? `<a href="${step.href}" class="onb-cta"
-            style="color:${step.color};border-color:${step.color}40">
-           ${step.cta} <i class="bi bi-arrow-right-short"></i>
+      ? `<a href="${step.href}" class="onb-cta">
+           ${step.cta} <i class="bi bi-arrow-right-short" aria-hidden="true"></i>
          </a>`
-      : `<button class="onb-cta" data-step="${step.key}"
-               style="color:${step.color};border-color:${step.color}40">
-           ${step.cta} <i class="bi bi-arrow-right-short"></i>
+      : `<button type="button" class="onb-cta" data-step="${step.key}">
+           ${step.cta} <i class="bi bi-arrow-right-short" aria-hidden="true"></i>
          </button>`;
 
   return `
-    <div class="${cls}" data-step="${step.key}">
-      <div class="onb-icon" style="background:${done ? '#f0f0f0' : step.bg};
-                                   color:${done ? '#adb5bd' : step.color}">
-        <i class="bi ${step.icon}"></i>
-        ${done ? `<span class="onb-tick"><i class="bi bi-check-lg"></i></span>` : ''}
+    <li class="${cls}" data-step="${step.key}">
+      <div class="onb-card__top">
+        <span class="onb-icon" aria-hidden="true">
+          <i class="bi ${done ? 'bi-check-lg' : step.icon}"></i>
+        </span>
+        <span class="onb-num">${done ? '<span class="visually-hidden">Hecho: </span>' : ''}Paso ${index + 1}</span>
       </div>
       <p class="onb-title">${step.title}</p>
       <p class="onb-desc">${step.desc}</p>
       ${ctaHtml}
-    </div>`;
+    </li>`;
 }
 
 /* ── Featured AI chat card ────────────────────────────── */
 function buildAiCard(done) {
   const promptsHtml = AI_STEP.prompts.map(p => `
-    <button class="onb-prompt-chip" data-prompt="${p.text}" title="Click to use this prompt">
-      <i class="bi ${p.icon}"></i>
+    <button type="button" class="onb-prompt-chip" data-prompt="${p.text}" title="Preguntárselo a Kahir">
+      <i class="bi ${p.icon}" aria-hidden="true"></i>
       <span>${p.text}</span>
     </button>`).join('');
 
   const ctaHtml = done
     ? `<div class="onb-ai-done">
-         <i class="bi bi-check-circle-fill text-success"></i>
-         <span>First conversation done!</span>
-         <a href="${CHAT_URL}" class="onb-ai-cta onb-ai-cta--done">Chat again</a>
+         <span><i class="bi bi-check2" aria-hidden="true"></i> Primera conversación hecha</span>
+         <a href="${CHAT_URL}" class="btn btn-outline-primary btn-sm">Volver a hablar</a>
        </div>`
-    : `<a href="${CHAT_URL}" class="onb-ai-cta">
-         <i class="bi bi-chat-dots-fill me-1"></i>Start chatting
-         <i class="bi bi-arrow-right-short"></i>
+    : `<a href="${CHAT_URL}" class="btn btn-primary onb-ai-cta">
+         Empezar a hablar <i class="bi bi-arrow-right-short" aria-hidden="true"></i>
        </a>`;
 
   return `
     <div class="onb-ai-card ${done ? 'onb-ai-card--done' : ''}" data-step="chat">
       <div class="onb-ai-left">
-        <div class="onb-ai-icon">
-          <i class="bi bi-robot"></i>
-          ${done ? `<span class="onb-tick"><i class="bi bi-check-lg"></i></span>` : ''}
-        </div>
+        <span class="onb-ai-icon" aria-hidden="true"><i class="bi bi-chat-text"></i></span>
         <div>
-          <p class="onb-ai-title">Ask Kahir AI</p>
+          <p class="onb-ai-title">Pregunta a Kahir</p>
           <p class="onb-ai-subtitle">
-            Your personal mountain guide — get route recommendations,<br>
-            safety tips, training advice and more.
+            Tu compañero de montaña para buscar ideas de rutas, resolver dudas de seguridad y preparar tus salidas.
           </p>
         </div>
       </div>
       <div class="onb-ai-prompts">
-        <p class="onb-ai-prompts__label">
-          <i class="bi bi-lightbulb-fill text-warning me-1"></i>
-          Try asking:
-        </p>
+        <p class="onb-ai-prompts__label">Prueba a preguntar</p>
         <div class="onb-ai-chips">${promptsHtml}</div>
       </div>
       <div class="onb-ai-footer">
@@ -180,12 +172,12 @@ function render(completed) {
   if (done === total) {
     section.innerHTML = `
       <div class="onb-complete">
-        <i class="bi bi-trophy-fill" style="color:#ffc107;font-size:1.3rem"></i>
+        <span class="onb-icon" aria-hidden="true"><i class="bi bi-check-lg"></i></span>
         <div>
-          <strong>You're all set!</strong>
-          <span class="text-muted ms-1 small">You've discovered all Kahir features.</span>
+          <strong>Ya te mueves por Kahir como en casa.</strong>
+          <span class="text-muted ms-1 small">Has completado todos los primeros pasos.</span>
         </div>
-        <button class="btn-close ms-auto onb-dismiss-btn" title="Dismiss"></button>
+        <button type="button" class="btn-close ms-auto onb-dismiss-btn" title="Cerrar" aria-label="Cerrar"></button>
       </div>`;
     section.style.display = '';
     section.querySelector('.onb-dismiss-btn')?.addEventListener('click', dismiss);
@@ -194,22 +186,24 @@ function render(completed) {
 
   section.innerHTML = `
     <div class="onb-header">
-      <span class="onb-header__title">
-        <i class="bi bi-stars text-warning me-1"></i>Getting started
-      </span>
+      <div class="onb-header__text">
+        <p class="acct-eyebrow mb-1">Primeros pasos</p>
+        <h2 class="onb-header__title">Haz tuyo Kahir</h2>
+      </div>
       <div class="onb-progress">
-        <div class="onb-progress__track">
+        <div class="onb-progress__track" role="progressbar" aria-label="Progreso de primeros pasos"
+             aria-valuemin="0" aria-valuemax="${total}" aria-valuenow="${done}">
           <div class="onb-progress__fill" style="width:${pct}%"></div>
         </div>
-        <span class="onb-progress__label">${done} / ${total}</span>
+        <span class="onb-progress__label">${done} de ${total} hechos</span>
       </div>
-      <button class="btn-close btn-close-sm onb-dismiss-btn" title="Hide for now"></button>
+      <button type="button" class="btn-close onb-dismiss-btn" title="Ocultar por ahora" aria-label="Ocultar primeros pasos"></button>
     </div>
 
     <!-- Regular 5-step row -->
-    <div class="onb-steps">
-      ${STEPS.map(s => buildCard(s, completed.has(s.key))).join('')}
-    </div>
+    <ol class="onb-steps">
+      ${STEPS.map((s, i) => buildCard(s, completed.has(s.key), i)).join('')}
+    </ol>
 
     <!-- Featured AI chat card -->
     ${buildAiCard(completed.has('chat'))}`;

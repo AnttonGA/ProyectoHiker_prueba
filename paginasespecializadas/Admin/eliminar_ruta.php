@@ -34,14 +34,14 @@ try {
     $stmt->close();
 } catch (Throwable $ex) {
     error_log('eliminar_ruta.php (select): ' . $ex->getMessage());
-    $_SESSION['message'] = 'No se pudo eliminar la ruta.';
+    $_SESSION['message'] = 'No se pudo eliminar la ruta. Inténtalo de nuevo.';
     header('Location: ' . $destino);
     exit();
 }
 
 if (!$ruta) {
     http_response_code(404);
-    exit('Ruta no encontrada.');
+    exit('No existe ninguna ruta con ese identificador.');
 }
 
 // Solo un administrador o el propietario de la ruta pueden borrarla
@@ -59,7 +59,7 @@ try {
     $_SESSION['message'] = 'Ruta eliminada.';
 } catch (Throwable $ex) {
     error_log('eliminar_ruta.php (update): ' . $ex->getMessage());
-    $_SESSION['message'] = 'No se pudo eliminar la ruta.';
+    $_SESSION['message'] = 'No se pudo eliminar la ruta. Inténtalo de nuevo.';
 }
 
 $conn->close();

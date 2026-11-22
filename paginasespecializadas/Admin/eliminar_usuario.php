@@ -24,7 +24,7 @@ if (!$id || $id < 1) {
 // Evitar que un administrador se borre a sí mismo por error
 $miId = (int) ($_SESSION['id'] ?? ($_SESSION['user_id'] ?? 0));
 if ($miId === $id) {
-    $_SESSION['message'] = "No puedes eliminar tu propio usuario";
+    $_SESSION['message'] = "No puedes eliminar tu propia cuenta.";
     header("Location: user_management.php");
     exit();
 }
@@ -40,19 +40,19 @@ try {
     $stmt->close();
 
     if ((int) $numRutas > 0) {
-        $_SESSION['message'] = "No se puede eliminar un usuario que tiene rutas (se borrarían en cascada). Desactívalo desde Editar en su lugar.";
+        $_SESSION['message'] = "Este usuario tiene rutas y se borrarían con él. Desactívalo desde Editar.";
     } else {
         $stmt = $conn->prepare("DELETE FROM usuarios WHERE id = ?");
         $stmt->bind_param("i", $id);
         $stmt->execute();
         $borrados = $stmt->affected_rows;
         $stmt->close();
-        $_SESSION['message'] = $borrados > 0 ? "Usuario eliminado exitosamente" : "El usuario no existe";
+        $_SESSION['message'] = $borrados > 0 ? "Usuario eliminado." : "Ese usuario ya no existe.";
     }
 } catch (Throwable $ex) {
     // p. ej. una restricción de clave foránea (error 1451)
     error_log('eliminar_usuario.php: ' . $ex->getMessage());
-    $_SESSION['message'] = "No se pudo eliminar el usuario. Si tiene datos asociados, desactívalo desde Editar en su lugar.";
+    $_SESSION['message'] = "No se pudo eliminar el usuario. Si tiene datos asociados, desactívalo desde Editar.";
 }
 
 $conn->close();

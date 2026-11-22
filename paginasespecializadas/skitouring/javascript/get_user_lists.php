@@ -6,13 +6,13 @@ require_once '../../inicio_sesion/conexion.php';
 header('Content-Type: application/json');
 
 if (!isset($_SESSION['usuario'])) {
-    echo json_encode(['success' => false, 'error' => 'User not logged in']);
+    echo json_encode(['success' => false, 'error' => 'Entra en tu cuenta para usar tus listas.']);
     exit;
 }
 
 $routeId = isset($_GET['routeId']) ? (int)$_GET['routeId'] : 0;
 if (!$routeId) {
-    echo json_encode(['success' => false, 'error' => 'Route ID is required']);
+    echo json_encode(['success' => false, 'error' => 'Falta la ruta. Recarga la página.']);
     exit;
 }
 

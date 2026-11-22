@@ -31,7 +31,7 @@ function activities_reply(array $data, int $status = 200): never {
 
 $userId = isset($_SESSION['id']) ? (int) $_SESSION['id'] : 0;
 if ($userId <= 0) {
-    activities_reply(['success' => false, 'error' => 'Inicia sesión.'], 401);
+    activities_reply(['success' => false, 'error' => 'Entra en tu cuenta para continuar.'], 401);
 }
 
 try {
@@ -62,7 +62,7 @@ try {
 
     $acts = is_array($data['actividades'] ?? null) ? $data['actividades'] : null;
     if ($acts === null) {
-        activities_reply(['success' => false, 'error' => 'Datos no válidos.'], 400);
+        activities_reply(['success' => false, 'error' => 'Datos no válidos. Recarga la página e inténtalo de nuevo.'], 400);
     }
     // Solo valores conocidos, sin repetir, en el orden de la lista
     $acts = array_values(array_intersect(ACTIVIDADES_VALIDAS, array_filter($acts, 'is_string')));
@@ -88,5 +88,5 @@ try {
 
 } catch (Throwable $e) {
     error_log('user_activities.php: ' . $e->getMessage());
-    activities_reply(['success' => false, 'error' => 'No se pudieron guardar tus actividades.'], 500);
+    activities_reply(['success' => false, 'error' => 'No se pudieron guardar tus actividades. Inténtalo de nuevo.'], 500);
 }

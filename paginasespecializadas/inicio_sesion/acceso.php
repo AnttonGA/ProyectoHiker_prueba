@@ -21,7 +21,7 @@ csrf_verify(true);
 include("conexion.php");
 
 if (!isset($_POST['usuario']) || !isset($_POST['password'])) {
-    $response['message'] = 'Por favor, proporciona tanto el usuario como la contraseña.';
+    $response['message'] = 'Escribe tu usuario y tu contraseña.';
     echo json_encode($response);
     exit();
 }
@@ -30,7 +30,7 @@ $usuario  = trim((string) $_POST['usuario']);
 $password = (string) $_POST['password'];
 
 if ($usuario === '' || $password === '') {
-    $response['message'] = 'El usuario y la contraseña no pueden estar vacíos.';
+    $response['message'] = 'Escribe tu usuario y tu contraseña.';
     echo json_encode($response);
     exit();
 }
@@ -107,14 +107,14 @@ try {
         setcookie('rol',     $fila['rol'],      $opcionesCookie);
 
         $response['success']  = true;
-        $response['message']  = '¡Bienvenido! Has iniciado sesión correctamente.';
+        $response['message']  = 'Hola de nuevo. Has entrado en tu cuenta.';
         $response['redirect'] = '../Usuario/my_account.php';
     } else {
         $response['message'] = 'Usuario o contraseña incorrectos.';
     }
 } catch (Throwable $e) {
     error_log('acceso.php: ' . $e->getMessage());
-    $response['message'] = 'Error al procesar la solicitud. Inténtalo de nuevo.';
+    $response['message'] = 'No se pudo iniciar sesión. Inténtalo de nuevo.';
 }
 
 echo json_encode($response);

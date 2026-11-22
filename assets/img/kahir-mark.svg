@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Kahir">
+  <title>Kahir</title>
+  <!-- Kahir: hito de piedras apiladas que marca el camino -->
+  <ellipse cx="32" cy="52" rx="22" ry="7.5" fill="#5F7444"/>
+  <ellipse cx="31" cy="39.5" rx="16" ry="6.5" fill="#7A8F5C"/>
+  <ellipse cx="33" cy="28.5" rx="11" ry="5.5" fill="#A0A88A"/>
+  <ellipse cx="31.5" cy="19" rx="7.5" ry="4.5" fill="#C7BEAB"/>
+  <ellipse cx="32.5" cy="11.5" rx="4.2" ry="3" fill="#B5653A"/>
+</svg>

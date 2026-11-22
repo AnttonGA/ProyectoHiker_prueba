@@ -39,8 +39,13 @@ try {
         $rutasPorEstado[$f['estado']] = (int) $f['n'];
     }
 
+    $etiquetasTipo = [
+        'ski_touring' => 'Esquí de travesía', 'hiking' => 'Senderismo', 'cycle_touring' => 'Cicloturismo',
+        'climbing' => 'Escalada', 'snowshoeing' => 'Raquetas', 'via_ferrata' => 'Vía ferrata',
+        'btt' => 'BTT', 'kayaking' => 'Kayak',
+    ];
     foreach (consulta($conn, "SELECT tipo_ruta, COUNT(*) AS n FROM rutas WHERE estado <> 'eliminada' GROUP BY tipo_ruta ORDER BY n DESC") as $f) {
-        $rutasPorTipo[ucfirst(str_replace('_', ' ', (string) $f['tipo_ruta']))] = (int) $f['n'];
+        $rutasPorTipo[$etiquetasTipo[(string) $f['tipo_ruta']] ?? ucfirst(str_replace('_', ' ', (string) $f['tipo_ruta']))] = (int) $f['n'];
     }
 
     $rutasPopulares = consulta($conn,
@@ -85,15 +90,21 @@ function n(int $v): string {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Estadísticas de la Web</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <title>Estadísticas · Admin · Kahir.ai</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <!-- Sistema de diseño Kahir (después del CSS de la página) -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Work+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <link href="../../assets/css/kahir.css?v=20261122" rel="stylesheet">
 </head>
 <body>
     <?php include('navbar.php'); ?>
 
     <div class="container mt-5 mb-5">
-        <h1>Estadísticas de la Web</h1>
+        <h1>Estadísticas de la web</h1>
         <?php if ($errorMsg !== ''): ?>
             <div class="alert alert-warning"><?php echo e($errorMsg); ?></div>
         <?php endif; ?>
@@ -105,7 +116,7 @@ function n(int $v): string {
                         <h5 class="card-title">Usuarios</h5>
                         <p class="card-text mb-1">Registrados: <strong><?php echo e(n($usuariosStats['total'])); ?></strong></p>
                         <p class="card-text mb-1">Activos: <strong><?php echo e(n($usuariosStats['activos'])); ?></strong></p>
-                        <p class="card-text">Email verificado: <strong><?php echo e(n($usuariosStats['verificados'])); ?></strong></p>
+                        <p class="card-text">Correo verificado: <strong><?php echo e(n($usuariosStats['verificados'])); ?></strong></p>
                     </div>
                 </div>
             </div>
@@ -124,7 +135,7 @@ function n(int $v): string {
                 <div class="card h-100">
                     <div class="card-body">
                         <h5 class="card-title">Actividad</h5>
-                        <p class="card-text mb-1">Favoritos: <strong><?php echo e(n($totales['favoritos'])); ?></strong></p>
+                        <p class="card-text mb-1">Rutas favoritas: <strong><?php echo e(n($totales['favoritos'])); ?></strong></p>
                         <p class="card-text mb-1">Rutas completadas: <strong><?php echo e(n($totales['completadas'])); ?></strong></p>
                         <p class="card-text">Sesiones de chat: <strong><?php echo e(n($totales['chats'])); ?></strong></p>
                     </div>
@@ -136,7 +147,7 @@ function n(int $v): string {
             <div class="col-lg-7">
                 <div class="card h-100">
                     <div class="card-body">
-                        <h5 class="card-title">Rutas por Tipo <small class="text-muted">(sin eliminadas)</small></h5>
+                        <h5 class="card-title">Rutas por actividad <small class="text-muted">(sin eliminadas)</small></h5>
                         <canvas id="rutasPorTipoChart"></canvas>
                     </div>
                 </div>
@@ -144,9 +155,9 @@ function n(int $v): string {
             <div class="col-lg-5">
                 <div class="card h-100">
                     <div class="card-body">
-                        <h5 class="card-title">Top 10 Rutas Más Vistas</h5>
+                        <h5 class="card-title">Las 10 rutas más vistas</h5>
                         <?php if (!$rutasPopulares): ?>
-                            <p class="text-muted">Todavía no hay datos de visitas.</p>
+                            <p class="text-muted">Aún no hay visitas registradas.</p>
                         <?php else: ?>
                             <table class="table table-sm table-striped mb-0">
                                 <thead><tr><th>#</th><th>Título</th><th class="text-end">Vistas</th></tr></thead>
@@ -176,7 +187,7 @@ function n(int $v): string {
                 data: {
                     labels: rutasPorTipo.labels,
                     datasets: [{
-                        label: 'Número de Rutas',
+                        label: 'Número de rutas',
                         data: rutasPorTipo.data,
                         backgroundColor: 'rgba(54, 162, 235, 0.2)',
                         borderColor: 'rgba(54, 162, 235, 1)',
@@ -184,6 +195,7 @@ function n(int $v): string {
                     }]
                 },
                 options: {
+                    locale: 'es-ES',
                     plugins: { legend: { display: false } },
                     scales: { y: { beginAtZero: true } }
                 }
@@ -191,6 +203,6 @@ function n(int $v): string {
         }
     </script>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

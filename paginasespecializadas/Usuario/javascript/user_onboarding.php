@@ -11,7 +11,7 @@ require_once __DIR__ . '/../../inicio_sesion/conexion.php';
 header('Content-Type: application/json');
 
 if (!isset($_SESSION['usuario'])) {
-    echo json_encode(['success' => false, 'error' => 'Not authenticated']);
+    echo json_encode(['success' => false, 'error' => 'Tu sesión ha caducado. Vuelve a entrar.']);
     exit;
 }
 
@@ -22,7 +22,7 @@ $stmt->bind_param("s", $username);
 $stmt->execute();
 $result = $stmt->get_result();
 if ($result->num_rows === 0) {
-    echo json_encode(['success' => false, 'error' => 'User not found']);
+    echo json_encode(['success' => false, 'error' => 'No se encontró tu cuenta. Sal y vuelve a entrar.']);
     exit;
 }
 $user_id = $result->fetch_assoc()['id'];

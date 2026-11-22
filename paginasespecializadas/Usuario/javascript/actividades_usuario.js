@@ -9,14 +9,14 @@
     'use strict';
 
     const ACTIVIDADES = [
-        ['hiking', 'Hiking', 'bi-signpost-split'],
-        ['ski_touring', 'Ski touring', 'bi-snow'],
-        ['snowshoeing', 'Snowshoeing', 'bi-snow2'],
-        ['climbing', 'Climbing', 'bi-triangle'],
-        ['via_ferrata', 'Via ferrata', 'bi-link-45deg'],
-        ['cycle_touring', 'Cycle touring', 'bi-bicycle'],
-        ['btt', 'Mountain biking', 'bi-bicycle'],
-        ['kayaking', 'Kayaking', 'bi-water'],
+        ['hiking', 'Senderismo', 'bi-signpost-split'],
+        ['ski_touring', 'Esquí de travesía', 'bi-snow'],
+        ['snowshoeing', 'Raquetas', 'bi-snow2'],
+        ['climbing', 'Escalada', 'bi-triangle'],
+        ['via_ferrata', 'Vía ferrata', 'bi-link-45deg'],
+        ['cycle_touring', 'Cicloturismo', 'bi-bicycle'],
+        ['btt', 'BTT', 'bi-bicycle'],
+        ['kayaking', 'Kayak', 'bi-water'],
     ];
     const LABEL = Object.fromEntries(ACTIVIDADES.map(([k, l]) => [k, l]));
     const DISMISS_KEY = 'kahir_actividades_dismissed';
@@ -37,13 +37,14 @@
 
     function renderSummary(card, declared) {
         card.replaceChildren();
-        const names = declared.map(k => LABEL[k] || k).join(', ');
-        const edit = el('button', { type: 'button', class: 'btn btn-link btn-sm p-0 ms-2', text: 'Edit' });
+        const edit = el('button', { type: 'button', class: 'btn btn-link btn-sm acct-acts-summary__edit', text: 'Editar' });
+        edit.setAttribute('aria-label', 'Editar tus actividades');
         edit.addEventListener('click', () => renderForm(card, declared, false));
-        card.appendChild(el('div', { class: 'd-flex align-items-center flex-wrap small text-muted' }, [
-            el('i', { class: 'bi bi-person-check me-2 text-success' }),
-            el('span', { text: 'Your activities: ' }),
-            el('strong', { class: 'ms-1 text-body', text: names }),
+        const chips = el('span', { class: 'acct-acts-summary__chips' },
+            declared.map(k => el('span', { class: 'k-chip k-chip-moss', text: LABEL[k] || k })));
+        card.appendChild(el('div', { class: 'acct-acts-summary' }, [
+            el('span', { class: 'acct-acts-summary__label', text: 'Tus actividades' }),
+            chips,
             edit,
         ]));
         card.hidden = false;
@@ -52,24 +53,24 @@
     function renderForm(card, selected, firstTime) {
         card.replaceChildren();
         const chosen = new Set(selected || []);
-        const box = el('div', { class: 'card shadow-sm' });
-        const body = el('div', { class: 'card-body' });
+        const box = el('section', { class: 'acct-panel acct-acts', 'aria-labelledby': 'acct-acts-title' });
+        const body = el('div', { class: 'acct-panel__body' });
 
-        body.appendChild(el('h5', { class: 'card-title mb-1', text: 'Which activities do you do?' }));
-        body.appendChild(el('p', { class: 'card-text small text-muted mb-3',
-            text: 'Kahir will prioritise these when recommending routes. You can change them any time.' }));
+        body.appendChild(el('p', { class: 'acct-eyebrow', text: firstTime ? 'Personaliza Kahir' : 'Tus actividades' }));
+        body.appendChild(el('h2', { class: 'acct-panel__title', id: 'acct-acts-title', text: '¿Qué actividades practicas?' }));
+        body.appendChild(el('p', { class: 'acct-panel__lead',
+            text: 'Kahir les dará prioridad al recomendarte rutas. Puedes cambiarlas cuando quieras.' }));
 
-        const group = el('div', { class: 'd-flex flex-wrap gap-2 mb-3', role: 'group', 'aria-label': 'Activities' });
+        const group = el('div', { class: 'acct-toggles', role: 'group', 'aria-label': 'Actividades' });
         ACTIVIDADES.forEach(([key, label, icon]) => {
-            const btn = el('button', { type: 'button', class: 'btn btn-sm ' + (chosen.has(key) ? 'btn-primary' : 'btn-outline-primary'),
+            const btn = el('button', { type: 'button', class: 'acct-toggle',
                 'aria-pressed': chosen.has(key) ? 'true' : 'false' }, [
-                el('i', { class: 'bi ' + icon + ' me-1' }),
+                el('i', { class: 'bi ' + icon, 'aria-hidden': 'true' }),
                 document.createTextNode(label),
             ]);
             btn.addEventListener('click', () => {
                 if (chosen.has(key)) chosen.delete(key); else chosen.add(key);
                 const on = chosen.has(key);
-                btn.className = 'btn btn-sm ' + (on ? 'btn-primary' : 'btn-outline-primary');
                 btn.setAttribute('aria-pressed', on ? 'true' : 'false');
                 save.disabled = chosen.size === 0;
             });
@@ -78,9 +79,9 @@
         body.appendChild(group);
 
         const msg = el('p', { class: 'small mb-0 mt-2', 'aria-live': 'polite' });
-        const save = el('button', { type: 'button', class: 'btn btn-success btn-sm', text: 'Save' });
+        const save = el('button', { type: 'button', class: 'btn btn-primary', text: 'Guardar actividades' });
         save.disabled = chosen.size === 0;
-        const later = el('button', { type: 'button', class: 'btn btn-link btn-sm text-muted', text: firstTime ? 'Not now' : 'Cancel' });
+        const later = el('button', { type: 'button', class: 'btn btn-link acct-link-muted', text: firstTime ? 'Ahora no' : 'Cancelar' });
 
         save.addEventListener('click', () => {
             save.disabled = true;
@@ -98,13 +99,13 @@
                         renderSummary(card, data.declared || actividades);
                     } else {
                         msg.className = 'small mb-0 mt-2 text-danger';
-                        msg.textContent = data.error || 'Could not save your activities.';
+                        msg.textContent = data.error || 'No se pudieron guardar tus actividades. Inténtalo de nuevo.';
                         save.disabled = false;
                     }
                 })
                 .catch(() => {
                     msg.className = 'small mb-0 mt-2 text-danger';
-                    msg.textContent = 'Could not reach the server.';
+                    msg.textContent = 'No hay conexión con el servidor. Inténtalo de nuevo.';
                     save.disabled = false;
                 });
         });
@@ -118,7 +119,7 @@
             }
         });
 
-        body.appendChild(el('div', {}, [save, later]));
+        body.appendChild(el('div', { class: 'acct-panel__actions' }, [save, later]));
         body.appendChild(msg);
         box.appendChild(body);
         card.appendChild(box);

@@ -36,6 +36,15 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
+    const etiquetas = {
+        nombre: 'Escribe tu nombre',
+        apellidos: 'Escribe tus apellidos',
+        mail: 'Escribe tu correo electrónico',
+        usuarioa: 'Elige un nombre de usuario',
+        passworda: 'Escribe una contraseña',
+        telefono: 'Escribe tu teléfono'
+    };
+
     function validarFormulario(event) {
         event.preventDefault();
         let isValid = true;
@@ -46,7 +55,7 @@ document.addEventListener('DOMContentLoaded', function () {
         fields.forEach(field => {
             if (fieldElements[field]) {
                 if (fieldElements[field].value.trim() === '') {
-                    showError(field, `${field.charAt(0).toUpperCase() + field.slice(1)} es requerido`);
+                    showError(field, etiquetas[field] || 'Rellena este campo');
                     isValid = false;
                 }
             } else {
@@ -57,7 +66,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
         // Validaciones específicas
         if (fieldElements.mail && !validarEmail(fieldElements.mail.value.trim())) {
-            showError('mail', 'Formato de email inválido');
+            showError('mail', 'Ese correo no parece válido. Revísalo.');
             isValid = false;
         }
 
@@ -83,7 +92,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }
 
         if (terminos && !terminos.checked) {
-            showError('terminos', 'Debe aceptar los términos y condiciones');
+            showError('terminos', 'Acepta los términos y condiciones para continuar');
             isValid = false;
         }
 
@@ -91,20 +100,20 @@ document.addEventListener('DOMContentLoaded', function () {
             validarUsuarioEmail()
                 .then(response => {
                     if (response.usuario_existe) {
-                        showError('usuarioa', 'El usuario ya está registrado');
+                        showError('usuarioa', 'Ese nombre de usuario ya está cogido. Prueba con otro.');
                         isValid = false;
                     }
                     if (response.email_existe) {
-                        showError('mail', 'El email ya está registrado');
+                        showError('mail', 'Ya hay una cuenta con este correo');
                         isValid = false;
                     }
                     if (isValid) {
-                        showNotification('Formulario enviado con éxito', 'success');
+                        showNotification('Creando tu cuenta…', 'success');
                         form.submit();
                     }
                 })
                 .catch(error => {
-                    showNotification('Error al validar usuario y email', 'error');
+                    showNotification('No se pudo comprobar el usuario y el correo. Inténtalo de nuevo.', 'error');
                 });
         }
     }
@@ -123,9 +132,9 @@ document.addEventListener('DOMContentLoaded', function () {
         .then(response => response.json())
         .then(data => {
             if (field === 'usuarioa' && data.usuario_existe) {
-                showError(field, 'El usuario ya está registrado');
+                showError(field, 'Ese nombre de usuario ya está cogido. Prueba con otro.');
             } else if (field === 'mail' && data.email_existe) {
-                showError(field, 'El email ya está registrado');
+                showError(field, 'Ya hay una cuenta con este correo');
             } else {
                 hideError(field);
             }

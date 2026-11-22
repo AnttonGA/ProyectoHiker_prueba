@@ -36,9 +36,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     // Validación del campo de correo electrónico
     if ($email === '') {
-        $emailErr = "El email es requerido";
+        $emailErr = "Escribe tu correo electrónico";
     } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-        $emailErr = "Formato de email inválido";
+        $emailErr = "Ese correo no parece válido. Revísalo.";
     } else {
         try {
             // Consulta para verificar si el correo y usuario existen y coinciden
@@ -108,10 +108,16 @@ mysqli_close($conn);
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Recuperar contraseña</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <title>Recuperar contraseña · Kahir.ai</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Estilos adicionales -->
-    <link href="../estilos2.css" rel="stylesheet">
+    <link href="../estilos2.css?v=20261122" rel="stylesheet">
+  <!-- Sistema de diseño Kahir (después del CSS de la página) -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Work+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <link href="../../assets/css/kahir.css?v=20261122" rel="stylesheet">
 </head>
 <body>
     <!-- Navbar -->
@@ -120,7 +126,7 @@ mysqli_close($conn);
     <!-- Header -->
     <div class="header">
         <div class="overlay">
-            <h1>TU CUENTA</h1>
+            <h1>Tu cuenta</h1>
         </div>
     </div>
 
@@ -140,20 +146,20 @@ mysqli_close($conn);
         <form method="post" action="<?php echo e($_SERVER["PHP_SELF"]); ?>" class="needs-validation" novalidate>
             <?= csrf_field() ?>
             <div class="mb-3">
-                <label for="mail" class="form-label">Email asociado a tu cuenta:</label>
+                <label for="mail" class="form-label">Correo de tu cuenta</label>
                 <input type="email" name="mail" id="mail" class="form-control" value="<?php echo htmlspecialchars($email); ?>" required>
                 <div class="invalid-feedback">
                     <?php echo e($emailErr); ?>
                 </div>
             </div>
             <div class="mb-3">
-                <label for="usuario" class="form-label">Usuario:</label>
+                <label for="usuario" class="form-label">Nombre de usuario</label>
                 <input type="text" name="usuario" id="usuario" class="form-control" value="<?php echo htmlspecialchars($usuario); ?>" required>
                 <div class="invalid-feedback">
                     <?php echo e($usuarioErr); ?>
                 </div>
             </div>
-            <button type="submit" class="btn btn-primary">Recuperar Contraseña</button>
+            <button type="submit" class="btn btn-primary">Recuperar contraseña</button>
         </form>
     </div>
 
@@ -161,7 +167,7 @@ mysqli_close($conn);
     <div id="footer"></div>
 
     <!-- Enlace a Bootstrap 5.2.3 JS (opcional, para funcionalidades avanzadas) -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="../../include.js"></script>
 </body>
 </html>

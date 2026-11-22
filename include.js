@@ -23,8 +23,22 @@
             .then(html => {
                 // Contenido propio del servidor (menu.php escapa los datos del usuario)
                 target.innerHTML = html;
+                if (elementId === 'menu') markActiveLink(target);
             })
             .catch(error => console.error(`Failed to load ${file}: ${error.message}`));
+    }
+
+    // Resalta en el menú el enlace de la página actual
+    function markActiveLink(nav) {
+        const here = window.location.pathname.replace(/\/index\.php$/, '/');
+        nav.querySelectorAll('a.nav-link').forEach(a => {
+            let path;
+            try { path = new URL(a.href, window.location.href).pathname.replace(/\/index\.php$/, '/'); } catch (e) { return; }
+            if (path === here) {
+                a.classList.add('active');
+                a.setAttribute('aria-current', 'page');
+            }
+        });
     }
 
     function init() {

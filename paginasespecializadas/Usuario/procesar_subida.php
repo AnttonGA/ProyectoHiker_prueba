@@ -38,7 +38,7 @@ const VALID_DIFFICULTIES = ['beginner', 'intermediate', 'advanced'];
 // ─── Auth ─────────────────────────────────────────────────────────────────────
 
 if (!isset($_SESSION['usuario'])) {
-    redirectError('Debes iniciar sesión para subir rutas.');
+    redirectError('Entra en tu cuenta para subir rutas.');
 }
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
@@ -55,7 +55,7 @@ if ($sessionUserId === 0) {
     $rowUid = $stmtUid->get_result()->fetch_assoc();
     $stmtUid->close();
     if (!$rowUid) {
-        redirectError('No se pudo identificar al usuario en la base de datos.');
+        redirectError('No se pudo identificar tu cuenta. Sal y vuelve a entrar.');
     }
     $sessionUserId = (int)$rowUid['id'];
 }
@@ -113,11 +113,11 @@ $pregunta3   = trim($_POST['pregunta3']    ?? '');
 $pregunta4   = trim($_POST['pregunta4']    ?? '');
 
 if (empty($nombre))      redirectError('El nombre de la ruta es obligatorio.');
-if (strlen($nombre) > 120) redirectError('El nombre no puede superar 120 caracteres.');
+if (strlen($nombre) > 120) redirectError('El nombre no puede pasar de 120 caracteres. Acórtalo un poco.');
 if (empty($descripcion)) redirectError('La descripción es obligatoria.');
 if (empty($location))    redirectError('La zona es obligatoria.');
-if (!in_array($tipoRuta,   VALID_ACTIVITIES,   true)) redirectError('Tipo de actividad no válido.');
-if (!in_array($dificultad, VALID_DIFFICULTIES, true)) redirectError('Nivel de dificultad no válido.');
+if (!in_array($tipoRuta,   VALID_ACTIVITIES,   true)) redirectError('Tipo de actividad no válido. Elige uno de la lista.');
+if (!in_array($dificultad, VALID_DIFFICULTIES, true)) redirectError('Dificultad no válida. Elige una de la lista.');
 // Las preguntas adicionales son opcionales: acceso, material, notas técnicas, mejor época
 
 // ─── 2. Validar archivo GPX ───────────────────────────────────────────────────
@@ -125,9 +125,9 @@ if (!in_array($dificultad, VALID_DIFFICULTIES, true)) redirectError('Nivel de di
 if (!isset($_FILES['archivo_gpx']) || $_FILES['archivo_gpx']['error'] !== UPLOAD_ERR_OK) {
     $phpErr = $_FILES['archivo_gpx']['error'] ?? -1;
     $msg = match ($phpErr) {
-        UPLOAD_ERR_INI_SIZE, UPLOAD_ERR_FORM_SIZE => 'El archivo GPX supera el tamaño máximo permitido.',
-        UPLOAD_ERR_NO_FILE  => 'No se ha seleccionado ningún archivo GPX.',
-        default             => 'Error al subir el archivo GPX (código: ' . $phpErr . ').',
+        UPLOAD_ERR_INI_SIZE, UPLOAD_ERR_FORM_SIZE => 'El archivo GPX supera el tamaño máximo permitido (10 MB).',
+        UPLOAD_ERR_NO_FILE  => 'No has elegido ningún archivo GPX.',
+        default             => 'No se pudo subir el archivo GPX (código: ' . $phpErr . '). Inténtalo de nuevo.',
     };
     redirectError($msg);
 }
@@ -167,10 +167,10 @@ $folderName = slugify($nombre) . '-' . time();
 $folderPath = RUTAS_BASE_PATH . $folderName;
 
 if (!is_dir(RUTAS_BASE_PATH)) {
-    redirectError('El directorio de rutas no existe en el servidor.');
+    redirectError('No se pudo guardar la ruta en el servidor. Inténtalo más tarde.');
 }
 if (!mkdir($folderPath, 0755, true)) {
-    redirectError('No se pudo crear el directorio para la ruta.');
+    redirectError('No se pudo guardar la ruta en el servidor. Inténtalo más tarde.');
 }
 
 // ─── 5. Mover el GPX ─────────────────────────────────────────────────────────
@@ -179,7 +179,7 @@ $gpxSafeName = safeFilename($gpxFile['name']);
 $gpxDest     = $folderPath . '/' . $gpxSafeName;
 if (!move_uploaded_file($gpxFile['tmp_name'], $gpxDest)) {
     rmdir($folderPath);
-    redirectError('Error al guardar el archivo GPX en el servidor.');
+    redirectError('No se pudo guardar el archivo GPX. Inténtalo de nuevo.');
 }
 
 // ─── 6. Manejar imágenes (opcionales) ────────────────────────────────────────
@@ -190,7 +190,7 @@ $hasImages     = !empty($_FILES['imagenes']['name'][0]);
 if ($hasImages) {
     $imgCount = count($_FILES['imagenes']['name']);
     if ($imgCount > IMG_MAX_COUNT) {
-        redirectError('Máximo ' . IMG_MAX_COUNT . ' imágenes por ruta.');
+        redirectError('Puedes subir hasta ' . IMG_MAX_COUNT . ' fotos por ruta.');
     }
 
     // La extensión se decide por el tipo REAL del archivo, nunca por el nombre que envía el usuario:
@@ -202,14 +202,14 @@ if ($hasImages) {
         if ($_FILES['imagenes']['error'][$k] !== UPLOAD_ERR_OK) continue;
         $imgNameHtml = htmlspecialchars((string) $imgName, ENT_QUOTES, 'UTF-8');
         if ($_FILES['imagenes']['size'][$k] > IMG_MAX_BYTES) {
-            redirectError("La imagen «{$imgNameHtml}» supera 5 MB.");
+            redirectError("La foto «{$imgNameHtml}» supera los 5 MB. Elige una más ligera.");
         }
 
         $imgTmp  = $_FILES['imagenes']['tmp_name'][$k];
         $imgMime = finfo_file(finfo_open(FILEINFO_MIME_TYPE), $imgTmp);
         $imgInfo = @getimagesize($imgTmp);
         if (!isset($validImgMimes[$imgMime]) || $imgInfo === false || $imgInfo[2] !== $validImgTypes[$imgMime]) {
-            redirectError("El archivo «{$imgNameHtml}» no es una imagen válida (JPG, PNG o WebP).");
+            redirectError("El archivo «{$imgNameHtml}» no es una imagen válida. Usa JPG, PNG o WebP.");
         }
 
         $imgSafe = 'img-' . ($k + 1) . '-' . bin2hex(random_bytes(4)) . '.' . $validImgMimes[$imgMime];
@@ -244,7 +244,8 @@ $stmt = $conn->prepare(
 );
 
 if (!$stmt) {
-    redirectError('Error preparando la consulta: ' . $conn->error);
+    error_log('procesar_subida.php prepare: ' . $conn->error);
+    redirectError('No se pudo guardar la ruta. Inténtalo de nuevo más tarde.');
 }
 
 $stmt->bind_param(
@@ -270,7 +271,8 @@ $stmt->bind_param(
 );
 
 if (!$stmt->execute()) {
-    redirectError('Error al guardar la ruta: ' . $stmt->error);
+    error_log('procesar_subida.php execute: ' . $stmt->error);
+    redirectError('No se pudo guardar la ruta. Inténtalo de nuevo más tarde.');
 }
 
 $routeId = (int)$conn->insert_id;

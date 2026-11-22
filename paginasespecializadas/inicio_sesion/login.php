@@ -3,12 +3,12 @@ require_once __DIR__ . '/../../includes/security.php';
 secure_session_start();
 ?>
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Base de datos 01</title>
+    <title>Entrar · Kahir.ai</title>
     
 </head>
 <style>
@@ -40,7 +40,7 @@ secure_session_start();
         <?php
         // personalizar error
         if (isset($_GET['msg'])){
-            $errores = ['error Nombre y usuario 0 ','Error EN DB 1 ','vacio 2'];
+            $errores = ['El usuario o el nombre no son válidos. Revísalos e inténtalo de nuevo.', 'No se pudo conectar con la base de datos. Inténtalo más tarde.', 'Rellena todos los campos.'];
             $indice = filter_var($_GET['msg'], FILTER_VALIDATE_INT);
             if ($indice !== false && isset($errores[$indice])) {
                 echo "<p>" . e($errores[$indice]) . "</p>";
@@ -48,30 +48,30 @@ secure_session_start();
         }
         ?>
     </div>
-    <h2 class="mb-4">Log In</h2>
+    <h2 class="mb-4">Entrar</h2>
     <form id="loginForm" name="form1" action="acceso.php" method="POST" onsubmit="return false;">
         <?= csrf_field() ?>
         <div class="mb-3">
-            <label for="usuario" class="form-label">User:</label>
+            <label for="usuario" class="form-label">Usuario o correo</label>
             <input type="text" name="usuario" class="form-control" id="usuario">
         </div>
         <div id="message"></div>
         <div class="mb-3">
-            <label for="password" class="form-label">Password:</label>
+            <label for="password" class="form-label">Contraseña</label>
             <input type="password" name="password" class="form-control" id="password">
         </div>
         <div id="message"></div>
         <div class="mb-3">
-            <a href="forget_password.php" target="_blank">¿Did you forget your password?</a>
+            <a href="forget_password.php" target="_blank">¿Has olvidado tu contraseña?</a>
         </div>
         <div class="form-check mb-3">
             <input type="checkbox" class="form-check-input" id="mantenerseLogeado">
-            <label class="form-check-label" for="mantenerseLogeado">keep me logged</label>
+            <label class="form-check-label" for="mantenerseLogeado">Mantener la sesión iniciada</label>
         </div>
-        <button type="submit" class="btn btn-primary">Login</button>
+        <button type="submit" class="btn btn-primary">Entrar</button>
     </form>
 </div>
 
-<script src="login.js"></script>
+<script src="login.js?v=20261122es"></script>
 </body>
 </html>

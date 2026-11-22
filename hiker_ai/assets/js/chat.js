@@ -62,9 +62,9 @@ const ChatApp = {
 
         const examples = [
             {
-                title: "Buscar Rutas",
-                icon: "fas fa-route",
-                description: "Encuentra la ruta perfecta para tu próxima aventura",
+                title: "Buscar rutas",
+                icon: "bi bi-signpost-split",
+                description: "La ruta adecuada para tu próxima salida",
                 prompts: [
                     "Busco una ruta fácil cerca de Candanchú",
                     "Ruta de senderismo para principiantes",
@@ -72,9 +72,9 @@ const ChatApp = {
                 ]
             },
             {
-                title: "Consultar Tiempo",
-                icon: "fas fa-cloud",
-                description: "Obtén información meteorológica detallada",
+                title: "Consultar el tiempo",
+                icon: "bi bi-cloud-sun",
+                description: "Parte, viento y nieve antes de salir",
                 prompts: [
                     "¿Qué tiempo hace hoy en Panticosa?",
                     "Previsión meteorológica para mañana en Astún",
@@ -82,9 +82,9 @@ const ChatApp = {
                 ]
             },
             {
-                title: "Información General",
-                icon: "fas fa-info-circle",
-                description: "Aprende sobre actividades y seguridad en montaña",
+                title: "Equipo y seguridad",
+                icon: "bi bi-backpack2",
+                description: "Material, épocas y buenas prácticas",
                 prompts: [
                     "¿Qué equipo necesito para ski de montaña?",
                     "Recomendaciones de seguridad para senderismo",
@@ -92,9 +92,9 @@ const ChatApp = {
                 ]
             },
             {
-                title: "Recomendaciones Personalizadas",
-                icon: "fas fa-compass",
-                description: "Obtén sugerencias basadas en tus preferencias",
+                title: "Para ti",
+                icon: "bi bi-compass",
+                description: "Sugerencias según tu nivel y tus salidas",
                 prompts: [
                     "Recomiéndame una ruta para mi nivel",
                     "Rutas similares a la última que hice",
@@ -103,28 +103,29 @@ const ChatApp = {
             }
         ];
 
+        const esc = (v) => this.chatEscapeHtml(v);
+
         promptContainer.innerHTML = `
-            <div class="row prompt-container">
+            <section class="k-hero kchat-welcome">
+                <img class="kchat-welcome-mark" src="assets/img/kahir-mark.svg" alt="" aria-hidden="true" width="52" height="52">
+                <p class="k-eyebrow">Pirineos y Euskadi</p>
+                <h1>¿A dónde quieres ir?</h1>
+                <p class="lead">Pregúntame por rutas, el parte o qué llevar en la mochila.</p>
+            </section>
+            <div class="prompt-groups">
                 ${examples.map(category => `
-                    <div class="col-md-6 col-lg-3 mb-4">
-                        <div class="prompt-box card h-100">
-                            <div class="card-body d-flex flex-column">
-                                <div class="text-center mb-3">
-                                    <i class="${category.icon} fa-2x"></i>
-                                </div>
-                                <h5 class="card-title text-center">${category.title}</h5>
-                                <p class="card-text text-muted small text-center mb-3">
-                                    ${category.description}
-                                </p>
-                                <div class="prompt-examples mt-auto">
-                                    ${category.prompts.map(prompt => `
-                                        <button class="btn btn-link prompt-example w-100 text-start mb-2"
-                                                data-prompt="${prompt}">
-                                            ${prompt}
-                                        </button>
-                                    `).join('')}
-                                </div>
+                    <div class="prompt-group">
+                        <div class="prompt-group-head">
+                            <span class="prompt-group-icon"><i class="${esc(category.icon)}" aria-hidden="true"></i></span>
+                            <div>
+                                <h2 class="prompt-group-title">${esc(category.title)}</h2>
+                                <p class="prompt-group-desc">${esc(category.description)}</p>
                             </div>
+                        </div>
+                        <div class="prompt-examples">
+                            ${category.prompts.map(prompt => `
+                                <button type="button" class="prompt-example" data-prompt="${esc(prompt)}">${esc(prompt)}</button>
+                            `).join('')}
                         </div>
                     </div>
                 `).join('')}
@@ -262,7 +263,7 @@ const ChatApp = {
         const div = document.createElement('div');
         div.className = 'weather-warning-box';
         div.innerHTML = lines.map(w =>
-            `<div class="weather-warning-item">⚠️ ${this.chatEscapeHtml(w)}</div>`
+            `<div class="weather-warning-item"><i class="bi bi-exclamation-triangle" aria-hidden="true"></i><span>${this.chatEscapeHtml(w)}</span></div>`
         ).join('');
 
         this.addMessage('system', div);
@@ -272,12 +273,28 @@ const ChatApp = {
         const container = document.getElementById('chat-container');
         const messageDiv = document.createElement('div');
         messageDiv.classList.add('message', `${role}-message`);
-        
-        if (typeof content === 'string') {
-            messageDiv.innerHTML = this.formatMessage(content);
-        } else {
-            messageDiv.appendChild(content);
+
+        // Avatar (hito de piedras) solo en los mensajes del asistente
+        if (role !== 'user') {
+            const avatar = document.createElement('img');
+            avatar.className = 'message-avatar';
+            avatar.src = 'assets/img/kahir-mark.svg';
+            avatar.alt = '';
+            avatar.setAttribute('aria-hidden', 'true');
+            messageDiv.appendChild(avatar);
         }
+
+        const body = document.createElement('div');
+        body.className = 'message-body';
+
+        if (typeof content === 'string') {
+            body.innerHTML = this.formatMessage(content);
+        } else {
+            // Tarjetas, carrusel, avisos: sin burbuja de texto alrededor
+            messageDiv.classList.add('message-rich');
+            body.appendChild(content);
+        }
+        messageDiv.appendChild(body);
 
         container.appendChild(messageDiv);
         this.scrollToBottom();
@@ -319,13 +336,15 @@ const ChatApp = {
             });
 
             const prevBtn = document.createElement('button');
+            prevBtn.type = 'button';
             prevBtn.className = 'carousel-btn prev';
-            prevBtn.innerHTML = '&#8249;';
+            prevBtn.innerHTML = '<i class="bi bi-chevron-left" aria-hidden="true"></i>';
             prevBtn.setAttribute('aria-label', 'Anterior');
 
             const nextBtn = document.createElement('button');
+            nextBtn.type = 'button';
             nextBtn.className = 'carousel-btn next';
-            nextBtn.innerHTML = '&#8250;';
+            nextBtn.innerHTML = '<i class="bi bi-chevron-right" aria-hidden="true"></i>';
             nextBtn.setAttribute('aria-label', 'Siguiente');
 
             const dotsWrap = document.createElement('div');
@@ -385,6 +404,7 @@ const ChatApp = {
         
         suggestions.forEach(suggestion => {
             const button = document.createElement('button');
+            button.type = 'button';
             button.classList.add('suggestion-btn');
             button.textContent = suggestion;
             button.addEventListener('click', () => {
@@ -401,7 +421,13 @@ const ChatApp = {
         const message = error.message || 'Ha ocurrido un error. Por favor, inténtalo de nuevo.';
         const errorDiv = document.createElement('div');
         errorDiv.classList.add('error-message');
-        errorDiv.textContent = message;
+        errorDiv.setAttribute('role', 'alert');
+        const errorIcon = document.createElement('i');
+        errorIcon.className = 'bi bi-exclamation-circle';
+        errorIcon.setAttribute('aria-hidden', 'true');
+        const errorText = document.createElement('span');
+        errorText.textContent = message;
+        errorDiv.append(errorIcon, errorText);
         this.addMessage('system', errorDiv);
     },
 
@@ -496,6 +522,12 @@ const ChatApp = {
     scrollToBottom() {
         const container = document.getElementById('chat-container');
         container.scrollTop = container.scrollHeight;
+        // La conversación usa el scroll de la página (compositor sticky):
+        // llevar el último mensaje a la vista
+        const last = container.lastElementChild;
+        if (last && typeof last.scrollIntoView === 'function') {
+            last.scrollIntoView({ block: 'end', behavior: 'smooth' });
+        }
     },
 
     showChatArea() {
@@ -505,10 +537,10 @@ const ChatApp = {
 
     createRouteCardHTML(route) {
         const diffLabels = { beginner: 'Principiante', intermediate: 'Intermedio', advanced: 'Avanzado' };
-        const diffColors = { beginner: '#22c55e',      intermediate: '#f59e0b',    advanced: '#ef4444'  };
         const diff      = route.difficulty || 'intermediate';
         const diffLabel = diffLabels[diff] || diff;
-        const diffColor = diffColors[diff] || '#6b7280';
+        // Clase de color (definida en chat.css); valores desconocidos → neutro
+        const diffClass = diffLabels[diff] ? `route-diff-${diff}` : 'route-diff-other';
 
         const actIcons = {
             hiking: 'fa-hiking', ski_touring: 'fa-skiing', climbing: 'fa-mountain',
@@ -553,12 +585,17 @@ const ChatApp = {
         const elevation = route.elevation != null ? `+${Math.round(route.elevation)} m`     : '—';
         const duration  = fmtDuration(route.duration);
 
-        // Badge de tiempo en coche — sobre la imagen (esquina inferior izquierda)
+        // Esfuerzo MIDE (1–5), solo si viene en los datos de la ruta
+        const effortNum = Number(route.esfuerzo);
+        const effort = (route.esfuerzo != null && route.esfuerzo !== '' && effortNum >= 1 && effortNum <= 5)
+            ? Math.round(effortNum) : null;
+
         const esc = (v) => this.chatEscapeHtml(v);
 
+        // Badge de tiempo en coche — sobre la imagen (esquina inferior izquierda)
         const driveBadge = route.drive_time_text
             ? `<span class="route-drive-badge">
-                   <i class="fas fa-car"></i> ${esc(route.drive_time_text)}
+                   <i class="bi bi-car-front" aria-hidden="true"></i> ${esc(route.drive_time_text)}
                </span>`
             : '';
 
@@ -568,28 +605,30 @@ const ChatApp = {
         const imageUrl = this.chatSafeUrl(route.image) || placeholder;
 
         return `
-            <div class="route-card-inner">
+            <article class="route-card-inner">
                 <div class="route-card-img-wrap">
                     <img src="${esc(imageUrl)}"
                          alt="${esc(cleanTitle)}"
+                         loading="lazy"
                          onerror="this.onerror=null;this.src='${placeholder}'">
-                    <span class="route-diff-badge" style="background:${diffColor}">${esc(diffLabel)}</span>
-                    <span class="route-act-badge"><i class="fas ${actIcon}"></i></span>
+                    <span class="route-diff-badge ${diffClass}">${esc(diffLabel)}</span>
+                    <span class="route-act-badge"><i class="fas ${actIcon}" aria-hidden="true"></i></span>
                     ${driveBadge}
                 </div>
                 <div class="route-card-body">
                     ${locationLabel ? `<p class="route-card-location">${esc(locationLabel)}</p>` : ''}
-                    <h5 class="route-card-title">${esc(cleanTitle)}</h5>
+                    <h3 class="route-card-title">${esc(cleanTitle)}</h3>
                     <div class="route-card-stats">
-                        <span><i class="fas fa-ruler-horizontal"></i> ${esc(distance)} km</span>
-                        <span><i class="fas fa-clock"></i> ${esc(duration)}</span>
-                        <span><i class="fas fa-arrow-up"></i> ${esc(elevation)}</span>
+                        <span class="k-chip"><i class="bi bi-arrow-left-right" aria-hidden="true"></i> ${esc(distance)} km</span>
+                        <span class="k-chip"><i class="bi bi-graph-up-arrow" aria-hidden="true"></i> ${esc(elevation)}</span>
+                        <span class="k-chip"><i class="bi bi-clock" aria-hidden="true"></i> ${esc(duration)}</span>
+                        ${effort ? `<span class="k-chip k-chip-moss" title="Esfuerzo MIDE"><i class="bi bi-activity" aria-hidden="true"></i> Esfuerzo ${esc(effort)}/5</span>` : ''}
                     </div>
-                    <a href="${esc(routeUrl)}" class="btn btn-primary btn-sm route-card-btn" target="_blank" rel="noopener noreferrer">
-                        <i class="fas fa-map-marked-alt"></i> Ver ficha
+                    <a href="${esc(routeUrl)}" class="route-card-btn" target="_blank" rel="noopener noreferrer">
+                        Ver ruta <i class="bi bi-arrow-right" aria-hidden="true"></i>
                     </a>
                 </div>
-            </div>
+            </article>
         `;
     },
 
@@ -598,26 +637,39 @@ const ChatApp = {
         const val = (v) => v != null && v !== '' && !isNaN(v);
         const esc = (v) => this.chatEscapeHtml(v);
 
+        const item = (icon, label, value) => `
+            <div class="weather-detail">
+                <i class="bi ${icon}" aria-hidden="true"></i>
+                <span class="weather-detail-label">${label}</span>
+                <span class="weather-detail-value">${value}</span>
+            </div>`;
+
+        const wind = val(weather.wind_speed)
+            ? `${esc(weather.wind_speed)} km/h${val(weather.wind_gusts) ? ` <small>rachas ${esc(weather.wind_gusts)}</small>` : ''}`
+            : '';
+
         const detailItems = [
-            val(weather.wind_speed)    ? `<div><i class="fas fa-wind"></i> ${weather.wind_speed} km/h</div>` : '',
-            val(weather.humidity)      ? `<div><i class="fas fa-cloud"></i> ${weather.humidity}% nubosidad</div>` : '',
-            val(weather.visibility)    ? `<div><i class="fas fa-eye"></i> ${weather.visibility} m visibilidad</div>` : '',
+            wind                        ? item('bi-wind', 'Viento', wind) : '',
+            // "humidity" trae la nubosidad (%), no la humedad: ver chat_handler.php
+            val(weather.humidity)       ? item('bi-clouds', 'Nubosidad', `${esc(weather.humidity)}%`) : '',
+            val(weather.visibility)     ? item('bi-eye', 'Visibilidad', `${esc(weather.visibility)} m`) : '',
             // cota_nieve_est = transición real del manto (multi-punto Open-Meteo o AEMET)
-            val(weather.cota_nieve_est) ? `<div><i class="fas fa-snowflake"></i> cota nieve ~${weather.cota_nieve_est} m</div>` : '',
+            val(weather.cota_nieve_est) ? item('bi-snow', 'Cota de nieve', `~${esc(weather.cota_nieve_est)} m`) : '',
             // snow_level = isocero (isoterma 0°C), no cota de nieve del manto
-            val(weather.snow_level)    ? `<div><i class="fas fa-thermometer-half"></i> isocero ${weather.snow_level} m</div>` : '',
+            val(weather.snow_level)     ? item('bi-thermometer-snow', 'Isocero', `${esc(weather.snow_level)} m`) : '',
         ].filter(Boolean).join('');
 
         return `
             <div class="weather-info">
+                <p class="weather-eyebrow"><i class="bi bi-cloud-sun" aria-hidden="true"></i> Parte meteorológico</p>
                 <div class="current-weather">
-                    <span class="temperature">${esc(weather.temperature)}°C</span>
+                    <span class="temperature">${esc(weather.temperature)}<span class="temperature-unit">°C</span></span>
                     <span class="conditions">${esc(weather.conditions || '')}</span>
                 </div>
                 ${detailItems ? `<div class="weather-details">${detailItems}</div>` : ''}
                 ${weather.warnings && weather.warnings.length ? `
                     <div class="weather-warnings">
-                        ${weather.warnings.map(w => `<div class="warning">${esc(w)}</div>`).join('')}
+                        ${weather.warnings.map(w => `<div class="warning"><i class="bi bi-exclamation-triangle" aria-hidden="true"></i><span>${esc(w)}</span></div>`).join('')}
                     </div>
                 ` : ''}
             </div>
@@ -631,7 +683,8 @@ const ChatApp = {
         
         questions.forEach(question => {
             const button = document.createElement('button');
-            button.classList.add('btn', 'btn-outline-primary', 'me-2', 'mb-2');
+            button.type = 'button';
+            button.classList.add('suggestion-btn');
             button.textContent = question;
             button.addEventListener('click', () => {
                 document.getElementById('user-input').value = question;

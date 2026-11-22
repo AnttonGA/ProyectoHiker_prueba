@@ -3,7 +3,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
         maxZoom: 18,
-        attribution: 'Map data &copy; <a href="https://www.opentopomap.org/copyright">OpenTopoMap</a> contributors'
+        attribution: 'Datos del mapa &copy; <a href="https://www.opentopomap.org/copyright">OpenTopoMap</a>'
     }).addTo(map);
 
     // Escapa texto antes de meterlo en el HTML del popup
@@ -36,52 +36,52 @@ document.addEventListener('DOMContentLoaded', function() {
                 var fillColor;
                 switch (feature.properties.type_hebergement.toLowerCase()) {
                     case 'cabane ouverte':
-                        fillColor = '#337DFF'; // Azul para cabane ouverte
+                        fillColor = '#3F6B7A'; // Lago: cabane ouverte
                         break;
                     case 'cabane fermee':
-                        fillColor = '#FF5733'; // Rojo para cabane fermee
+                        fillColor = '#B5653A'; // Óxido: cabane fermee
                         break;
                     case 'cabane ouverte mais ocupee par le berger l ete':
-                        fillColor = '#FFA500'; // Naranja para cabane ouverte ocupada por el pastor en verano
+                        fillColor = '#D49A3A'; // Ocre: ocupada por el pastor en verano
                         break;
                     case 'orri toue abri en pierre':
-                        fillColor = '#FFFF00'; // Amarillo para orri, toue, abri en pierre
+                        fillColor = '#C9B27C'; // Arena: orri, toue, abri en pierre
                         break;
                     case 'refuge garde l ete partie hivernal':
-                        fillColor = '#00FF00'; // Verde para refuge guardé l'été, parte invernal
+                        fillColor = '#7E9A55'; // Musgo claro: guardado en verano, parte invernal
                         break;
                     case 'refuge garde toute l annee':
-                        fillColor = '#FF1493'; // Rosa intenso para refuge guardé toute l'année
+                        fillColor = '#7A4E6E'; // Ciruela: guardado todo el año
                         break;
                     case 'ruine':
-                        fillColor = '#8C8C8C'; // Gris para ruine
+                        fillColor = '#9A968C'; // Piedra: ruine
                         break;
                     default:
-                        fillColor = '#198754'; // Verde por defecto
+                        fillColor = '#5F7444'; // Musgo por defecto
                         break;
                 }
                 return L.circleMarker(latlng, {
-                    radius: 8,
+                    radius: 7,
                     fillColor: fillColor,
-                    color: "#000",
-                    weight: 1,
+                    color: "#FFFDF8",
+                    weight: 2,
                     opacity: 1,
-                    fillOpacity: 0.8
+                    fillOpacity: 0.95
                 }).bindPopup(function(layer) {
                     var props = layer.feature.properties || {};
                     var url = safeHttpUrl(props.url);
+                    var facts = [
+                        props.altitude  ? `<dt>Altitud</dt><dd>${escapeHtml(isNaN(Number(props.altitude)) ? props.altitude : Number(props.altitude).toLocaleString('es-ES'))} m</dd>` : '',
+                        props.cap_ete   ? `<dt>Plazas en verano</dt><dd>${escapeHtml(props.cap_ete)}</dd>` : '',
+                        props.cap_hiver ? `<dt>Plazas en invierno</dt><dd>${escapeHtml(props.cap_hiver)}</dd>` : ''
+                    ].join('');
                     var popupContent = `
-                        <div class="card border-0">
-                            <div class="card-header bg-primary text-dark">
-                                <h5 class="card-title">${escapeHtml(props.name || 'N/A')}</h5>
-                            </div>
-                            <div class="card-body">
-                                <p class="card-text"><b>Region:</b> ${escapeHtml(props.region || 'N/A')}</p>
-                                <p class="card-text"><b>Altitude:</b> ${escapeHtml(props.altitude || 'N/A')}</p>
-                                <p class="card-text"><b>Capacity (summer):</b> ${escapeHtml(props.cap_ete || 'N/A')}</p>
-                                <p class="card-text"><b>Capacity (winter):</b> ${escapeHtml(props.cap_hiver || 'N/A')}</p>
-                                ${url ? `<a href="${escapeHtml(url)}" class="btn btn-primary text-dark" target="_blank" rel="noopener noreferrer">More info</a>` : ''}
-                            </div>
+                        <div class="k-popup">
+                            <p class="k-popup__eyebrow"><span class="k-dot" style="--act:${fillColor};" aria-hidden="true"></span>Refugio</p>
+                            <h3 class="k-popup__title">${escapeHtml(props.name || 'Refugio sin nombre')}</h3>
+                            ${props.region ? `<p class="k-popup__place"><i class="bi bi-geo-alt" aria-hidden="true"></i>${escapeHtml(props.region)}</p>` : ''}
+                            ${facts ? `<dl class="k-popup__facts">${facts}</dl>` : ''}
+                            ${url ? `<a href="${escapeHtml(url)}" class="k-popup__link" target="_blank" rel="noopener noreferrer">Más información <i class="bi bi-box-arrow-up-right" aria-hidden="true"></i></a>` : ''}
                         </div>`;
                     return popupContent;
                 });
@@ -104,8 +104,9 @@ document.addEventListener('DOMContentLoaded', function() {
         .catch(error => {
             console.error('Error al cargar el archivo GeoJSON:', error);
             var errorMessage = document.createElement('div');
-            errorMessage.className = 'alert alert-danger';
-            errorMessage.textContent = 'Error al cargar el archivo GeoJSON. Por favor, inténtelo de nuevo.';
+            errorMessage.className = 'alert alert-danger k-map-alert';
+            errorMessage.setAttribute('role', 'alert');
+            errorMessage.textContent = 'No se pudieron cargar los refugios. Recarga la página en un momento.';
             document.getElementById('map').appendChild(errorMessage);
         });
 

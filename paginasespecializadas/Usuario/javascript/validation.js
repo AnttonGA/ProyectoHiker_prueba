@@ -4,7 +4,8 @@
  * Paso 1: el usuario sube el GPX → se parsea en el cliente → se auto-rellena la zona
  *         y se muestra un preview de distancia / desnivel / duración estimada.
  * Paso 2: detalles de la ruta (nombre, tipo, dificultad, zona editable, descripción,
- *         notas opcionales, fotos opcionales).
+ *         notas opcionales). Se valida al pasar al paso 3 y otra vez al enviar.
+ * Paso 3: fotos opcionales y publicar.
  */
 
 document.addEventListener('DOMContentLoaded', function () {
@@ -15,6 +16,12 @@ document.addEventListener('DOMContentLoaded', function () {
     const fileInput   = document.getElementById('archivo_gpx');
     const nextBtn     = document.getElementById('nextStep1');
     const prevBtn     = document.getElementById('prevStep1');
+    const nextBtn2    = document.getElementById('nextStep2');
+    const prevBtn2    = document.getElementById('prevStep2');
+    const photoInput  = document.getElementById('imagenes');
+    const photoLabel  = document.getElementById('photoDropLabel');
+    const photoDrop   = document.getElementById('photoDrop');
+    const PHOTO_LABEL = photoLabel ? photoLabel.textContent : '';
     const gpxPreview  = document.getElementById('gpxPreview');
     const gpxError    = document.getElementById('gpx-error');
 
@@ -29,15 +36,58 @@ document.addEventListener('DOMContentLoaded', function () {
 
     prevBtn.addEventListener('click', () => goToStep(1));
 
+    if (nextBtn2) {
+        nextBtn2.addEventListener('click', function () {
+            if (validateStep2()) goToStep(3);
+        });
+    }
+    if (prevBtn2) prevBtn2.addEventListener('click', () => goToStep(2));
+
     function goToStep(n) {
-        document.getElementById('step1').style.display = n === 1 ? 'block' : 'none';
-        document.getElementById('step2').style.display = n === 2 ? 'block' : 'none';
-        document.getElementById('ind-step1').className = 'step ' + (n === 1 ? 'active' : 'done');
-        document.getElementById('ind-step2').className = 'step ' + (n === 2 ? 'active' : '');
+        [1, 2, 3].forEach(function (i) {
+            const panel = document.getElementById('step' + i);
+            const ind   = document.getElementById('ind-step' + i);
+            if (panel) panel.style.display = n === i ? 'block' : 'none';
+            if (ind) {
+                ind.className = 'step' + (i === n ? ' active' : (i < n ? ' done' : ''));
+                if (i === n) ind.setAttribute('aria-current', 'step');
+                else ind.removeAttribute('aria-current');
+            }
+        });
+        const title = document.getElementById('step' + n + '-title');
+        if (title) {
+            title.setAttribute('tabindex', '-1');
+            title.focus({ preventScroll: true });
+        }
+        const indicator = document.querySelector('.step-indicator');
+        if (indicator && indicator.getBoundingClientRect().top < 0) {
+            indicator.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+    }
+
+    // ── Fotos (paso 3): mostrar cuántas se han elegido ────────────────────────
+    if (photoInput && photoLabel) {
+        photoInput.addEventListener('change', function () {
+            const n = photoInput.files.length;
+            photoLabel.textContent = n === 0 ? PHOTO_LABEL
+                : (n === 1 ? photoInput.files[0].name : n + ' fotos seleccionadas');
+            if (photoDrop) photoDrop.classList.toggle('has-file', n > 0);
+        });
+        if (photoDrop) {
+            photoInput.addEventListener('dragenter', () => photoDrop.classList.add('drag-over'));
+            photoInput.addEventListener('dragleave', () => photoDrop.classList.remove('drag-over'));
+            photoInput.addEventListener('drop', () => photoDrop.classList.remove('drag-over'));
+        }
     }
 
     // ── Zona de drop / clic ───────────────────────────────────────────────────
     dropZone.addEventListener('click', () => fileInput.click());
+    dropZone.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            fileInput.click();
+        }
+    });
 
     dropZone.addEventListener('dragover', (e) => {
         e.preventDefault();
@@ -48,6 +98,8 @@ document.addEventListener('DOMContentLoaded', function () {
         e.preventDefault();
         dropZone.classList.remove('drag-over');
         const file = e.dataTransfer.files[0];
+        // Sin esto el archivo soltado no llega al <input> ni al POST
+        try { fileInput.files = e.dataTransfer.files; } catch (err) { /* navegador antiguo */ }
         if (file) handleGPXFile(file);
     });
 
@@ -61,13 +113,13 @@ document.addEventListener('DOMContentLoaded', function () {
 
         // Validar extensión
         if (!file.name.toLowerCase().endsWith('.gpx')) {
-            showGpxError('El archivo debe tener extensión .gpx');
+            showGpxError('El archivo debe tener extensión .gpx. Elige otro archivo.');
             resetGpxUI();
             return;
         }
         // Validar tamaño (10 MB)
         if (file.size > 10 * 1024 * 1024) {
-            showGpxError('El archivo supera los 10 MB permitidos.');
+            showGpxError('El archivo supera los 10 MB permitidos. Elige uno más ligero.');
             resetGpxUI();
             return;
         }
@@ -94,14 +146,14 @@ document.addEventListener('DOMContentLoaded', function () {
     function applyGPXResult(filename, result) {
         // Actualizar zona de drop
         dropZone.classList.add('has-file');
-        dropZone.querySelector('.gpx-icon').innerHTML = '<i class="fas fa-check-circle"></i>';
+        dropZone.querySelector('.gpx-icon').innerHTML = '<i class="bi bi-check-circle-fill"></i>';
         document.getElementById('gpxDropLabel').textContent = filename;
 
         // Mostrar preview de stats
         document.getElementById('gpxFileName').textContent = filename;
-        document.getElementById('statDist').textContent = result.distance ?? '—';
-        document.getElementById('statElev').textContent = result.elevation ?? '—';
-        document.getElementById('statDur').textContent  = result.duration  ?? '—';
+        document.getElementById('statDist').textContent = fmtNum(result.distance, 1);
+        document.getElementById('statElev').textContent = fmtNum(result.elevation, 0);
+        document.getElementById('statDur').textContent  = fmtNum(result.duration, 1);
         document.getElementById('statZone').textContent = locationLabel(result.location);
         gpxPreview.style.display = 'block';
 
@@ -110,8 +162,8 @@ document.addEventListener('DOMContentLoaded', function () {
         if (result.location) {
             sel.value = result.location;
             document.getElementById('locationHint').innerHTML =
-                '<i class="fas fa-magic me-1 text-success"></i>' +
-                'Zona auto-detectada por las coordenadas del GPX. Puedes cambiarla si es necesario.';
+                '<i class="bi bi-magic me-1" aria-hidden="true"></i>' +
+                'Zona detectada por las coordenadas del GPX. Puedes cambiarla si lo necesitas.';
         }
 
         // Habilitar botón Siguiente
@@ -120,7 +172,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     function resetGpxUI() {
         dropZone.classList.remove('has-file');
-        dropZone.querySelector('.gpx-icon').innerHTML = '<i class="fas fa-route"></i>';
+        dropZone.querySelector('.gpx-icon').innerHTML = '<i class="bi bi-signpost-split"></i>';
         document.getElementById('gpxDropLabel').textContent =
             'Arrastra aquí tu archivo GPX o haz clic para seleccionarlo';
         gpxPreview.style.display = 'none';
@@ -134,7 +186,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
         // Comprobar errores de parse
         const parseErr = xml.querySelector('parsererror');
-        if (parseErr) return { error: 'El archivo no es XML válido.' };
+        if (parseErr) return { error: 'El archivo no es un XML válido. Comprueba que sea un GPX.' };
 
         const root = xml.documentElement;
         if (root.tagName.toLowerCase() !== 'gpx') {
@@ -212,11 +264,19 @@ document.addEventListener('DOMContentLoaded', function () {
 
     function locationLabel(zone) {
         const labels = {
-            Western_Pyrenees: 'Pirineo Occidental',
-            Central_Pyrenees: 'Pirineo Central',
-            Eastern_Pyrenees: 'Pirineo Oriental',
+            Western_Pyrenees: 'Pirineo occidental',
+            Central_Pyrenees: 'Pirineo central',
+            Eastern_Pyrenees: 'Pirineo oriental',
+            Other:            'Otras zonas',
         };
         return labels[zone] || zone || '—';
+    }
+
+    /** Número en formato español para mostrar (no se envía al servidor) */
+    function fmtNum(v, dec) {
+        const x = Number(v);
+        if (v === null || v === undefined || !Number.isFinite(x)) return '—';
+        return x.toLocaleString('es-ES', { maximumFractionDigits: dec });
     }
 
     // ── Error GPX ─────────────────────────────────────────────────────────────
@@ -233,7 +293,10 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // ── Validación Paso 2 al enviar ───────────────────────────────────────────
     form.addEventListener('submit', function (event) {
-        if (!validateStep2()) event.preventDefault();
+        if (!validateStep2()) {
+            event.preventDefault();
+            goToStep(2);   // los errores están en el paso 2
+        }
     });
 
     function validateStep2() {

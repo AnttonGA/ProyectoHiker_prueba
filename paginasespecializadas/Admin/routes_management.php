@@ -111,7 +111,18 @@ function pagina_url(int $n, string $q, string $tipo, string $dificultad, string 
 }
 
 function etiqueta_enum(?string $valor): string {
-    return ucfirst(str_replace('_', ' ', (string) $valor));
+    // Etiquetas visibles en español; los valores que viajan al servidor no cambian
+    static $etiquetas = [
+        'ski_touring' => 'Esquí de travesía', 'hiking' => 'Senderismo', 'cycle_touring' => 'Cicloturismo',
+        'climbing' => 'Escalada', 'snowshoeing' => 'Raquetas', 'via_ferrata' => 'Vía ferrata',
+        'btt' => 'BTT', 'kayaking' => 'Kayak',
+        'beginner' => 'Fácil', 'intermediate' => 'Moderada', 'advanced' => 'Difícil', 'expert' => 'Experta',
+        'Western_Pyrenees' => 'Pirineo occidental', 'Central_Pyrenees' => 'Pirineo central',
+        'Eastern_Pyrenees' => 'Pirineo oriental', 'Other' => 'Otras zonas',
+        'publicada' => 'Publicada', 'borrador' => 'Borrador', 'eliminada' => 'Eliminada',
+    ];
+    $valor = (string) $valor;
+    return $etiquetas[$valor] ?? ucfirst(str_replace('_', ' ', $valor));
 }
 ?>
 
@@ -120,8 +131,8 @@ function etiqueta_enum(?string $valor): string {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gestión de Rutas</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <title>Rutas · Admin · Kahir.ai</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
         .search-box {
             margin-bottom: 20px;
@@ -132,11 +143,17 @@ function etiqueta_enum(?string $valor): string {
             opacity: 1 !important;
         }
     </style>
+  <!-- Sistema de diseño Kahir (después del CSS de la página) -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Work+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <link href="../../assets/css/kahir.css?v=20261122" rel="stylesheet">
 </head>
 <?php include('navbar.php'); ?>
 <body>
     <div class="container mt-5">
-        <h1>Gestión de Rutas</h1>
+        <h1>Gestión de rutas</h1>
         <?php if (!empty($_SESSION['message'])): ?>
             <div class="alert alert-info"><?php echo e($_SESSION['message']); ?></div>
             <?php unset($_SESSION['message']); ?>
@@ -145,24 +162,24 @@ function etiqueta_enum(?string $valor): string {
             <div class="alert alert-danger"><?php echo e($errorMsg); ?></div>
         <?php endif; ?>
         <div class="mb-3">
-            <a href="../Usuario/subir_ruta.html" class="btn btn-success">Agregar Ruta</a>
+            <a href="../Usuario/subir_ruta.html" class="btn btn-success">Subir ruta</a>
         </div>
 
         <!-- Búsqueda y filtros en servidor -->
         <form method="GET" action="routes_management.php" class="row g-2 search-box">
             <div class="col-md-4">
-                <input type="text" name="q" class="form-control" maxlength="100" placeholder="Buscar por título..." value="<?php echo e($q); ?>">
+                <input type="text" name="q" class="form-control" maxlength="100" placeholder="Buscar por título" aria-label="Buscar por título" value="<?php echo e($q); ?>">
             </div>
             <div class="col-md-2">
-                <select name="tipo_ruta" class="form-select">
-                    <option value="">Todos los tipos</option>
+                <select name="tipo_ruta" class="form-select" aria-label="Actividad">
+                    <option value="">Todas las actividades</option>
                     <?php foreach ($tiposValidos as $t): ?>
                         <option value="<?php echo e($t); ?>" <?php if ($tipo === $t) echo 'selected'; ?>><?php echo e(etiqueta_enum($t)); ?></option>
                     <?php endforeach; ?>
                 </select>
             </div>
             <div class="col-md-2">
-                <select name="dificultad" class="form-select">
+                <select name="dificultad" class="form-select" aria-label="Dificultad">
                     <option value="">Todas las dificultades</option>
                     <?php foreach ($dificultadesValidas as $d): ?>
                         <option value="<?php echo e($d); ?>" <?php if ($dificultad === $d) echo 'selected'; ?>><?php echo e(etiqueta_enum($d)); ?></option>
@@ -170,7 +187,7 @@ function etiqueta_enum(?string $valor): string {
                 </select>
             </div>
             <div class="col-md-2">
-                <select name="estado" class="form-select">
+                <select name="estado" class="form-select" aria-label="Estado">
                     <option value="">Todos los estados</option>
                     <?php foreach ($estadosValidos as $es): ?>
                         <option value="<?php echo e($es); ?>" <?php if ($estado === $es) echo 'selected'; ?>><?php echo e(etiqueta_enum($es)); ?></option>
@@ -179,7 +196,7 @@ function etiqueta_enum(?string $valor): string {
             </div>
             <div class="col-md-2 d-flex gap-2">
                 <button type="submit" class="btn btn-primary">Filtrar</button>
-                <a href="routes_management.php" class="btn btn-outline-secondary">Limpiar</a>
+                <a href="routes_management.php" class="btn btn-outline-secondary">Quitar filtros</a>
             </div>
         </form>
 
@@ -194,9 +211,9 @@ function etiqueta_enum(?string $valor): string {
                 <tr>
                     <th>ID</th>
                     <th>Título</th>
-                    <th>Tipo</th>
+                    <th>Actividad</th>
                     <th>Dificultad</th>
-                    <th>Ubicación</th>
+                    <th>Zona</th>
                     <th>Distancia (km)</th>
                     <th>Estado</th>
                     <th>Autor</th>
@@ -212,10 +229,10 @@ function etiqueta_enum(?string $valor): string {
                         <td><?php echo e(etiqueta_enum($ruta['tipo_ruta'])); ?></td>
                         <td><?php echo e(etiqueta_enum($ruta['dificultad'])); ?></td>
                         <td><?php echo e(etiqueta_enum($ruta['ubicacion'])); ?></td>
-                        <td><?php echo e($ruta['distancia_km'] ?? ''); ?></td>
-                        <td><?php echo e($ruta['estado']); ?></td>
+                        <td><?php echo $ruta['distancia_km'] !== null && $ruta['distancia_km'] !== '' ? e(number_format((float) $ruta['distancia_km'], 1, ',', '.')) : ''; ?></td>
+                        <td><?php echo e(etiqueta_enum($ruta['estado'])); ?></td>
                         <td><?php echo e($ruta['autor'] ?? '—'); ?></td>
-                        <td><?php echo (int) $ruta['views']; ?></td>
+                        <td><?php echo e(number_format((int) $ruta['views'], 0, ',', '.')); ?></td>
                         <td class="text-nowrap">
                             <a href="../skitouring/ruta.html?id=<?php echo $rid; ?>" class="btn btn-info btn-sm" target="_blank" rel="noopener">Ver</a>
                             <a href="editar_ruta.php?id=<?php echo $rid; ?>" class="btn btn-primary btn-sm">Editar</a>
@@ -230,7 +247,7 @@ function etiqueta_enum(?string $valor): string {
                     </tr>
                 <?php } ?>
                 <?php if (!$rutas && $errorMsg === ''): ?>
-                    <tr><td colspan="10" class="text-center text-muted">No hay rutas que coincidan con la búsqueda.</td></tr>
+                    <tr><td colspan="10" class="text-center text-muted">Ninguna ruta coincide con la búsqueda. Prueba a quitar filtros.</td></tr>
                 <?php endif; ?>
             </tbody>
         </table>
@@ -265,6 +282,6 @@ function etiqueta_enum(?string $valor): string {
         </nav>
         <?php endif; ?>
     </div>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

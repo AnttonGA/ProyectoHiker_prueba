@@ -23,7 +23,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     // Validación de la contraseña
     if (empty($_POST['password'])) {
-        $passwordErr = "Contraseña es requerida";
+        $passwordErr = "Escribe una contraseña nueva";
     } else {
         $password = $_POST['password'];
         $confirm_password = $_POST['confirm_password'] ?? '';
@@ -78,22 +78,22 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                         $stmt_update->bind_param("ss", $hash, $tokenHash);
 
                         if ($stmt_update->execute()) {
-                            $message = 'Contraseña actualizada correctamente. <a href="gestion.php">Inicia sesion</a>';
+                            $message = 'Contraseña cambiada. Ya puedes <a href="gestion.php">entrar</a> con la nueva.';
                         } else {
                             error_log('change_password.php: ' . $stmt_update->error);
-                            $message = "Error al actualizar la contraseña.";
+                            $message = "No se pudo cambiar la contraseña. Inténtalo de nuevo.";
                         }
                         $stmt_update->close();
                     } else {
-                        $message = "Token no válido.";
+                        $message = "El enlace no es válido o ha caducado. Pide uno nuevo desde «¿Has olvidado tu contraseña?».";
                     }
                     $stmt->close();
                 } else {
-                    $message = "Token no válido o no proporcionado.";
+                    $message = "Falta el enlace de recuperación o no es válido. Pide uno nuevo desde «¿Has olvidado tu contraseña?».";
                 }
             } catch (Throwable $ex) {
                 error_log('change_password.php: ' . $ex->getMessage());
-                $message = "Error al actualizar la contraseña.";
+                $message = "No se pudo cambiar la contraseña. Inténtalo de nuevo.";
             }
         }
     }
@@ -106,14 +106,20 @@ $conn->close();
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Recuperación de Contraseña</title>
+  <title>Nueva contraseña · Kahir.ai</title>
   <!-- Enlace a Bootstrap 5.2.3 CSS -->
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <!-- Estilos adicionales -->
-  <link href="../estilos2.css" rel="stylesheet">
+  <link href="../estilos2.css?v=20261122" rel="stylesheet">
   <style>
     /* Estilos adicionales específicos para esta página si es necesario */
   </style>
+  <!-- Sistema de diseño Kahir (después del CSS de la página) -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Work+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <link href="../../assets/css/kahir.css?v=20261122" rel="stylesheet">
 </head>
 <body>
    <!-- Navbar -->
@@ -124,7 +130,7 @@ $conn->close();
   <header class="header">
     <div class="overlay">
       <div class="container">
-        <h1 class="text-white">Recuperación de Contraseña</h1>
+        <h1 class="text-white">Nueva contraseña</h1>
       </div>
     </div>
   </header>
@@ -139,15 +145,15 @@ $conn->close();
     <form method="post" action="<?php echo e($_SERVER["PHP_SELF"]) . "?token=" . e(urlencode((string) ($_GET['token'] ?? ''))); ?>" class="needs-validation" novalidate>
       <?= csrf_field() ?>
       <div class="mb-3">
-        <label for="password" class="form-label">Nueva contraseña:</label>
+        <label for="password" class="form-label">Nueva contraseña</label>
         <input type="password" name="password" id="password" class="form-control" required>
       </div>
       <div class="mb-3">
-        <label for="confirm_password" class="form-label">Repetir contraseña:</label>
+        <label for="confirm_password" class="form-label">Repite la contraseña</label>
         <input type="password" name="confirm_password" id="confirm_password" class="form-control" required>
         <span class="error-message"><?php echo $passwordErr; ?></span>
       </div>
-      <button type="submit" class="btn btn-primary">Actualizar Contraseña</button>
+      <button type="submit" class="btn btn-primary">Cambiar contraseña</button>
     </form>
   </section>
 
@@ -156,7 +162,7 @@ $conn->close();
 
 
   <!-- Enlace a Bootstrap 5.2.3 JS (opcional, para funcionalidades avanzadas) -->
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
   <script src="../../include.js"></script>
 </body>
 </html>

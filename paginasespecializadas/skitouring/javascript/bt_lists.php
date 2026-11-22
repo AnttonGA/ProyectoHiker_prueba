@@ -12,7 +12,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 }
 
 if (!isset($_SESSION['usuario'])) {
-    echo json_encode(['success' => false, 'error' => 'User not logged in']);
+    echo json_encode(['success' => false, 'error' => 'Entra en tu cuenta para usar tus listas.']);
     exit;
 }
 
@@ -48,16 +48,16 @@ try {
         $stmt->execute();
         $row = $stmt->get_result()->fetch_assoc();
         $stmt->close();
-        if (!$row) throw new InvalidArgumentException('User not found');
+        if (!$row) throw new InvalidArgumentException('No encontramos tu cuenta. Vuelve a entrar.');
         $userId = (int)$row['id'];
     }
 
-    if (!$routeId) throw new InvalidArgumentException('Route ID is required');
+    if (!$routeId) throw new InvalidArgumentException('Falta la ruta. Recarga la página.');
 
     if ($action === 'create') {
         $listName = trim((string)($data['listName'] ?? ''));
-        if ($listName === '') throw new InvalidArgumentException('List name is required');
-        if (mb_strlen($listName) > 100) throw new InvalidArgumentException('List name is too long');
+        if ($listName === '') throw new InvalidArgumentException('Escribe un nombre para la lista.');
+        if (mb_strlen($listName) > 100) throw new InvalidArgumentException('El nombre es demasiado largo (máximo 100 caracteres).');
 
         $conn->begin_transaction();
         $enTransaccion = true;
@@ -82,16 +82,16 @@ try {
 
         echo json_encode([
             'success' => true,
-            'message' => 'New list created and route added',
+            'message' => 'Lista creada y ruta añadida',
             'listId'  => $listId
         ]);
 
     } elseif ($action === 'add') {
         $listId = isset($data['listId']) ? (int)$data['listId'] : 0;
-        if (!$listId) throw new InvalidArgumentException('List ID is required');
+        if (!$listId) throw new InvalidArgumentException('Falta la lista. Recarga la página.');
         if (!listaEsDelUsuario($conn, $listId, $userId)) {
             http_response_code(403);
-            throw new InvalidArgumentException('List not found');
+            throw new InvalidArgumentException('No encontramos esa lista. Recarga la página.');
         }
 
         $checkStmt = $conn->prepare(
@@ -102,7 +102,7 @@ try {
         $exists = $checkStmt->get_result()->fetch_row()[0] > 0;
         $checkStmt->close();
 
-        if ($exists) throw new InvalidArgumentException('Route is already in this list');
+        if ($exists) throw new InvalidArgumentException('La ruta ya está en esta lista.');
 
         $addToListStmt = $conn->prepare(
             "INSERT INTO user_list_routes (lista_id, ruta_id) VALUES (?, ?)"
@@ -111,14 +111,14 @@ try {
         $addToListStmt->execute();
         $addToListStmt->close();
 
-        echo json_encode(['success' => true, 'message' => 'Route added to list']);
+        echo json_encode(['success' => true, 'message' => 'Ruta añadida a la lista']);
 
     } elseif ($action === 'remove') {
         $listId = isset($data['listId']) ? (int)$data['listId'] : 0;
-        if (!$listId) throw new InvalidArgumentException('List ID is required');
+        if (!$listId) throw new InvalidArgumentException('Falta la lista. Recarga la página.');
         if (!listaEsDelUsuario($conn, $listId, $userId)) {
             http_response_code(403);
-            throw new InvalidArgumentException('List not found');
+            throw new InvalidArgumentException('No encontramos esa lista. Recarga la página.');
         }
 
         $removeStmt = $conn->prepare(
@@ -128,10 +128,10 @@ try {
         $removeStmt->execute();
         $removeStmt->close();
 
-        echo json_encode(['success' => true, 'message' => 'Route removed from list']);
+        echo json_encode(['success' => true, 'message' => 'Ruta quitada de la lista']);
 
     } else {
-        throw new InvalidArgumentException('Invalid action');
+        throw new InvalidArgumentException('Acción no válida.');
     }
 
 } catch (InvalidArgumentException $e) {

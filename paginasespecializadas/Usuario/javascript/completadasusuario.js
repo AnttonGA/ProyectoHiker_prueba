@@ -13,26 +13,31 @@ function loadCompletedRoutes(page = 1) {
     .then(data => {
       const el = document.getElementById('completedRoutes');
       if (!data.success) {
-        el.innerHTML = `<div class="col-12 acct-empty">
-          <i class="bi bi-exclamation-triangle"></i>
-          <p>${escHtml(data.error ?? 'Error loading completed routes.')}</p>
-        </div>`;
+        el.innerHTML = acctState({
+          icon: 'bi-exclamation-circle', tone: 'error',
+          title: 'No se pudieron cargar tus rutas completadas',
+          text: data.error ?? 'Recarga la página dentro de un momento.',
+        });
         return;
       }
       if (data.message || !data.routes?.length) {
-        el.innerHTML = `<div class="col-12 acct-empty">
-          <i class="bi bi-check-circle"></i>
-          <p>${escHtml(data.message ?? "You haven't completed any routes yet. Go explore!")}</p>
-        </div>`;
+        el.innerHTML = acctState({
+          icon: 'bi-flag',
+          title: 'Tu cuaderno de montaña empieza aquí',
+          text: 'Después de cada salida, marca la ruta como hecha y ve guardando el registro de dónde has estado.',
+          ctaHtml: '<a href="../skitouring/skitouring.html" class="btn btn-primary"><i class="bi bi-compass me-1" aria-hidden="true"></i>Buscar tu próxima ruta</a>',
+        });
         return;
       }
       el.innerHTML = data.routes.map(r => buildRouteCard(r, { showCompleted: true })).join('');
       renderPagination('completedRoutes-pagination', page, data.total, COMPLETED_PER_PAGE, loadCompletedRoutes);
     })
     .catch(() => {
-      document.getElementById('completedRoutes').innerHTML = `<div class="col-12 acct-empty">
-        <i class="bi bi-wifi-off"></i><p>Network error. Please try again.</p>
-      </div>`;
+      document.getElementById('completedRoutes').innerHTML = acctState({
+        icon: 'bi-wifi-off', tone: 'error',
+        title: 'Sin conexión',
+        text: 'Comprueba tu conexión y recarga la página.',
+      });
     });
 }
 

@@ -14,7 +14,7 @@ header('Content-Type: application/json');
 
 try {
     if (!isset($_SESSION['usuario'])) {
-        throw new InvalidArgumentException('Usuario no autenticado');
+        throw new InvalidArgumentException('Tu sesión ha caducado. Vuelve a entrar.');
     }
 
     $username = $_SESSION['usuario'];
@@ -29,7 +29,7 @@ try {
     $stmt->bind_param("s", $username);
     $stmt->execute();
     $result = $stmt->get_result();
-    if ($result->num_rows === 0) throw new InvalidArgumentException('Usuario no encontrado');
+    if ($result->num_rows === 0) throw new InvalidArgumentException('No se encontró tu cuenta. Sal y vuelve a entrar.');
     $user_id = $result->fetch_assoc()['id'];
     $stmt->close();
 
@@ -41,7 +41,7 @@ try {
     $count_stmt->close();
 
     if ($total === 0) {
-        echo json_encode(['success' => true, 'message' => '¡Aún no has completado ninguna ruta!', 'total' => 0]);
+        echo json_encode(['success' => true, 'message' => 'Aún no has completado ninguna ruta', 'total' => 0]);
         exit;
     }
 
@@ -82,7 +82,7 @@ try {
 } catch (Throwable $e) {
     debug_log("Exception: " . $e->getMessage());
     error_log('completadausuario.php: ' . $e->getMessage());
-    echo json_encode(['success' => false, 'error' => 'No se han podido cargar las rutas. Inténtalo de nuevo más tarde.']);
+    echo json_encode(['success' => false, 'error' => 'No se pudieron cargar las rutas. Inténtalo de nuevo más tarde.']);
 } finally {
     if (isset($conn)) $conn->close();
 }

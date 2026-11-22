@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Route — Hiker</title>
+  <title>Ruta — Kahir</title>
   <link rel="icon" type="image/svg+xml" href="../../favicon.svg">
 
   <!-- Leaflet + elevation -->
@@ -12,265 +12,260 @@
   <link href="https://api.mapbox.com/mapbox.js/plugins/leaflet-fullscreen/v1.0.1/leaflet.fullscreen.css" rel="stylesheet" />
 
   <!-- Bootstrap + icons -->
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.10.0/font/bootstrap-icons.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
 
   <!-- Custom CSS -->
-  <link href="../estilos2.css" rel="stylesheet">
-  <link href="css/ruta.css" rel="stylesheet">
+  <link href="../estilos2.css?v=20261122" rel="stylesheet">
+  <link href="css/ruta.css?v=20261122es" rel="stylesheet">
+  <!-- Sistema de diseño Kahir (después del CSS de la página) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Work+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <link href="../../assets/css/kahir.css?v=20261122" rel="stylesheet">
 </head>
-
-<body>
+<body class="k-route-page">
   <div id="menu"></div>
 
-  <!-- ── Hero ─────────────────────────────────────────── -->
-  <div class="ruta-hero">
-    <div class="ruta-hero__overlay">
-      <div class="container-xl">
-        <nav aria-label="breadcrumb" class="ruta-breadcrumb">
-          <ol class="breadcrumb mb-2">
-            <li class="breadcrumb-item">
-              <a href="skitouring.html"><i class="bi bi-search me-1"></i>Search</a>
-            </li>
-            <li class="breadcrumb-item active" id="breadcrumb-title">Route</li>
-          </ol>
-        </nav>
-        <h1 class="ruta-hero__title" id="ruta-title">Loading…</h1>
-        <div class="ruta-hero__badges mt-2">
-          <span id="hero-difficulty-badge" class="ruta-badge diff--easy d-none"></span>
-          <span id="hero-activity-badge" class="ruta-badge ruta-badge--activity d-none"></span>
-        </div>
+  <main class="container k-route">
+
+    <!-- ── Cabecera editorial ───────────────────────────── -->
+    <header class="k-route-head">
+      <nav aria-label="Estás en" class="k-route-crumbs">
+        <ol class="breadcrumb">
+          <li class="breadcrumb-item">
+            <a href="skitouring.html"><i class="bi bi-map me-1" aria-hidden="true"></i>Rutas</a>
+          </li>
+          <li class="breadcrumb-item active" id="breadcrumb-title" aria-current="page">Ruta</li>
+        </ol>
+      </nav>
+
+      <p class="k-eyebrow k-route-eyebrow">
+        <span id="hero-activity-badge">Ruta</span>
+        <span class="k-route-eyebrow__sep" aria-hidden="true">·</span>
+        <span id="hero-location">Pirineos</span>
+      </p>
+
+      <h1 class="k-route-title" id="ruta-title">Cargando…</h1>
+
+      <div class="k-route-meta">
+        <p id="ruta-author" class="k-route-meta__author">
+          <i class="bi bi-person-circle" aria-hidden="true"></i> Compartida por <span></span>
+        </p>
+        <span id="hero-difficulty-badge" class="k-chip k-diff d-none"></span>
       </div>
-    </div>
-  </div>
 
-  <!-- ── Main ─────────────────────────────────────────── -->
-  <main class="container-xl py-4">
-    <div class="row g-4">
+      <!-- Acciones -->
+      <div class="k-route-actions" role="group" aria-label="Acciones de la ruta">
+        <button id="btn-favorite" type="button" class="btn btn-outline-secondary k-act k-act--fav" aria-pressed="false">
+          <i class="bi bi-heart" aria-hidden="true"></i><span class="k-act__label">Favorita</span>
+        </button>
+        <button id="btn-add-to-list" type="button" class="btn btn-outline-secondary k-act">
+          <i class="bi bi-bookmark-plus" aria-hidden="true"></i><span class="k-act__label">Añadir a una lista</span>
+        </button>
+        <button id="btn-completed" type="button" class="btn btn-outline-success k-act k-act--done" aria-pressed="false">
+          <i class="bi bi-check-circle" aria-hidden="true"></i><span class="k-act__label">Marcar como hecha</span>
+        </button>
+        <div id="ruta-download" class="k-route-actions__gpx"></div>
+      </div>
+    </header>
 
-      <!-- ════ LEFT COLUMN ════ -->
-      <div class="col-lg-8">
+    <!-- ── Datos clave ──────────────────────────────────── -->
+    <ul class="k-stats" aria-label="Datos de la ruta">
+      <li class="k-stat">
+        <i class="bi bi-arrows-expand k-stat__icon" aria-hidden="true"></i>
+        <span class="k-stat__value" id="ruta-distance">—</span>
+        <span class="k-stat__label">Distancia</span>
+      </li>
+      <li class="k-stat">
+        <i class="bi bi-arrow-up-right k-stat__icon" aria-hidden="true"></i>
+        <span class="k-stat__value" id="ruta-elevation">—</span>
+        <span class="k-stat__label">Desnivel</span>
+      </li>
+      <li class="k-stat">
+        <i class="bi bi-clock k-stat__icon" aria-hidden="true"></i>
+        <span class="k-stat__value" id="ruta-duration">—</span>
+        <span class="k-stat__label">Duración</span>
+      </li>
+      <li class="k-stat k-stat--effort" title="Esfuerzo tipo MIDE: tiempo estimado a pie según distancia y desnivel (1 = menos de 1 h … 5 = más de 10 h)">
+        <i class="bi bi-activity k-stat__icon" aria-hidden="true"></i>
+        <span class="k-stat__value" id="ruta-effort">—</span>
+        <span class="k-stat__label">Esfuerzo (MIDE)</span>
+      </li>
+      <li class="k-stat">
+        <i class="bi bi-bar-chart-line k-stat__icon" aria-hidden="true"></i>
+        <span class="k-stat__value" id="ruta-difficulty">—</span>
+        <span class="k-stat__label">Dificultad</span>
+      </li>
+      <li class="k-stat">
+        <i class="bi bi-compass k-stat__icon" aria-hidden="true"></i>
+        <span class="k-stat__value" id="ruta-activity">—</span>
+        <span class="k-stat__label">Actividad</span>
+      </li>
+      <li class="k-stat k-stat--wide">
+        <i class="bi bi-geo-alt k-stat__icon" aria-hidden="true"></i>
+        <span class="k-stat__value" id="ruta-location">—</span>
+        <span class="k-stat__label">Zona</span>
+      </li>
+    </ul>
 
-        <!-- Map -->
-        <div id="map" class="ruta-map mb-3"></div>
+    <div class="row g-4 g-xl-5">
 
-        <!-- Elevation profile -->
-        <div class="ruta-card mb-3">
-          <div class="ruta-card__header">
-            <i class="bi bi-graph-up"></i> Elevation Profile
-          </div>
-          <div class="ruta-card__body p-0">
-            <div id="elevation-profile"></div>
-          </div>
-        </div>
-
-        <!-- Stats bar -->
-        <div class="ruta-stats-bar mb-3">
-          <div class="ruta-stat">
-            <i class="bi bi-arrow-up-short ruta-stat__icon"></i>
-            <span class="ruta-stat__value" id="ruta-elevation">—</span>
-            <span class="ruta-stat__label">Elevation</span>
-          </div>
-          <div class="ruta-stat">
-            <i class="bi bi-arrows-expand ruta-stat__icon"></i>
-            <span class="ruta-stat__value" id="ruta-distance">—</span>
-            <span class="ruta-stat__label">Distance</span>
-          </div>
-          <div class="ruta-stat">
-            <i class="bi bi-clock ruta-stat__icon"></i>
-            <span class="ruta-stat__value" id="ruta-duration">—</span>
-            <span class="ruta-stat__label">Duration</span>
-          </div>
-          <div class="ruta-stat" title="MIDE-style effort: estimated walking time from distance and ascent (1 = under 1 h … 5 = over 10 h)">
-            <i class="bi bi-activity ruta-stat__icon"></i>
-            <span class="ruta-stat__value" id="ruta-effort">—</span>
-            <span class="ruta-stat__label">Effort (MIDE)</span>
-          </div>
-          <div class="ruta-stat">
-            <i class="bi bi-signal ruta-stat__icon"></i>
-            <span class="ruta-stat__value" id="ruta-difficulty">—</span>
-            <span class="ruta-stat__label">Difficulty</span>
-          </div>
-          <div class="ruta-stat">
-            <i class="bi bi-geo-alt ruta-stat__icon"></i>
-            <span class="ruta-stat__value" id="ruta-location">—</span>
-            <span class="ruta-stat__label">Location</span>
-          </div>
-          <div class="ruta-stat">
-            <i class="bi bi-lightning ruta-stat__icon"></i>
-            <span class="ruta-stat__value" id="ruta-activity">—</span>
-            <span class="ruta-stat__label">Activity</span>
-          </div>
-        </div>
-
-        <!-- Action bar -->
-        <div class="ruta-actions mb-4">
-          <p id="ruta-author" class="ruta-author">
-            <i class="bi bi-person-circle"></i> <span></span>
-          </p>
-          <div class="ruta-actions__btns">
-            <button id="btn-favorite" class="btn btn-outline-primary btn-sm">
-              <i class="bi bi-heart"></i> Favorite
-            </button>
-            <button id="btn-add-to-list" class="btn btn-outline-secondary btn-sm">
-              <i class="bi bi-bookmark-plus"></i> Add to List
-            </button>
-            <button id="btn-completed" class="btn btn-outline-success btn-sm">
-              <i class="bi bi-check-circle"></i> Mark as Completed
-            </button>
-            <div id="ruta-download" class="d-inline-block"></div>
-          </div>
-        </div>
+      <!-- ════ Columna principal ════ -->
+      <div class="col-lg-7 order-2 order-lg-1">
 
         <!-- Valoración tras completar (Fase 1) -->
-        <div id="route-feedback" class="ruta-card mb-3" hidden>
-          <div class="ruta-card__header">
-            <i class="bi bi-chat-heart"></i> How did it go?
+        <section id="route-feedback" class="k-card k-feedback" aria-labelledby="feedback-title" hidden>
+          <div class="k-feedback__head">
+            <span class="k-feedback__icon" aria-hidden="true"><i class="bi bi-chat-heart"></i></span>
+            <div>
+              <h2 id="feedback-title" class="k-card__title">¿Qué tal te fue?</h2>
+              <p class="k-feedback__hint">Tu respuesta ayuda a Kahir a recomendarte rutas a tu nivel.</p>
+            </div>
           </div>
-          <div class="ruta-card__body">
-            <p class="mb-2 small text-muted">Your answer helps Kahir recommend routes at your level.</p>
-            <div class="btn-group mb-2" role="group" aria-label="Perceived difficulty">
-              <button type="button" class="btn btn-outline-success btn-sm" data-percepcion="facil" aria-pressed="false">Easy for me</button>
-              <button type="button" class="btn btn-outline-primary btn-sm" data-percepcion="adecuada" aria-pressed="false">About right</button>
-              <button type="button" class="btn btn-outline-danger btn-sm" data-percepcion="dura" aria-pressed="false">Hard for me</button>
+
+          <div class="k-feedback__row">
+            <span class="k-feedback__label" id="feedback-perc-label">¿Cómo te resultó?</span>
+            <div class="k-seg" role="group" aria-labelledby="feedback-perc-label">
+              <button type="button" class="k-seg__btn" data-percepcion="facil" aria-pressed="false">Fácil para mí</button>
+              <button type="button" class="k-seg__btn" data-percepcion="adecuada" aria-pressed="false">Justa</button>
+              <button type="button" class="k-seg__btn" data-percepcion="dura" aria-pressed="false">Dura para mí</button>
             </div>
-            <div class="mb-2" role="group" aria-label="Rating (optional)">
-              <span class="small text-muted me-1">Rating (optional):</span>
-              <button type="button" class="btn btn-link btn-sm p-0 text-warning" data-star="1" aria-label="1 star"><i class="bi bi-star"></i></button>
-              <button type="button" class="btn btn-link btn-sm p-0 text-warning" data-star="2" aria-label="2 stars"><i class="bi bi-star"></i></button>
-              <button type="button" class="btn btn-link btn-sm p-0 text-warning" data-star="3" aria-label="3 stars"><i class="bi bi-star"></i></button>
-              <button type="button" class="btn btn-link btn-sm p-0 text-warning" data-star="4" aria-label="4 stars"><i class="bi bi-star"></i></button>
-              <button type="button" class="btn btn-link btn-sm p-0 text-warning" data-star="5" aria-label="5 stars"><i class="bi bi-star"></i></button>
+          </div>
+
+          <div class="k-feedback__row">
+            <span class="k-feedback__label" id="feedback-stars-label">Valoración <span class="k-feedback__opt">(opcional)</span></span>
+            <div class="k-stars" role="group" aria-labelledby="feedback-stars-label">
+              <button type="button" class="k-star" data-star="1" aria-label="1 estrella" aria-pressed="false"><i class="bi bi-star"></i></button>
+              <button type="button" class="k-star" data-star="2" aria-label="2 estrellas" aria-pressed="false"><i class="bi bi-star"></i></button>
+              <button type="button" class="k-star" data-star="3" aria-label="3 estrellas" aria-pressed="false"><i class="bi bi-star"></i></button>
+              <button type="button" class="k-star" data-star="4" aria-label="4 estrellas" aria-pressed="false"><i class="bi bi-star"></i></button>
+              <button type="button" class="k-star" data-star="5" aria-label="5 estrellas" aria-pressed="false"><i class="bi bi-star"></i></button>
             </div>
-            <button type="button" id="feedback-save" class="btn btn-success btn-sm" disabled>Save</button>
+          </div>
+
+          <div class="k-feedback__foot">
+            <button type="button" id="feedback-save" class="btn btn-primary" disabled>Guardar valoración</button>
             <p id="feedback-msg" class="small mt-2" aria-live="polite"></p>
           </div>
-        </div>
+        </section>
 
-        <!-- Description -->
-        <div class="ruta-card mb-3">
-          <div class="ruta-card__header">
-            <i class="bi bi-file-text"></i> Description
+        <!-- Descripción -->
+        <section class="k-section" aria-labelledby="desc-title">
+          <h2 id="desc-title" class="k-section__title">Sobre esta ruta</h2>
+          <p id="ruta-description" class="k-prose"></p>
+        </section>
+
+        <!-- Información adicional (pregunta1..4) -->
+        <section class="k-section" id="ruta-preguntas-wrap" aria-labelledby="qa-title" style="display:none;">
+          <h2 id="qa-title" class="k-section__title">Conviene saber</h2>
+          <dl id="ruta-preguntas" class="k-qa"></dl>
+        </section>
+
+        <!-- Galería -->
+        <section class="k-section" aria-labelledby="gallery-title">
+          <h2 id="gallery-title" class="k-section__title">Fotos</h2>
+          <div id="ruta-gallery" class="ruta-gallery k-gallery"></div>
+        </section>
+
+        <a href="skitouring.html" onclick="if (history.length > 1) { history.back(); return false; }" class="btn btn-link k-route-back">
+          <i class="bi bi-arrow-left me-1" aria-hidden="true"></i>Volver a rutas
+        </a>
+
+      </div><!-- /col principal -->
+
+      <!-- ════ Lateral: mapa, perfil, ficha ════ -->
+      <aside class="col-lg-5 order-1 order-lg-2" aria-label="Mapa y detalles de la ruta">
+        <div class="k-route-aside">
+
+          <div class="k-card k-map-card">
+            <div id="map" class="ruta-map"></div>
+            <div class="k-elev">
+              <h2 class="k-elev__title"><i class="bi bi-graph-up" aria-hidden="true"></i> Perfil de desnivel</h2>
+              <div id="elevation-profile"></div>
+            </div>
           </div>
-          <div class="ruta-card__body">
-            <p id="ruta-description" class="mb-0 text-muted lh-lg"></p>
-          </div>
-        </div>
 
-        <!-- Additional info -->
-        <div class="ruta-card mb-4" id="ruta-preguntas-wrap" style="display:none;">
-          <div class="ruta-card__header">
-            <i class="bi bi-info-circle"></i> Additional Information
-          </div>
-          <div class="ruta-card__body">
-            <div id="ruta-preguntas"></div>
-          </div>
-        </div>
-
-        <!-- Back -->
-        <button onclick="history.back()" class="btn btn-outline-secondary">
-          <i class="bi bi-arrow-left me-1"></i>Back to Search
-        </button>
-
-      </div><!-- /col-lg-8 -->
-
-      <!-- ════ RIGHT COLUMN ════ -->
-      <div class="col-lg-4">
-
-        <!-- Quick info card -->
-        <div class="ruta-card mb-3">
-          <div class="ruta-card__header">
-            <i class="bi bi-info-square"></i> Route Info
-          </div>
-          <div class="ruta-card__body p-0">
+          <div class="k-card k-info-card">
+            <h2 class="k-card__title">Ficha de la ruta</h2>
             <table class="table table-sm table-borderless mb-0 ruta-info-table">
               <tbody>
                 <tr>
-                  <td class="text-muted"><i class="bi bi-signal"></i> Difficulty</td>
-                  <td><span id="ruta-difficulty-2" class="difficulty-badge"></span></td>
+                  <th scope="row"><i class="bi bi-signal" aria-hidden="true"></i> Dificultad</th>
+                  <td><span id="ruta-difficulty-2" class="k-diff"></span></td>
                 </tr>
                 <tr>
-                  <td class="text-muted"><i class="bi bi-geo-alt"></i> Location</td>
+                  <th scope="row"><i class="bi bi-geo-alt" aria-hidden="true"></i> Zona</th>
                   <td id="ruta-location-2">—</td>
                 </tr>
                 <tr>
-                  <td class="text-muted"><i class="bi bi-lightning"></i> Activity</td>
+                  <th scope="row"><i class="bi bi-compass" aria-hidden="true"></i> Actividad</th>
                   <td id="ruta-activity-2">—</td>
                 </tr>
                 <tr>
-                  <td class="text-muted"><i class="bi bi-arrow-up-short"></i> Elevation</td>
+                  <th scope="row"><i class="bi bi-arrow-up-right" aria-hidden="true"></i> Desnivel</th>
                   <td id="ruta-elevation-2">—</td>
                 </tr>
                 <tr>
-                  <td class="text-muted"><i class="bi bi-arrows-expand"></i> Distance</td>
+                  <th scope="row"><i class="bi bi-arrows-expand" aria-hidden="true"></i> Distancia</th>
                   <td id="ruta-distance-2">—</td>
                 </tr>
                 <tr>
-                  <td class="text-muted"><i class="bi bi-clock"></i> Duration</td>
+                  <th scope="row"><i class="bi bi-clock" aria-hidden="true"></i> Duración</th>
                   <td id="ruta-duration-2">—</td>
                 </tr>
                 <tr>
-                  <td class="text-muted"><i class="bi bi-activity"></i> Effort (MIDE)</td>
+                  <th scope="row"><i class="bi bi-activity" aria-hidden="true"></i> Esfuerzo (MIDE)</th>
                   <td id="ruta-effort-2">—</td>
                 </tr>
               </tbody>
             </table>
           </div>
-        </div>
 
-        <!-- Gallery -->
-        <div class="ruta-card">
-          <div class="ruta-card__header">
-            <i class="bi bi-images"></i> Photos
-          </div>
-          <div class="ruta-card__body p-0">
-            <div id="ruta-gallery" class="ruta-gallery"></div>
-          </div>
         </div>
-
-      </div><!-- /col-lg-4 -->
+      </aside>
 
     </div><!-- /row -->
   </main>
 
   <div id="footer"></div>
 
-  <!-- ── Add-to-List Modal ─────────────────────────────── -->
+  <!-- ── Modal "Añadir a lista" ─────────────────────────── -->
   <div class="modal fade" id="listModal" tabindex="-1" aria-labelledby="listModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
-      <div class="modal-content">
+      <div class="modal-content k-list-modal">
         <div class="modal-header">
-          <h5 class="modal-title" id="listModalLabel">
-            <i class="bi bi-bookmark-plus me-2"></i>Add to List
-          </h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          <h2 class="modal-title h5" id="listModalLabel">
+            <i class="bi bi-bookmark-plus me-2" aria-hidden="true"></i>Añadir a una lista
+          </h2>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
         </div>
         <div class="modal-body">
-          <div id="existingLists" class="mb-3"></div>
-          <hr>
-          <div class="mb-2">
-            <label for="newListName" class="form-label fw-semibold small">Create New List</label>
-            <input type="text" class="form-control form-control-sm" id="newListName"
-                   placeholder="Enter new list name…">
-            <span class="feedback-text text-danger ms-2"></span>
+          <p class="k-list-modal__hint">Elige en qué listas quieres guardar esta ruta.</p>
+          <div id="existingLists" class="k-list-options"></div>
+          <div class="k-list-modal__new">
+            <label for="newListName" class="form-label">Crea una lista nueva</label>
+            <input type="text" class="form-control" id="newListName"
+                   placeholder="p. ej. Clásicas de invierno">
+            <span class="feedback-text text-danger"></span>
           </div>
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">Close</button>
-          <button id="createNewList" class="btn btn-primary btn-sm">
-            <i class="bi bi-plus-circle me-1"></i>Create and Add
+          <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cerrar</button>
+          <button id="createNewList" type="button" class="btn btn-primary">
+            <i class="bi bi-plus-circle me-1" aria-hidden="true"></i>Crear y añadir
           </button>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- Lightbox overlay (populated by JS) -->
+  <!-- Lightbox (lo rellena el JS) -->
   <div id="lightbox-overlay" class="lightbox-overlay" style="display:none;">
-    <button class="lightbox-close" id="lightbox-close" aria-label="Close">
-      <i class="bi bi-x-lg"></i>
+    <button type="button" class="lightbox-close" id="lightbox-close" aria-label="Cerrar">
+      <i class="bi bi-x-lg" aria-hidden="true"></i>
     </button>
-    <img id="lightbox-img" src="" alt="Enlarged photo">
+    <img id="lightbox-img" src="" alt="Foto ampliada">
   </div>
 
   <!-- ── Scripts ──────────────────────────────────────── -->
@@ -284,15 +279,15 @@
 
   <!-- Bootstrap -->
   <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.min.js"></script>
 
   <!-- App scripts -->
   <script src="../../csrf.js?v=20261121"></script>
-  <script src="javascript/paginaunica.js?v=20261121"></script>
-  <script src="javascript/bt_fav.js?v=20261121"></script>
-  <script src="javascript/bt_lists.js?v=20261121"></script>
-  <script src="javascript/bt_completed.js?v=20261121"></script>
-  <script src="javascript/route_feedback.js?v=20261121"></script>
+  <script src="javascript/paginaunica.js?v=20261122es"></script>
+  <script src="javascript/bt_fav.js?v=20261122es"></script>
+  <script src="javascript/bt_lists.js?v=20261122es"></script>
+  <script src="javascript/bt_completed.js?v=20261122es"></script>
+  <script src="javascript/route_feedback.js?v=20261122es"></script>
   <script src="javascript/user_preferences.js?v=20261121"></script>
   <script src="../../include.js"></script>
 

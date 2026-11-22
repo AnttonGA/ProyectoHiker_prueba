@@ -22,7 +22,7 @@ document.addEventListener('DOMContentLoaded', function () {
         fields.forEach(field => {
             if (fieldElements[field]) {
                 if (fieldElements[field].value.trim() === '') {
-                    showError(field, `${field.charAt(0).toUpperCase() + field.slice(1)} es requerido`);
+                    showError(field, field === 'password' ? 'Escribe tu contraseña' : 'Escribe tu usuario o correo');
                     isValid = false;
                 }
             } else {
@@ -52,7 +52,7 @@ document.addEventListener('DOMContentLoaded', function () {
             })
             .catch(error => {
                 console.error('Error:', error);
-                showMessage('Ocurrió un error. Por favor, intenta de nuevo más tarde.', 'error');
+                showMessage('No se pudo conectar. Inténtalo de nuevo más tarde.', 'error');
             });
         }
     }

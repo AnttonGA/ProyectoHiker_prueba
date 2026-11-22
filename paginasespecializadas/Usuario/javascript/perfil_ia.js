@@ -6,32 +6,44 @@
 const PerfilIA = {
 
   activityLabels: {
-    hiking:        'Hiking',
-    ski_touring:   'Ski Touring',
-    climbing:      'Climbing',
-    cycle_touring: 'Cycling',
-    snowshoeing:   'Snowshoeing',
-    via_ferrata:   'Via Ferrata',
+    hiking:        'Senderismo',
+    ski_touring:   'Esquí de travesía',
+    climbing:      'Escalada',
+    cycle_touring: 'Cicloturismo',
+    snowshoeing:   'Raquetas',
+    via_ferrata:   'Vía ferrata',
+    mtb:           'BTT',
+    btt:           'BTT',
+    kayaking:      'Kayak',
   },
 
   levelLabels: {
-    beginner:     { text: 'Beginner',     badge: 'success' },
-    intermediate: { text: 'Intermediate', badge: 'warning' },
-    advanced:     { text: 'Advanced',     badge: 'danger'  },
+    beginner:     { text: 'Nivel fácil',    badge: 'success' },
+    intermediate: { text: 'Nivel moderado', badge: 'warning' },
+    advanced:     { text: 'Nivel difícil',  badge: 'danger'  },
+  },
+
+  /* Single shared request: used by the AI Profile tab and the header stats */
+  _promise: null,
+  load() {
+    if (!this._promise) {
+      this._promise = fetch('javascript/user_profile.php').then(r => r.json());
+    }
+    return this._promise;
   },
 
   init() {
-    fetch('javascript/user_profile.php')
-      .then(r => r.json())
+    this.load()
       .then(data => {
-        if (!data.success) throw new Error(data.error || 'Error loading profile');
+        if (!data.success) throw new Error(data.error || 'No se pudo cargar tu perfil. Recarga la página.');
         this.render(data);
       })
       .catch(err => {
         document.getElementById('perfil-ia-content').innerHTML =
-          `<div class="alert alert-warning">
-              <i class="bi bi-exclamation-triangle-fill me-2"></i>
-              Could not load AI Profile. ${this.esc(err.message)}
+          `<div class="acct-empty acct-empty--error">
+              <span class="acct-empty__icon" aria-hidden="true"><i class="bi bi-exclamation-circle"></i></span>
+              <h3 class="acct-empty__title">No se pudo cargar tu perfil IA</h3>
+              <p class="acct-empty__text">${this.esc(err.message)}</p>
            </div>`;
       });
   },
@@ -42,217 +54,191 @@ const PerfilIA = {
 
     const hasPrefs  = p !== null;
     const actLabel  = (key) => this.esc(this.activityLabels[key] || key);
-    const levelInfo = this.levelLabels[p?.experience_level] ?? { text: 'No data', badge: 'secondary' };
+    const levelInfo = this.levelLabels[p?.experience_level] ?? { text: 'Nivel aún sin definir', badge: 'secondary' };
+    const n         = (v) => (Number.isFinite(Number(v)) ? Number(v) : 0);
+    const locLabel  = (l) => this.esc(l === 'Other' ? 'Otras zonas' : ((typeof LOC_LABEL !== 'undefined' && LOC_LABEL[l]) || l));
+    const num1      = (v) => (v === null || v === undefined || v === '' || !Number.isFinite(Number(v)))
+      ? this.esc(v)
+      : Number(v).toLocaleString('es-ES', { maximumFractionDigits: 1 });
+    const initial   = this.esc(String(user.nombre || user.usuario || '?').trim().charAt(0).toUpperCase());
 
     container.innerHTML = `
       <!-- Profile header -->
-      <div class="row g-3 mb-4">
-        <div class="col-12">
-          <div class="d-flex align-items-center gap-3 flex-wrap">
-            <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center"
-                 style="width:64px;height:64px;font-size:1.6rem;flex-shrink:0;">
-              <i class="bi bi-person-fill"></i>
-            </div>
-            <div class="flex-grow-1 min-width-0">
-              <h4 class="mb-0">${this.esc(user.nombre || user.usuario)}</h4>
-              <small class="text-muted">@${this.esc(user.usuario)}</small>
-              ${user.ultimo_acceso
-                ? `<br><small class="text-muted"><i class="bi bi-clock me-1"></i>Last login: ${this.formatDate(user.ultimo_acceso)}</small>`
-                : ''}
-            </div>
-            <span class="badge bg-${levelInfo.badge} fs-6 flex-shrink-0">
-              <i class="bi bi-trophy-fill me-1"></i>${levelInfo.text}
-            </span>
-          </div>
+      <div class="ia-head">
+        <span class="k-avatar ia-head__avatar" aria-hidden="true">${initial}</span>
+        <div class="ia-head__text">
+          <h2 class="ia-head__name">${this.esc(user.nombre || user.usuario)}</h2>
+          <p class="ia-head__meta">
+            @${this.esc(user.usuario)}
+            ${user.ultimo_acceso
+              ? `<span class="ia-dot" aria-hidden="true">·</span>Última visita: ${this.esc(this.formatDate(user.ultimo_acceso))}`
+              : ''}
+          </p>
         </div>
+        <span class="k-chip ${p?.experience_level ? 'k-chip-moss' : ''} ia-head__level">
+          <i class="bi bi-bar-chart-steps" aria-hidden="true"></i>${this.esc(levelInfo.text)}
+        </span>
       </div>
 
       <!-- Quick stats -->
-      <div class="row g-3 mb-4">
-        ${this.statCard('bi bi-signpost-2-fill', 'primary', 'Routes uploaded',  stats.total_routes)}
-        ${this.statCard('bi bi-heart-fill',       'danger',  'Favourites',       stats.total_favorites)}
-        ${this.statCard('bi bi-check-circle-fill','success', 'Completed',        stats.total_completed)}
-        ${this.statCard('bi bi-fire',             'warning', 'Current streak',   stats.streak_days + ' days')}
+      <div class="ia-stats">
+        ${this.statCard('bi-signpost-split', 'Rutas subidas',  n(stats.total_routes))}
+        ${this.statCard('bi-heart',          'Favoritas',      n(stats.total_favorites))}
+        ${this.statCard('bi-flag',           'Completadas',    n(stats.total_completed))}
+        ${this.statCard('bi-calendar-check', 'Días seguidos',  n(stats.streak_days))}
       </div>
 
-      <div class="row g-3 mb-4">
+      <div class="row g-3 mb-3">
         <!-- Preferred activities -->
         <div class="col-md-6">
-          <div class="card h-100">
-            <div class="card-header fw-semibold">
-              <i class="bi bi-person-walking me-2 text-primary"></i>Preferred Activities
-            </div>
-            <div class="card-body">
+          <section class="acct-panel h-100">
+            <div class="acct-panel__body">
+              <h3 class="ia-card-title">Actividades preferidas</h3>
               ${hasPrefs && p.preferred_activities.length > 0
-                ? p.preferred_activities.map(a =>
-                    `<span class="badge bg-primary me-1 mb-1 p-2">${actLabel(a)}</span>`
-                  ).join('')
-                : '<p class="text-muted small mb-0">Not enough data yet. Explore routes and the system will learn your preferences.</p>'
+                ? `<div class="ia-chips">${p.preferred_activities.map(a =>
+                    `<span class="k-chip k-chip-moss">${actLabel(a)}</span>`
+                  ).join('')}</div>`
+                : '<p class="ia-note">Kahir lo irá aprendiendo a medida que explores rutas. Abre algunas que te interesen.</p>'
               }
               ${activity_breakdown.length > 0
-                ? `<hr class="my-2">
-                   <small class="text-muted d-block mb-1">Interaction breakdown:</small>
+                ? `<p class="ia-sublabel">Interacciones por actividad</p>
                    ${this.miniBarChart(activity_breakdown)}`
                 : ''
               }
             </div>
-          </div>
+          </section>
         </div>
 
         <!-- Usual zones -->
         <div class="col-md-6">
-          <div class="card h-100">
-            <div class="card-header fw-semibold">
-              <i class="bi bi-geo-alt-fill me-2 text-danger"></i>Usual Zones
-            </div>
-            <div class="card-body">
+          <section class="acct-panel h-100">
+            <div class="acct-panel__body">
+              <h3 class="ia-card-title">Zonas habituales</h3>
               ${hasPrefs && p.preferred_locations.length > 0
-                ? p.preferred_locations.map(l =>
-                    `<span class="badge bg-secondary me-1 mb-1 p-2">${this.esc(l)}</span>`
-                  ).join('')
-                : '<p class="text-muted small mb-0">Explore routes in the Pyrenees to let the system detect your usual areas.</p>'
+                ? `<div class="ia-chips">${p.preferred_locations.map(l =>
+                    `<span class="k-chip"><i class="bi bi-geo-alt" aria-hidden="true"></i>${locLabel(l)}</span>`
+                  ).join('')}</div>`
+                : '<p class="ia-note">Explora rutas por el Pirineo y Kahir sabrá adónde te gusta ir.</p>'
               }
               ${top_zones.length > 0
-                ? `<hr class="my-2">
-                   <ol class="list-group list-group-numbered list-group-flush">
+                ? `<p class="ia-sublabel">Más visitadas</p>
+                   <ol class="ia-rank">
                       ${top_zones.slice(0, 3).map(z =>
-                        `<li class="list-group-item d-flex justify-content-between align-items-start px-0 py-1">
-                            <span class="small">${this.esc(z.location || 'Unknown')}</span>
-                            <span class="badge bg-primary rounded-pill">${z.cnt}</span>
+                        `<li>
+                            <span>${z.location ? locLabel(z.location) : 'Sin zona'}</span>
+                            <span class="ia-rank__count">${n(z.cnt)}</span>
                          </li>`
                       ).join('')}
                    </ol>`
                 : ''
               }
             </div>
-          </div>
+          </section>
         </div>
       </div>
 
       <!-- Average metrics -->
       ${hasPrefs ? `
-      <div class="row g-3 mb-4">
-        <div class="col-12">
-          <div class="card">
-            <div class="card-header fw-semibold">
-              <i class="bi bi-bar-chart-fill me-2 text-info"></i>Your Typical Route Metrics
+      <section class="acct-panel mb-3">
+        <div class="acct-panel__body">
+          <h3 class="ia-card-title">Tu ruta típica</h3>
+          <div class="ia-metrics">
+            <div class="ia-metric">
+              <span class="ia-metric__value">${num1(p.avg_preferred_distance)}</span>
+              <span class="ia-metric__label">km de media</span>
             </div>
-            <div class="card-body">
-              <div class="row text-center">
-                <div class="col-4">
-                  <div class="display-6 fw-bold text-primary">${this.esc(p.avg_preferred_distance)}</div>
-                  <small class="text-muted">avg km</small>
-                </div>
-                <div class="col-4">
-                  <div class="display-6 fw-bold text-success">${this.esc(p.avg_preferred_duration)}</div>
-                  <small class="text-muted">avg hours</small>
-                </div>
-                <div class="col-4">
-                  <div class="display-6 fw-bold text-warning">${this.esc(p.avg_preferred_elevation)}</div>
-                  <small class="text-muted">avg elevation (m)</small>
-                </div>
-              </div>
+            <div class="ia-metric">
+              <span class="ia-metric__value">${num1(p.avg_preferred_duration)}</span>
+              <span class="ia-metric__label">horas de media</span>
+            </div>
+            <div class="ia-metric">
+              <span class="ia-metric__value">${num1(p.avg_preferred_elevation)}</span>
+              <span class="ia-metric__label">m de desnivel de media</span>
             </div>
           </div>
         </div>
-      </div>
+      </section>
       ` : ''}
 
       <!-- Monthly activity -->
       ${activity_by_month.length > 0 ? `
-      <div class="row g-3 mb-4">
-        <div class="col-12">
-          <div class="card">
-            <div class="card-header fw-semibold">
-              <i class="bi bi-calendar3 me-2 text-secondary"></i>Activity — Last 6 Months
-            </div>
-            <div class="card-body">
-              ${this.monthlyChart(activity_by_month)}
-            </div>
-          </div>
+      <section class="acct-panel mb-3">
+        <div class="acct-panel__body">
+          <h3 class="ia-card-title">Actividad en los últimos 6 meses</h3>
+          ${this.monthlyChart(activity_by_month)}
         </div>
-      </div>
+      </section>
       ` : ''}
 
       <!-- Recent chat sessions -->
       ${chat_sessions.length > 0 ? `
-      <div class="row g-3 mb-4">
-        <div class="col-12">
-          <div class="card">
-            <div class="card-header fw-semibold">
-              <i class="bi bi-robot me-2 text-info"></i>Recent Conversations with Kahir
-            </div>
-            <ul class="list-group list-group-flush">
-              ${chat_sessions.map(s => `
-                <li class="list-group-item d-flex justify-content-between align-items-center">
-                  <span class="small">
-                    <i class="bi bi-chat-dots text-muted me-2"></i>
-                    ${this.formatDate(s.fecha_inicio)}
-                  </span>
-                  <span class="badge bg-info rounded-pill">${s.num_mensajes} messages</span>
-                </li>
-              `).join('')}
-            </ul>
-          </div>
+      <section class="acct-panel mb-3">
+        <div class="acct-panel__body pb-2">
+          <h3 class="ia-card-title">Conversaciones recientes con Kahir</h3>
+          <ul class="ia-chats">
+            ${chat_sessions.map(s => `
+              <li>
+                <span><i class="bi bi-chat-text" aria-hidden="true"></i>${this.esc(this.formatDate(s.fecha_inicio))}</span>
+                <span class="k-chip">${n(s.num_mensajes).toLocaleString('es-ES')} ${n(s.num_mensajes) === 1 ? 'mensaje' : 'mensajes'}</span>
+              </li>
+            `).join('')}
+          </ul>
         </div>
-      </div>
+      </section>
       ` : ''}
 
       <!-- AI Profile status -->
-      <div class="alert alert-light border small mt-2">
-        <i class="bi bi-info-circle text-primary me-2"></i>
+      <p class="ia-status">
+        <i class="bi bi-info-circle" aria-hidden="true"></i>
         ${hasPrefs && stats.total_interactions >= 5
-          ? `AI Profile active · ${stats.total_interactions} interactions analysed · Updated ${this.formatDate(p.last_updated)}`
-          : `The AI Profile activates automatically after 5 route interactions. Explore the catalogue!`
+          ? `Perfil IA activo · ${n(stats.total_interactions).toLocaleString('es-ES')} interacciones analizadas · Actualizado el ${this.esc(this.formatDate(p.last_updated))}`
+          : `Tu perfil IA se activa tras 5 interacciones con rutas. Explora el catálogo para ponerlo en marcha.`
         }
-      </div>
+      </p>
     `;
   },
 
-  statCard(icon, color, label, value) {
+  statCard(icon, label, value) {
     return `
-      <div class="col-6 col-md-3">
-        <div class="card text-center h-100">
-          <div class="card-body py-3">
-            <i class="${icon} text-${color} mb-2 d-block" style="font-size:2rem"></i>
-            <div class="fs-4 fw-bold">${value}</div>
-            <small class="text-muted">${label}</small>
-          </div>
-        </div>
+      <div class="ia-stat">
+        <i class="bi ${icon} ia-stat__icon" aria-hidden="true"></i>
+        <span class="ia-stat__value">${Number(value).toLocaleString('es-ES')}</span>
+        <span class="ia-stat__label">${label}</span>
       </div>`;
   },
 
   miniBarChart(breakdown) {
-    const max = Math.max(...breakdown.map(b => b.cnt), 1);
-    return `<div class="mt-1">
+    const max = Math.max(...breakdown.map(b => Number(b.cnt) || 0), 1);
+    return `<div class="ia-bars">
       ${breakdown.map(b => `
-        <div class="d-flex align-items-center gap-2 mb-1">
-          <small class="text-muted" style="width:100px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis">
+        <div class="ia-bars__row">
+          <span class="ia-bars__label">
             ${this.esc(this.activityLabels[b.tipo_ruta] || b.tipo_ruta)}
-          </small>
-          <div class="flex-grow-1 bg-light rounded" style="height:8px">
-            <div class="bg-primary rounded" style="height:8px;width:${Math.round(b.cnt / max * 100)}%"></div>
-          </div>
-          <small class="text-muted">${b.cnt}</small>
+          </span>
+          <span class="ia-bars__track">
+            <span class="ia-bars__fill" style="width:${Math.round((Number(b.cnt) || 0) / max * 100)}%"></span>
+          </span>
+          <span class="ia-bars__count">${(Number(b.cnt) || 0).toLocaleString('es-ES')}</span>
         </div>
       `).join('')}
     </div>`;
   },
 
   monthlyChart(data) {
-    const max = Math.max(...data.map(d => d.cnt), 1);
+    const max = Math.max(...data.map(d => Number(d.cnt) || 0), 1);
     const monthNames = {
-      '01':'Jan','02':'Feb','03':'Mar','04':'Apr','05':'May','06':'Jun',
-      '07':'Jul','08':'Aug','09':'Sep','10':'Oct','11':'Nov','12':'Dec',
+      '01':'ene','02':'feb','03':'mar','04':'abr','05':'may','06':'jun',
+      '07':'jul','08':'ago','09':'sep','10':'oct','11':'nov','12':'dic',
     };
-    return `<div class="d-flex align-items-end gap-2" style="height:80px">
+    return `<div class="ia-months">
       ${data.map(d => {
-        const [, m] = d.mes.split('-');
-        const h = Math.max(Math.round(d.cnt / max * 64), 4);
-        return `<div class="d-flex flex-column align-items-center flex-grow-1">
-          <small class="text-muted">${d.cnt}</small>
-          <div class="bg-primary rounded-top w-100" style="height:${h}px"></div>
-          <small class="text-muted mt-1">${monthNames[m] || m}</small>
+        const [, m] = String(d.mes ?? '').split('-');
+        const cnt = Number(d.cnt) || 0;
+        const h = Math.max(Math.round(cnt / max * 72), 4);
+        return `<div class="ia-months__col">
+          <span class="ia-months__count">${cnt.toLocaleString('es-ES')}</span>
+          <span class="ia-months__bar" style="height:${h}px"></span>
+          <span class="ia-months__label">${this.esc(monthNames[m] || m)}</span>
         </div>`;
       }).join('')}
     </div>`;
@@ -261,7 +247,7 @@ const PerfilIA = {
   formatDate(iso) {
     if (!iso) return '';
     try {
-      return new Date(iso).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+      return new Date(iso).toLocaleDateString('es-ES', { day: '2-digit', month: 'short', year: 'numeric' });
     } catch { return iso; }
   },
 
@@ -275,7 +261,29 @@ const PerfilIA = {
   },
 };
 
+/* Header summary stats (my_account.php #acct-stats) — optional, hidden on failure */
+function fillAccountStats() {
+  const box = document.getElementById('acct-stats');
+  if (!box) return;
+  PerfilIA.load()
+    .then(data => {
+      if (!data?.success || !data.stats) return;
+      const map = {
+        routes:    data.stats.total_routes,
+        favorites: data.stats.total_favorites,
+        completed: data.stats.total_completed,
+      };
+      box.querySelectorAll('[data-stat]').forEach(el => {
+        const v = Number(map[el.dataset.stat]);
+        el.textContent = Number.isFinite(v) ? v.toLocaleString('es-ES') : '0';
+      });
+      box.hidden = false;
+    })
+    .catch(() => { /* the stats strip is optional */ });
+}
+
 document.addEventListener('DOMContentLoaded', () => {
+  fillAccountStats();
   const tab = document.getElementById('perfil-ia-tab');
   if (!tab) return;
 

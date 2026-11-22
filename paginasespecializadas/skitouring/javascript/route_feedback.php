@@ -111,7 +111,7 @@ try {
         throw $e;
     }
 
-    feedback_reply(['success' => true, 'message' => '¡Gracias! Usaremos tu valoración para recomendarte mejor.']);
+    feedback_reply(['success' => true, 'message' => 'Gracias. Usaremos tu valoración para recomendarte mejor.']);
 
 } catch (Throwable $e) {
     error_log('route_feedback.php: ' . $e->getMessage());

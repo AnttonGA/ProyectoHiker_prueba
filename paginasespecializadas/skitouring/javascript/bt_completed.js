@@ -32,7 +32,7 @@ document.addEventListener('DOMContentLoaded', function() {
         })
         .then(response => {
             if (!response.ok) {
-                throw new Error('Network response was not ok');
+                throw new Error('No se pudo conectar. Inténtalo de nuevo.');
             }
             return response.json();
         })
@@ -40,9 +40,9 @@ document.addEventListener('DOMContentLoaded', function() {
             if (data.success) {
                 const isCompleted = !button.classList.contains('btn-success');
                 updateButtonState(button, isCompleted);
-                showFeedback(button, isCompleted ? 'Marked as completed' : 'Marked as not completed', true);
+                showFeedback(button, isCompleted ? 'Marcada como hecha' : 'Marcada como pendiente', true);
             } else {
-                throw new Error(data.error || 'Unknown error occurred');
+                throw new Error(data.error || 'No se pudo actualizar la ruta. Inténtalo de nuevo.');
             }
         })
         .catch(error => {
@@ -59,14 +59,26 @@ document.addEventListener('DOMContentLoaded', function() {
         // Avisar al panel de valoración (route_feedback.js)
         document.dispatchEvent(new CustomEvent('kahir:completed', { detail: { isCompleted: !!isCompleted } }));
         if (isCompleted) {
-            button.textContent = 'Completed';
+            setButtonContent(button, 'bi-check-circle-fill', 'Completada');
             button.classList.remove('btn-outline-success');
             button.classList.add('btn-success');
         } else {
-            button.textContent = 'Mark as Completed';
+            setButtonContent(button, 'bi-check-circle', 'Marcar como hecha');
             button.classList.remove('btn-success');
             button.classList.add('btn-outline-success');
         }
+        button.setAttribute('aria-pressed', isCompleted ? 'true' : 'false');
+    }
+
+    // Cambia el texto sin perder el icono
+    function setButtonContent(button, iconClass, text) {
+        const icon = document.createElement('i');
+        icon.className = `bi ${iconClass}`;
+        icon.setAttribute('aria-hidden', 'true');
+        const label = document.createElement('span');
+        label.className = 'k-act__label';
+        label.textContent = text;
+        button.replaceChildren(icon, label);
     }
 
     function checkCompletedStatus() {

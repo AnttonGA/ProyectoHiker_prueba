@@ -41,7 +41,7 @@ document.addEventListener('DOMContentLoaded', function() {
     function addListToDOM(list) {
         const existingLists = document.getElementById('existingLists');
         const listItem = document.createElement('div');
-        listItem.className = 'form-check mb-2';
+        listItem.className = 'form-check k-list-option';
         const listId = escapeHtml(parseInt(list.id, 10) || '');
         listItem.innerHTML = `
             <input class="form-check-input" type="checkbox" id="list${listId}" value="${listId}" ${list.is_route_in_list && list.is_route_in_list !== '0' ? 'checked' : ''}>
@@ -58,7 +58,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (newListName) {
             createNewListAndAdd(newListName);
         } else {
-            showFeedback(this, 'Please enter a list name', false);
+            showFeedback(this, 'Escribe un nombre para la lista.', false);
         }
     });
 
@@ -68,7 +68,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         createNewListBtn.disabled = true;
         createNewListBtn.classList.add('btn-loading');
-        createNewListBtn.textContent = 'Creating...';
+        createNewListBtn.textContent = 'Creando…';
 
         fetch('javascript/bt_lists.php', {
             method: 'POST',
@@ -81,7 +81,7 @@ document.addEventListener('DOMContentLoaded', function() {
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                showFeedback(createNewListBtn, 'List created!', true);
+                showFeedback(createNewListBtn, 'Lista creada', true);
                 addListToDOM({
                     id: data.listId,
                     list_name: listName,
@@ -89,7 +89,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 });
                 document.getElementById('newListName').value = '';
             } else {
-                throw new Error(data.error || 'Unknown error occurred');
+                throw new Error(data.error || 'No se pudo crear la lista. Inténtalo de nuevo.');
             }
         })
         .catch(error => {
@@ -99,7 +99,8 @@ document.addEventListener('DOMContentLoaded', function() {
         .finally(() => {
             createNewListBtn.disabled = false;
             createNewListBtn.classList.remove('btn-loading');
-            createNewListBtn.textContent = 'Create and Add';
+            // Restaura el contenido original (con icono) en lugar de solo texto
+            createNewListBtn.innerHTML = '<i class="bi bi-plus-circle me-1" aria-hidden="true"></i>Crear y añadir';
         });
     }
 
@@ -123,9 +124,9 @@ document.addEventListener('DOMContentLoaded', function() {
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    showFeedback(e.target, isChecked ? 'Added!' : 'Removed!', true);
+                    showFeedback(e.target, isChecked ? 'Añadida' : 'Quitada', true);
                 } else {
-                    throw new Error(data.error || 'Unknown error occurred');
+                    throw new Error(data.error || 'No se pudo actualizar la lista. Inténtalo de nuevo.');
                 }
             })
             .catch(error => {

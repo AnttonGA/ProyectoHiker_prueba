@@ -12,7 +12,7 @@ function debug_log($message) {
 }
 
 if (!isset($_SESSION['usuario'])) {
-    echo json_encode(['error' => 'Usuario no autenticado']);
+    echo json_encode(['error' => 'Tu sesión ha caducado. Vuelve a entrar.']);
     exit;
 }
 
@@ -24,7 +24,7 @@ $stmt->bind_param("s", $username);
 $stmt->execute();
 $result = $stmt->get_result();
 if ($result->num_rows === 0) {
-    echo json_encode(['error' => 'Usuario no encontrado']);
+    echo json_encode(['error' => 'No se encontró tu cuenta. Sal y vuelve a entrar.']);
     exit;
 }
 $user_id = $result->fetch_assoc()['id'];
@@ -57,7 +57,7 @@ $accionesEscritura = ['createList', 'removeRouteFromList', 'deleteList'];
 if (in_array($action, $accionesEscritura, true)) {
     if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
         http_response_code(405);
-        echo json_encode(['error' => 'Método no permitido']);
+        echo json_encode(['error' => 'Método no permitido.']);
         exit;
     }
     csrf_verify(true);
@@ -83,10 +83,10 @@ switch ($action) {
                 echo json_encode(['success' => true, 'id' => $conn->insert_id]);
             } else {
                 error_log('user_lists_handler.php (createList): ' . $conn->error);
-                echo json_encode(['error' => 'No se ha podido crear la lista.']);
+                echo json_encode(['error' => 'No se pudo crear la lista. Inténtalo de nuevo.']);
             }
         } else {
-            echo json_encode(['error' => 'Nombre de lista vacío']);
+            echo json_encode(['error' => 'Ponle un nombre a la lista.']);
         }
         break;
 
@@ -104,10 +104,10 @@ switch ($action) {
                 echo json_encode(['success' => true]);
             } else {
                 error_log('user_lists_handler.php (removeRouteFromList): ' . $conn->error);
-                echo json_encode(['error' => 'No se ha podido quitar la ruta de la lista.']);
+                echo json_encode(['error' => 'No se pudo quitar la ruta de la lista. Inténtalo de nuevo.']);
             }
         } else {
-            echo json_encode(['error' => 'Parámetros inválidos']);
+            echo json_encode(['error' => 'Datos no válidos. Recarga la página e inténtalo de nuevo.']);
         }
         break;
 
@@ -126,14 +126,14 @@ switch ($action) {
             $stmt = $conn->prepare("DELETE FROM user_lists WHERE id = ? AND usuario_id = ?");
             $stmt->bind_param("ii", $list_id, $user_id);
             $stmt->execute();
-            echo json_encode($stmt->affected_rows > 0 ? ['success' => true] : ['error' => 'Lista no encontrada']);
+            echo json_encode($stmt->affected_rows > 0 ? ['success' => true] : ['error' => 'No se encontró la lista. Recarga la página.']);
         } else {
-            echo json_encode(['error' => 'ID de lista inválido']);
+            echo json_encode(['error' => 'Lista no válida. Recarga la página.']);
         }
         break;
 
     default:
-        echo json_encode(['error' => 'Acción no reconocida']);
+        echo json_encode(['error' => 'Acción no reconocida. Recarga la página.']);
 }
 } catch (Throwable $e) {
     error_log('user_lists_handler.php: ' . $e->getMessage());

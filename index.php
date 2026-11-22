@@ -44,23 +44,28 @@ if ($isLoggedIn) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="<?= e(csrf_token()) ?>">
-    <title><?php echo $isLoggedIn ? 'Kahir.ai Chat - Asistente de Rutas' : 'Kahir.AI - Tu Asistente de Montaña'; ?></title>
+    <title><?php echo $isLoggedIn ? 'Asistente · Kahir.ai' : 'Kahir.ai · Tu asistente de montaña'; ?></title>
     
     <!-- Meta tags -->
     <meta name="description" content="Asistente inteligente para rutas de montaña y senderismo en los Pirineos">
-    <meta name="keywords" content="senderismo, montaña, Pirineos, rutas, AI, asistente virtual">
+    <meta name="keywords" content="senderismo, montaña, Pirineos, rutas, IA, asistente virtual">
     
     <!-- Preload de recursos críticos -->
     <link rel="preconnect" href="https://cdn.jsdelivr.net">
     <link rel="preconnect" href="https://cdnjs.cloudflare.com">
     
     <!-- CSS Base -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     
     <?php if ($isLoggedIn): ?>
         <!-- Estilos para la interfaz de chat -->
-        <link href="hiker_ai/assets/css/chat.css" rel="stylesheet">
+        <link href="hiker_ai/assets/css/chat.css?v=20261122" rel="stylesheet">
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Work+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+        <link href="assets/css/kahir.css?v=20261122" rel="stylesheet">
     <?php else: ?>
         <!-- Estilos para la página de inicio -->
         <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
@@ -74,40 +79,44 @@ if ($isLoggedIn) {
 
     <?php if ($isLoggedIn): ?>
         <!-- Interfaz de chat -->
-        <main class="flex-grow-1 d-flex flex-column">
-            <div class="container my-4 flex-grow-1 d-flex flex-column">
-                <div class="row justify-content-center flex-grow-1">
-                    <div class="col-md-10 col-lg-8">
-                        <!-- Contenedor de prompts -->
-                        <div id="prompt-container" class="prompt-container mb-4"></div>
+        <main class="kchat flex-grow-1 d-flex flex-column">
+            <div class="kchat-column flex-grow-1 d-flex flex-column">
+                <!-- Estado vacío: bienvenida + ejemplos de preguntas (lo rellena chat.js) -->
+                <div id="prompt-container" class="prompt-container"></div>
 
-                        <!-- Área de chat -->
-                        <div id="chat-area" class="chat-area flex-grow-1 d-none">
-                            <div id="chat-container" class="chat-container mb-3"></div>
-                            <div id="typing-indicator" class="typing-indicator d-none">
-                                <div class="typing-dot"></div>
-                                <div class="typing-dot"></div>
-                                <div class="typing-dot"></div>
-                            </div>
+                <!-- Conversación -->
+                <div id="chat-area" class="chat-area flex-grow-1 d-none">
+                    <div id="chat-container" class="chat-container" aria-live="polite"></div>
+                    <div id="typing-indicator" class="typing-indicator d-none" role="status">
+                        <img class="message-avatar" src="assets/img/kahir-mark.svg" alt="" aria-hidden="true" width="32" height="32">
+                        <div class="typing-bubble">
+                            <span class="typing-dot"></span>
+                            <span class="typing-dot"></span>
+                            <span class="typing-dot"></span>
+                            <span class="typing-label">Kahir está mirando el mapa…</span>
                         </div>
-
-                        <!-- Panel de sugerencias -->
-                        <div id="suggestions-panel" class="suggestions-panel mb-3 d-none"></div>
                     </div>
                 </div>
 
-                <!-- Formulario de chat -->
-                <form id="chat-form" class="chat-form">
-                    <div class="input-group">
-                        <input type="text" id="user-input" class="form-control" 
-                               placeholder="Pregunta sobre rutas, tiempo o recomendaciones..." 
-                               maxlength="500" required>
-                        <button class="btn btn-primary" type="submit">
-                            <i class="fas fa-paper-plane"></i>
+                <!-- Sugerencias de seguimiento -->
+                <div id="suggestions-panel" class="suggestions-panel d-none" aria-label="Sugerencias"></div>
+            </div>
+
+            <!-- Compositor fijo abajo -->
+            <div class="kchat-composer">
+                <form id="chat-form" class="chat-form kchat-column">
+                    <label for="user-input" class="visually-hidden">Escribe tu pregunta</label>
+                    <div class="composer-box">
+                        <input type="text" id="user-input" class="form-control composer-input"
+                               placeholder="Pregunta por rutas, el tiempo o qué llevar…"
+                               maxlength="500" autocomplete="off" required>
+                        <button class="btn btn-primary composer-send" type="submit" aria-label="Enviar">
+                            <i class="bi bi-arrow-up" aria-hidden="true"></i>
                         </button>
                     </div>
-                    <div id="char-counter" class="text-muted small mt-1">
-                        <span id="char-count">0</span>/500
+                    <div class="composer-meta">
+                        <span class="composer-hint">Revisa siempre el parte y las condiciones antes de salir.</span>
+                        <span id="char-counter" class="char-counter"><span id="char-count">0</span>/500</span>
                     </div>
                 </form>
             </div>
@@ -122,7 +131,7 @@ if ($isLoggedIn) {
 
     <!-- Scripts comunes -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <!-- CSRF: añade X-CSRF-Token a fetch()/$.ajax POST (después de jQuery, antes de los scripts propios) -->
     <script src="csrf.js"></script>
     <!-- Marked.js: renderiza Markdown en las respuestas del asistente -->
@@ -143,9 +152,9 @@ if ($isLoggedIn) {
                 }
             };
         </script>
-        <script src="hiker_ai/assets/js/chat.js"></script>
-        <script src="hiker_ai/assets/js/chatcard.js"></script>
-        <script src="hiker_ai/assets/js/weather_card.js"></script>
+        <script src="hiker_ai/assets/js/chat.js?v=20261122"></script>
+        <script src="hiker_ai/assets/js/chatcard.js?v=20261122"></script>
+        <script src="hiker_ai/assets/js/weather_card.js?v=20261122"></script>
         <script>
             document.addEventListener('DOMContentLoaded', () => {
                 if (typeof ChatApp !== 'undefined' && window.appConfig) {

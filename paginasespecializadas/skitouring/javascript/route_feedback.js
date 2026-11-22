@@ -87,12 +87,12 @@ document.addEventListener('DOMContentLoaded', function () {
             .then(r => r.json().catch(() => ({ success: false })))
             .then(data => {
                 if (data.success) {
-                    showMessage(data.message || '¡Gracias por tu valoración!', true);
+                    showMessage(data.message || 'Gracias por tu valoración.', true);
                 } else {
-                    showMessage(data.error || 'No se pudo guardar la valoración.', false);
+                    showMessage(data.error || 'No se pudo guardar la valoración. Inténtalo de nuevo.', false);
                 }
             })
-            .catch(() => showMessage('No se pudo conectar con el servidor.', false))
+            .catch(() => showMessage('No se pudo conectar con el servidor. Inténtalo de nuevo.', false))
             .finally(() => { saveBtn.disabled = !percepcion; });
     });
 
