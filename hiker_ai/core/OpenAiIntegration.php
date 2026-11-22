@@ -314,16 +314,23 @@ PROMPT;
             $body['system'] = $systemPrompt;
         }
 
+        $headers = [
+            'Content-Type: application/json',
+            'x-api-key: '         . $this->apiKey,
+            'anthropic-version: ' . self::API_VERSION,
+        ];
+        // Claves de organización (no asociadas a un workspace) exigen indicar el workspace
+        $workspaceId = trim((string) ($_ENV['CLAUDE_WORKSPACE_ID'] ?? getenv('CLAUDE_WORKSPACE_ID') ?: ''));
+        if ($workspaceId !== '') {
+            $headers[] = 'anthropic-workspace-id: ' . $workspaceId;
+        }
+
         $ch = curl_init(self::API_URL);
         curl_setopt_array($ch, [
             CURLOPT_POST           => true,
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_TIMEOUT        => API_TIMEOUT,
-            CURLOPT_HTTPHEADER     => [
-                'Content-Type: application/json',
-                'x-api-key: '         . $this->apiKey,
-                'anthropic-version: ' . self::API_VERSION,
-            ],
+            CURLOPT_HTTPHEADER     => $headers,
             CURLOPT_POSTFIELDS     => json_encode($body),
             CURLOPT_SSL_VERIFYPEER => true,
         ]);
