@@ -1,7 +1,7 @@
 <?php
 namespace KahirAI\Core;
 
-use KahirAI\Services\{WeatherService, LoggerService};
+use KahirAI\Services\LoggerService;
 use KahirAI\Interfaces\IRecommender;
 use KahirAI\Exceptions\RouteException;
 
@@ -20,12 +20,15 @@ use KahirAI\Exceptions\RouteException;
  *   difficulty | difficulty_in nivel exacto o lista de niveles admitidos
  *   min/max_distance (km), min/max_duration (h), max_elevation / min_elevation (m de desnivel)
  *   target_duration (h)        duración deseada ("unas 6 horas")
+ *   place_label                nombre del lugar o región (para los motivos)
+ *
+ * Las horas son las MIDE (las que ve el usuario en la tarjeta) a pie; en BTT y cicloturismo,
+ * que no tienen horas MIDE, se estiman por distancia (12 y 18 km/h).
  *   exclude_ids                rutas a no repetir
  */
 class RouteRecommender implements IRecommender {
 
     private LoggerService $logger;
-    private WeatherService $weather;
     private \mysqli $conn;
 
     /** IDs del último pool de candidatos (pre-scoring). */
@@ -62,7 +65,6 @@ class RouteRecommender implements IRecommender {
     public function __construct(\mysqli $conn) {
         $this->conn    = $conn;
         $this->logger  = new LoggerService('route_recommender');
-        $this->weather = new WeatherService();
     }
 
     // -----------------------------------------------------------------
@@ -83,6 +85,7 @@ class RouteRecommender implements IRecommender {
             foreach ($candidates as $route) {
                 $id = (int) $route['id'];
                 $route['_completed'] = isset($sets['completed'][$id]);
+                if (!empty($criteria['place_label'])) $route['_place'] = $criteria['place_label'];
                 $route['_favorite']  = isset($sets['favorites'][$id]);
                 $score = $this->scoreRoute($route, $userPreferences, $criteria);
                 // Las rutas ya hechas bajan mucho (pero pueden salir si no hay otra cosa)
@@ -95,12 +98,6 @@ class RouteRecommender implements IRecommender {
             }
 
             usort($scored, fn($a, $b) => $b['score'] <=> $a['score'] ?: ((float) $a['route']['dist_km'] <=> (float) $b['route']['dist_km']));
-
-            // Fuera de temporada (p. ej. esquí de travesía en verano): solo se quitan si quedan otras
-            $inSeason = array_values(array_filter($scored, fn($r) => $this->isInSeason($r['route'])));
-            if (count($inSeason) >= min(2, count($scored))) {
-                $scored = $inSeason;
-            }
 
             return array_slice($this->dedupe($scored), 0, $limit);
 
@@ -187,7 +184,7 @@ class RouteRecommender implements IRecommender {
     /** Ruta completa por id (o null). */
     public function getRouteById(int $id): ?array {
         $stmt = $this->conn->prepare(
-            "SELECT r.*, rp.popularity_score FROM rutas r
+            "SELECT r." . str_replace(', ', ', r.', AICore::ROUTE_COLUMNS) . ", rp.popularity_score FROM rutas r
              LEFT JOIN route_popularity rp ON rp.ruta_id = r.id
              WHERE r.id = ? AND r.estado = 'publicada' LIMIT 1"
         );
@@ -219,10 +216,11 @@ class RouteRecommender implements IRecommender {
             $params[] = $criteria['activity'];
             $types   .= 's';
         }
+        $hoursSql = self::hoursSql($criteria['activity'] ?? null);
         foreach ([
             'max_distance'  => 'r.distancia_km <= ?',
-            'max_duration'  => 'r.duracion_horas <= ?',
-            'min_duration'  => 'r.duracion_horas >= ?',
+            'max_duration'  => "$hoursSql <= ?",
+            'min_duration'  => "$hoursSql >= ?",
             'max_elevation' => 'r.elevacion_ganada <= ?',
             'min_elevation' => 'r.elevacion_ganada >= ?',
         ] as $key => $sql) {
@@ -251,7 +249,8 @@ class RouteRecommender implements IRecommender {
                       . 'COS(RADIANS(?)) * COS(RADIANS(r.start_lat)) * POWER(SIN(RADIANS(r.start_lng - ?) / 2), 2))))';
             $distParams = [$lat, $lat, $lon];
 
-            if (!empty($criteria['bbox']) && count($criteria['bbox']) === 4) {
+            $inBbox = !empty($criteria['bbox']) && count($criteria['bbox']) === 4;
+            if ($inBbox) {
                 [$s, $n, $w, $e] = array_map('floatval', $criteria['bbox']);
                 $conditions[] = 'r.start_lat BETWEEN ? AND ? AND r.start_lng BETWEEN ? AND ?';
                 array_push($params, $s, $n, $w, $e);
@@ -265,16 +264,19 @@ class RouteRecommender implements IRecommender {
                 $types .= 'dddd';
                 $having = 'HAVING dist_km <= ' . number_format($km, 2, '.', '');
             }
-            $order = 'dist_km ASC';
+            // En una región toda la caja vale igual: se puntúa entera (no solo lo cercano al centro)
+            $order = $inBbox ? 'COALESCE(rp.popularity_score, 0) DESC, r.id ASC' : 'dist_km ASC';
         }
+        $limit = !empty($inBbox) ? 600 : 120;
 
-        $query = "SELECT r.*, rp.popularity_score, $distExpr AS dist_km
+        $cols = 'r.' . str_replace(', ', ', r.', AICore::ROUTE_COLUMNS);
+        $query = "SELECT $cols, rp.popularity_score, $distExpr AS dist_km
                   FROM rutas r
                   LEFT JOIN route_popularity rp ON r.id = rp.ruta_id
                   WHERE " . implode(' AND ', $conditions) . "
                   $having
                   ORDER BY $order
-                  LIMIT 80";
+                  LIMIT $limit";
 
         $stmt = $this->conn->prepare($query);
         $allParams = array_merge($distParams, $params);
@@ -306,7 +308,8 @@ class RouteRecommender implements IRecommender {
 
     private function proximityScore(array $route, array $criteria): float {
         if (empty($criteria['coordinates']) || !isset($route['dist_km'])) return 0.5;
-        $radius = (float) ($criteria['radius_km'] ?? 40);
+        if (!empty($criteria['bbox'])) return 0.7;   // dentro de la región pedida: no importa el centro
+        $radius = (float) ($criteria['radius_km'] ?? 30);
         return max(0.0, 1.0 - (float) $route['dist_km'] / max(10.0, $radius * 1.2));
     }
 
@@ -340,7 +343,7 @@ class RouteRecommender implements IRecommender {
 
     /** Encaje de duración/distancia con lo pedido o con lo habitual del usuario. */
     private function sizeMatch(array $route, array $prefs, array $criteria): float {
-        $h = (float) ($route['horas_mide'] ?? $route['duracion_horas'] ?? 0);
+        $h = self::routeHours($route);
         $target = (float) ($criteria['target_duration'] ?? 0);
         if ($target > 0 && $h > 0) {
             return max(0.0, 1.0 - abs($h - $target) / $target);
@@ -364,7 +367,8 @@ class RouteRecommender implements IRecommender {
         $month    = (int) date('n');
         $activity = $route['tipo_ruta'] ?? 'hiking';
         if ($activity === 'ski_touring') {
-            return in_array($month, [12, 1, 2, 3, 4], true) ? 1.0 : 0.05;
+            if (in_array($month, [12, 1, 2, 3, 4], true)) return 1.0;
+            return in_array($month, [11, 5], true) ? 0.6 : 0.05;
         }
         if ($activity === 'hiking') {
             if (in_array($month, [6, 7, 8], true))  return 1.0;
@@ -389,12 +393,15 @@ class RouteRecommender implements IRecommender {
     /** Motivos concretos y verificables de por qué sale cada ruta. */
     private function buildReasons(array $route, array $prefs, array $criteria): array {
         $reasons = [];
-        if (isset($route['dist_km']) && !empty($criteria['coordinates'])) {
+        if (!empty($criteria['bbox'])) {
+            $reasons[] = 'Está en ' . ($criteria['place_label'] ?? 'la zona que pides');
+        } elseif (isset($route['dist_km']) && !empty($criteria['coordinates'])) {
             $d = (float) $route['dist_km'];
             $place = $criteria['place_label'] ?? null;
-            $reasons[] = $d < 3
-                ? 'Sale desde ' . ($place ?: 'el mismo lugar')
-                : 'Empieza a ' . round($d) . ' km' . ($place ? " de $place" : '');
+            $km = $d < 10 ? str_replace('.', ',', (string) round($d, 1)) : (string) round($d);
+            $reasons[] = $d < 1.5
+                ? 'Empieza en ' . ($place ?: 'el mismo lugar')
+                : "Empieza a {$km} km" . ($place ? " de $place" : '');
         }
         $level = $route['dificultad'] ?? null;
         if (!empty($criteria['difficulty']) && $level === $criteria['difficulty']) {
@@ -405,14 +412,34 @@ class RouteRecommender implements IRecommender {
         } elseif ($level && $level === ($prefs['experience_level'] ?? null)) {
             $reasons[] = 'Encaja con tu nivel (' . (self::LEVEL_ES[$level] ?? $level) . ')';
         }
-        $h = (float) ($route['horas_mide'] ?? $route['duracion_horas'] ?? 0);
+        $h = self::routeHours($route);
         if (!empty($criteria['target_duration']) && $h > 0 && abs($h - $criteria['target_duration']) <= 1.5) {
-            $reasons[] = 'Unas ' . str_replace('.', ',', (string) round($h, 1)) . ' h, cerca de lo que buscas';
+            $bike = in_array($route['tipo_ruta'] ?? '', ['btt', 'cycle_touring'], true);
+            $reasons[] = 'Unas ' . str_replace('.', ',', (string) round($h, 1)) . ' h' . ($bike ? ' estimadas' : '') . ', cerca de lo que buscas';
         }
         if (!empty($route['_favorite']))  $reasons[] = 'Está en tus favoritas';
         if (!empty($route['_completed'])) $reasons[] = 'Ya la has hecho';
         if (($route['popularity_score'] ?? 0) > 0.03) $reasons[] = 'Muy valorada por otros usuarios';
         return $reasons ?: ['Cumple lo que pides'];
+    }
+
+    /** Horas que se muestran al usuario: MIDE a pie; en bici, estimadas por distancia. */
+    public static function routeHours(array $route): float {
+        $km = (float) ($route['distancia_km'] ?? 0);
+        return match ($route['tipo_ruta'] ?? '') {
+            'btt'           => round($km / 12, 1),
+            'cycle_touring' => round($km / 18, 1),
+            default         => (float) ($route['horas_mide'] ?? $route['duracion_horas'] ?? 0),
+        };
+    }
+
+    /** Misma regla que routeHours() en SQL. */
+    private static function hoursSql(?string $activity): string {
+        return match ($activity) {
+            'btt'           => '(r.distancia_km / 12)',
+            'cycle_touring' => '(r.distancia_km / 18)',
+            default         => 'COALESCE(r.horas_mide, r.duracion_horas)',
+        };
     }
 
     /** Quita duplicados evidentes (mismo nombre normalizado). */

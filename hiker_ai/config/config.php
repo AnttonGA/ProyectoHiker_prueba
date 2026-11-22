@@ -62,7 +62,7 @@ define('LOG_PATH',           __DIR__ . '/../logs');
 define('MAX_LOG_FILES',      30);
 define('LOG_ROTATION_SIZE',  10485760); // 10 MB
 // Audit log de Kahir — ponlo en true cuando quieras activar el rastreo del pipeline
-define('KAHIR_AUDIT_LOG',    true);
+if (!defined('KAHIR_AUDIT_LOG')) define('KAHIR_AUDIT_LOG', true);  // los scripts de prueba pueden fijarlo antes
 
 // Caché de archivos
 define('CACHE_ENABLED',     true);

@@ -9,7 +9,7 @@
  * Usa el mismo recorrido que chat_handler.php (ChatManager + AICore) con el usuario
  * de prueba local y comprueba automáticamente cada respuesta. Hace llamadas reales
  * a la API de Claude (coste: ~1–3 llamadas por pregunta).
- * Guarda el resultado completo en hiker_ai/tests/eval/results/<fecha>.json.
+ * Guarda el resultado completo en <temp>/kahir_eval/<fecha>.json (fuera de la web; o en $KAHIR_EVAL_OUT).
  */
 declare(strict_types=1);
 
@@ -17,6 +17,9 @@ if (PHP_SAPI !== 'cli') {
     http_response_code(403);
     exit('Solo disponible desde la línea de comandos.');
 }
+
+// La batería no escribe en el registro de auditoría (no se puede deshacer con la transacción)
+define('KAHIR_AUDIT_LOG', false);
 
 $root = dirname(__DIR__, 3);
 require_once $root . '/includes/env_loader.php';
@@ -47,12 +50,10 @@ $keep = in_array('--keep', $argv, true);
 $args = array_values(array_filter(array_slice($argv, 1), fn($a) => $a !== '--keep'));
 $only = isset($args[0]) ? array_filter(explode(',', $args[0])) : [];
 
-// Todo lo que escribe la batería (sesiones, mensajes, zonas aprendidas) se deshace al final,
-// para no gastar el límite de mensajes del usuario de pruebas ni ensuciar su perfil.
-// Usa --keep para conservarlo.
-if (!$keep) {
-    $conn->begin_transaction();
-}
+// Todo lo que escribe la batería en la BD (sesiones, mensajes, zonas aprendidas, listas guardadas)
+// se deshace al final de cada caso, para no gastar el límite de mensajes del usuario de pruebas
+// ni ensuciar su perfil. Usa --keep para conservarlo. Las cachés de ficheros (tiempo, geocodificación)
+// sí se quedan: son cachés.
 $results = [];
 $totalChecks = 0;
 $passedChecks = 0;
@@ -62,6 +63,7 @@ foreach ($cases as $caseId => $case) {
     if ($only && !in_array($caseId, $only, true)) {
         continue;
     }
+    if (!$keep) $conn->begin_transaction();
     $cm = new ChatManager();
     $ai = new AICore($conn);
     $st = $conn->prepare("INSERT INTO chat_sessions (usuario_id) VALUES (?)");
@@ -75,6 +77,7 @@ foreach ($cases as $caseId => $case) {
         $t = microtime(true);
         $resp = null;
         $error = null;
+        $listsBefore = kahir_eval_count_lists($conn, $userId);
         try {
             $cr = $cm->processMessage($q);
             if (($cr['type'] ?? '') !== 'ready') {
@@ -92,6 +95,7 @@ foreach ($cases as $caseId => $case) {
         }
         $lat = round(microtime(true) - $t, 2);
         $latencies[] = $lat;
+        $resp['_new_lists'] = kahir_eval_count_lists($conn, $userId) - $listsBefore;
 
         $routes = kahir_eval_routes($conn, $resp);
         $checkResults = kahir_eval_run_checks($turn['checks'] ?? [], $resp, $routes, $prev);
@@ -122,10 +126,7 @@ foreach ($cases as $caseId => $case) {
         ];
         $prev = ['resp' => $resp, 'routes' => $routes];
     }
-}
-
-if (!$keep) {
-    $conn->rollback();
+    if (!$keep) $conn->rollback();
 }
 
 sort($latencies);
@@ -134,8 +135,19 @@ $score = $totalChecks ? round($passedChecks / $totalChecks * 100, 1) : 0;
 printf("\n==== RESULTADO: %d/%d comprobaciones (%.1f %%) · latencia p50 %.1fs · p90 %.1fs\n",
     $passedChecks, $totalChecks, $score, $p(0.5), $p(0.9));
 
-@mkdir(__DIR__ . '/results', 0755, true);
-file_put_contents(__DIR__ . '/results/' . date('Ymd-His') . '.json', json_encode([
+// Resultados fuera de la carpeta pública (con nginx o sin .htaccess se servirían)
+$outDir = getenv('KAHIR_EVAL_OUT') ?: sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'kahir_eval';
+@mkdir($outDir, 0700, true);
+$outFile = $outDir . DIRECTORY_SEPARATOR . date('Ymd-His') . '.json';
+echo "Detalle guardado en $outFile\n";
+file_put_contents($outFile, json_encode([
     'score' => $score, 'passed' => $passedChecks, 'total' => $totalChecks,
     'p50' => $p(0.5), 'p90' => $p(0.9), 'results' => $results,
 ], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+
+function kahir_eval_count_lists(mysqli $conn, int $userId): int {
+    $st = $conn->prepare("SELECT COUNT(*) FROM user_lists WHERE usuario_id = ?");
+    $st->bind_param('i', $userId);
+    $st->execute();
+    return (int) $st->get_result()->fetch_row()[0];
+}

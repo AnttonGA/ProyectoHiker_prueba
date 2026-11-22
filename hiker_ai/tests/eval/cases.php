@@ -24,7 +24,7 @@ return [
     ]],
     'aludes' => ['turns' => [
         ['q' => '¿Cómo está el riesgo de aludes en el Pirineo aragonés?', 'checks' => [
-            'text_any' => ['boletín', 'aemet', 'no tengo', 'no dispongo', 'nivel', 'riesgo'],
+            'text_any' => ['boletín', 'aemet', 'météo-france', 'no tengo', 'no dispongo', 'no he podido', 'no está disponible', 'no puedo consultar'],
             'text_none' => array_merge($GENERIC_BAD, ['eaws'])]],
     ]],
     'nivel' => ['turns' => [
@@ -78,7 +78,7 @@ return [
         // Debe hablar del día de mañana por su nombre (lunes, martes…)
         ['q' => '¿Qué tiempo hará mañana en Benasque?', 'checks' => [
             'type_in' => ['weather_info'],
-            'text_any' => ['mañana', ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado'][(int) date('w', strtotime('+1 day'))]],
+            'text_any' => [['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado'][(int) date('w', strtotime('+1 day'))]],
             'text_none' => $GENERIC_BAD]],
     ]],
     'lejano' => ['turns' => [
@@ -93,11 +93,64 @@ return [
         ['q' => '¿Cuál me conviene si no quiero pasar de 3 horas?', 'checks' => [
             'text_none' => $GENERIC_BAD, 'no_invented_numbers' => true]],
         ['q' => 'Vale, apúntame la primera para el sábado', 'checks' => [
-            'text_any' => ['guardad', 'apuntad', 'lista', 'anotad', 'listas']]],
+            'saved_list' => true, 'text_any' => ['sábado']]],
     ]],
     'finde' => ['turns' => [
         ['q' => '¿Qué ruta me recomiendas para este fin de semana en el Pirineo navarro?', 'checks' => [
             'has_routes' => 2, 'bbox' => [42.75, 43.1, -1.6, -0.7, 'Pirineo navarro'],
-            'text_any' => ['sábado', 'domingo', 'fin de semana', 'previsión', 'tiempo']]],
+            'text_any' => ['sábado', 'domingo', 'previsión']]],
+    ]],
+    // ── Regresiones de la revisión de noviembre de 2026 ──────────────────────
+    'hecho' => ['turns' => [
+        // "hecho" es un verbo aquí, no el Valle de Hecho
+        ['q' => 'Rutas cerca de Bilbao que no haya hecho', 'checks' => [
+            'has_routes' => 2, 'near' => [43.26, -2.93, 40]]],
+    ]],
+    'andes' => ['turns' => [
+        // "andes" es el verbo andar, no la cordillera
+        ['q' => 'Una ruta cerca de Jaca en la que no andes mucho', 'checks' => [
+            'has_routes' => 1, 'near' => [42.57, -0.55, 40]]],
+    ]],
+    'contexto' => ['turns' => [
+        ['q' => 'Rutas en el Gorbea', 'checks' => ['has_routes' => 1, 'near' => [43.03, -2.78, 25]]],
+        ['q' => '¿Qué tiempo hará en Ordesa el sábado?', 'checks' => [
+            'type_in' => ['weather_info'], 'text_any' => ['ordesa'], 'text_none' => ['gorbea']]],
+        // "¿y el domingo?" sigue hablando de Ordesa, no del Gorbea
+        ['q' => '¿Y el domingo?', 'checks' => [
+            'type_in' => ['weather_info'], 'text_any' => ['ordesa', 'domingo'], 'text_none' => ['gorbea']]],
+    ]],
+    'filtros' => ['turns' => [
+        ['q' => 'Rutas de senderismo cerca de Jaca', 'checks' => ['has_routes' => 3]],
+        ['q' => '¿Alguna más corta?', 'checks' => ['has_routes' => 1, 'shorter_than_prev' => true]],
+        // "más larga" sustituye al límite anterior en vez de sumarse ("no hay ninguna")
+        ['q' => '¿Y alguna más larga?', 'checks' => ['has_routes' => 1]],
+    ]],
+    'cual_tiempo' => ['turns' => [
+        ['q' => 'Rutas por Panticosa', 'checks' => ['has_routes' => 2]],
+        // Lleva "cuál" pero pregunta por el tiempo: no es una comparación de rutas
+        ['q' => '¿Cuál será el tiempo el sábado?', 'checks' => [
+            'type_in' => ['weather_info'], 'text_any' => ['sábado']]],
+    ]],
+    'franja' => ['turns' => [
+        // "por la mañana" es una franja del sábado, no el día de mañana
+        ['q' => '¿Qué tiempo hará el sábado por la mañana en Benasque?', 'checks' => [
+            'type_in' => ['weather_info'], 'text_any' => ['sábado'],
+            'text_none' => array_values(array_diff(
+                [['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado'][(int) date('w', strtotime('+1 day'))]],
+                ['sábado']))]],
+    ]],
+    'comparacion' => ['turns' => [
+        // Una comparación con los Alpes no es una petición fuera de cobertura
+        ['q' => 'Quiero algo con paisaje como los Alpes pero cerca de Benasque', 'checks' => [
+            'has_routes' => 1, 'near' => [42.60, 0.52, 40]]],
+    ]],
+    'candanchu' => ['turns' => [
+        // Conversación real revisada en noviembre de 2026: distancias coherentes, nieve con datos, previsión
+        ['q' => 'Busco una ruta fácil cerca de Candanchú', 'checks' => [
+            'has_routes' => 2, 'near' => [42.79, -0.53, 25], 'no_invented_numbers' => true]],
+        ['q' => '¿Qué tiempo hace en esa zona?', 'checks' => [
+            'type_in' => ['weather_info'], 'text_any' => ['candanchú', 'candanchu']]],
+        ['q' => '¿Y cómo viene la semana?', 'checks' => [
+            'type_in' => ['weather_info'], 'text_any' => ['sábado', 'domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes']]],
     ]],
 ];

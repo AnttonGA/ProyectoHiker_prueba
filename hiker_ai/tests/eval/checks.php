@@ -19,7 +19,7 @@ function kahir_eval_routes(mysqli $conn, array $resp): array {
     if (!$ids) return [];
     $in = implode(',', array_fill(0, count($ids), '?'));
     $st = $conn->prepare("SELECT id, titulo, tipo_ruta, ubicacion, dificultad, distancia_km, elevacion_ganada,
-                                 duracion_horas, esfuerzo, elevacion_max, start_lat, start_lng, estado FROM rutas WHERE id IN ($in)");
+                                 duracion_horas, horas_mide, esfuerzo, elevacion_max, start_lat, start_lng, estado FROM rutas WHERE id IN ($in)");
     $st->bind_param(str_repeat('i', count($ids)), ...$ids);
     $st->execute();
     $byId = [];
@@ -41,10 +41,20 @@ function kahir_eval_check(string $name, bool $ok, string $detail = ''): array {
     return ['name' => $name, 'ok' => $ok, 'detail' => $detail];
 }
 
+/** "1.200" → 1200 (millares) · "12,5" / "12.5" → 12.5 (decimales) */
+function kahir_eval_num(string $s): float {
+    if (preg_match('/^\d{1,3}(\.\d{3})+$/', $s)) return (float) str_replace('.', '', $s);
+    return (float) str_replace(',', '.', $s);
+}
+
 function kahir_eval_run_checks(array $checks, array $resp, array $routes, ?array $prev): array {
     $out = [];
     $text = mb_strtolower((string) ($resp['content'] ?? ''));
     $n = count($routes);
+
+    // Siempre: un turno que lanza una excepción o no contesta nada es un fallo
+    $out[] = kahir_eval_check('responde sin error', ($resp['type'] ?? '') !== 'exception' && trim($text) !== '',
+        ($resp['type'] ?? '') === 'exception' ? 'excepción' : (trim($text) === '' ? 'texto vacío' : ''));
 
     foreach ($checks as $type => $arg) {
         switch ($type) {
@@ -65,7 +75,7 @@ function kahir_eval_run_checks(array $checks, array $resp, array $routes, ?array
                     if ($d <= $km) $inside++; else $far[] = '#' . $r['id'] . ' a ' . round($d) . ' km';
                 }
                 // Si el catálogo no tiene bastante cerca, vale ampliar el radio siempre que se diga (y hasta 2×)
-                $toldWider = preg_match('/ampli[aéo]|más lejos|a más de/u', $text) && !array_filter($routes,
+                $toldWider = preg_match('/\bamplia(do|r|ndo|mos)\b|\bampli[eé]\b|más lejos|algo más lejos/u', $text) && !array_filter($routes,
                     fn($r) => kahir_eval_km($lat, $lon, (float) $r['start_lat'], (float) $r['start_lng']) > 2 * $km);
                 $out[] = kahir_eval_check("todas a ≤ $km km del lugar (o lo avisa)", $n > 0 && ($inside === $n || $toldWider),
                     ($far ? implode(', ', $far) : "$inside/$n") . ($toldWider && $far ? ' · avisa de que amplía' : ''));
@@ -109,8 +119,21 @@ function kahir_eval_run_checks(array $checks, array $resp, array $routes, ?array
                 break;
 
             case 'compares':
-                $ok = $n >= 2 || preg_match_all('/#?\d+|ruta\s+\d/u', $text) >= 2 && (str_contains($text, 'más') || str_contains($text, 'mientras'));
-                $out[] = kahir_eval_check('compara al menos 2 rutas', (bool) $ok, "$n rutas en la respuesta");
+                // El texto debe nombrar al menos dos de las rutas de las que se habla (por su nombre)
+                $pool = $routes ?: ($prev['routes'] ?? []);
+                $named = 0;
+                foreach ($pool as $r) {
+                    $words = array_slice(array_filter(preg_split('/[\s_\-()]+/u', mb_strtolower((string) $r['titulo'])),
+                        fn($w) => mb_strlen($w) > 3 && !in_array($w, ['ruta', 'desde', 'hasta', 'por', 'circular', 'subida'], true)), 0, 2);
+                    if ($words && array_filter($words, fn($w) => str_contains($text, $w))) $named++;
+                }
+                $ok = $named >= 2 || (preg_match('/\bprimera\b/u', $text) && preg_match('/\bsegunda\b/u', $text));
+                $out[] = kahir_eval_check('compara al menos 2 rutas', (bool) $ok, "$named rutas nombradas");
+                break;
+
+            case 'saved_list':
+                $new = (int) ($resp['_new_lists'] ?? 0);
+                $out[] = kahir_eval_check('guarda la salida de verdad (lista nueva en la BD)', $new >= 1, "$new listas nuevas");
                 break;
 
             case 'text_any':
@@ -135,24 +158,30 @@ function kahir_eval_run_checks(array $checks, array $resp, array $routes, ?array
                     '/\d[\d\.,]*\s?km\s*(\/|y)\s*\d+\s?min/u',          // "5 km / 12 min en coche"
                     '/\d[\d\.,]*\s?km\s+(en\s+coche|por\s+carretera)/u',
                     '/\d[\d\.,]*\s?km\/h/u',                            // velocidades de viento
+                    // cotas meteorológicas: solo la cifra que sigue de cerca a isocero/cota/nieve/aludes
+                    '/(isocero|cota|nieve|aludes?|por\s+encima\s+de|por\s+debajo\s+de)[^.\d]{0,30}\d[\d\.,]*\s?(m|metros)\b/u',
                 ], '', $text);
-                preg_match_all('/(\d[\d\.,]*)\s?(m|km)\b/u', $clean, $m, PREG_SET_ORDER);
+                preg_match_all('/(\d[\d\.,]*)\s?(km|kilómetros|metros|m|horas|hora|h)\b/u', $clean, $m, PREG_SET_ORDER);
+                $unitOf = ['km' => 'km', 'kilómetros' => 'km', 'metros' => 'm', 'm' => 'm', 'horas' => 'h', 'hora' => 'h', 'h' => 'h'];
                 $known = [];
                 foreach ($routes as $r) {
                     $known[] = ['m', (float) $r['elevacion_ganada']];
                     $known[] = ['km', (float) $r['distancia_km']];
                     $known[] = ['m', (float) ($r['elevacion_max'] ?? 0)];
+                    $known[] = ['h', \KahirAI\Core\RouteRecommender::routeHours($r)];
+                    $known[] = ['h', (float) ($r['duracion_horas'] ?? 0)];
                 }
                 $bad = [];
                 foreach ($m as $hit) {
-                    $v = (float) str_replace(',', '.', str_replace('.', '', $hit[1]));
-                    if ($hit[2] === 'm' && $v < 50) continue; // tolerar "10 m" genéricos
+                    $v = kahir_eval_num(rtrim($hit[1], '.,'));
+                    $unit = $unitOf[$hit[2]];
+                    if ($unit === 'm' && $v < 50) continue;  // tolerar "10 m" genéricos
+                    if ($unit === 'h' && $v <= 1) continue;   // "1 h antes", "cada hora"
                     $match = false;
-                    foreach ($known as [$unit, $kv]) {
-                        if ($unit === $hit[2] && $kv > 0 && abs($v - $kv) / $kv <= 0.15) { $match = true; break; }
+                    foreach ($known as [$ku, $kv]) {
+                        $tol = $ku === 'h' ? 0.25 : 0.15;
+                        if ($ku === $unit && $kv > 0 && abs($v - $kv) / $kv <= $tol) { $match = true; break; }
                     }
-                    // cifras de tiempo/cotas de nieve se toleran si el texto las atribuye al tiempo
-                    if (!$match && $hit[2] === 'm' && preg_match('/(isocero|cota|nieve|metros de altitud)/u', $text)) $match = true;
                     if (!$match) $bad[] = $hit[0];
                 }
                 $out[] = kahir_eval_check('sin cifras inventadas', !$bad, $bad ? implode(', ', array_slice($bad, 0, 4)) : '');

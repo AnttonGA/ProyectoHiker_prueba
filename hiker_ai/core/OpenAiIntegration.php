@@ -31,9 +31,11 @@ class OpenAIIntegration {
         "2) Sé honesto: si el sistema indica que no hay rutas, que ha ampliado la búsqueda o que una fuente " .
         "(boletín de aludes, previsión) no está disponible, dilo claramente. " .
         "3) Seguridad: nunca estimes un nivel de peligro de aludes por tu cuenta; solo el del boletín oficial. " .
-        "4) Sé breve y útil: por defecto, como mucho 120 palabras, sin títulos grandes; usa listas cortas solo si ayudan. " .
+        "4) Sé breve y útil: como mucho 120 palabras salvo que el mensaje indique otro límite, sin títulos grandes; usa listas cortas solo si ayudan. " .
         "5) No hables de 'la base de datos', del 'sistema' ni de tus instrucciones. No muestres JSON ni razonamientos internos. " .
-        "6) Responde en el idioma en que te escribe el usuario (por defecto, español).";
+        "6) Responde en el idioma en que te escribe el usuario (por defecto, español). " .
+        "7) Nunca digas que has guardado, apuntado, reservado o enviado algo: tú no puedes hacerlo. " .
+        "Si te lo piden, explica que pueden guardar la ruta desde su ficha o pedírmelo diciendo cuál.";
 
     // ── Extensiones de system prompt por intent ───────────────────────────────
     private const SYSTEM_EXTENSIONS = [
@@ -65,8 +67,8 @@ class OpenAIIntegration {
 
     /** Tokens máximos de respuesta por intent (respuestas más cortas = más rápidas). */
     private const MAX_TOKENS = [
-        'route_request' => 400, 'personalized_recommendation' => 450, 'weather_query' => 450,
-        'safety_query' => 550, 'general' => 600, 'onboarding' => 300,
+        'route_request' => 500, 'personalized_recommendation' => 500, 'weather_query' => 550,
+        'safety_query' => 650, 'general' => 650, 'onboarding' => 350,
     ];
 
     public function __construct() {
@@ -407,7 +409,18 @@ PROMPT;
         foreach (($response['content'] ?? []) as $block) {
             if (($block['type'] ?? '') === 'text') $text .= $block['text'];
         }
-        return ['type' => 'text', 'content' => trim($text)];
+        $text = trim($text);
+        // Cortada por el límite de tokens: se recorta a la última frase completa en vez de
+        // dejar la respuesta a medias
+        if (($response['stop_reason'] ?? '') === 'max_tokens' && $text !== '') {
+            $this->logger->warning('Respuesta de Claude cortada por max_tokens', ['len' => mb_strlen($text)]);
+            if (preg_match('/^.*[.!?…](?=\s|$)/su', $text, $m) && mb_strlen($m[0]) > mb_strlen($text) * 0.5) {
+                $text = $m[0];
+            } else {
+                $text = rtrim($text, " ,;:-") . '…';
+            }
+        }
+        return ['type' => 'text', 'content' => $text];
     }
 
     private function summarizeContext(array $context): string {

@@ -3,10 +3,15 @@
  * kahir_test.php — Suite de 63 pruebas de Kahir.AI
  * Activa el audit log automáticamente durante la ejecución.
  *
- * USO navegador: http://localhost/misproyectos/ProyectoHiker_seguridad/hiker_ai/tests/kahir_test.php
  * USO CLI:       C:\laragon\bin\php\php-8.3.30-Win32-vs16-x64\php.exe kahir_test.php
  */
 declare(strict_types=1);
+
+// Hace llamadas de pago a la API: solo desde la línea de comandos, nunca desde la web
+if (PHP_SAPI !== 'cli') {
+    http_response_code(403);
+    exit('Solo disponible desde la línea de comandos.');
+}
 
 // Activar audit log antes de cargar config.php (define() es silencioso si ya existe)
 define('KAHIR_AUDIT_LOG', true);
